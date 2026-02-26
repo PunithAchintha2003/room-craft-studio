@@ -1,6 +1,7 @@
 import { env } from './config/env';
 import { connectDB } from './config/db';
 import app from './app';
+import { initSocketServer } from './lib/socket';
 
 const startServer = async (): Promise<void> => {
   await connectDB();
@@ -9,6 +10,8 @@ const startServer = async (): Promise<void> => {
     console.log(`🚀 RoomCraft Studio API running on http://localhost:${env.PORT}`);
     console.log(`📦 Environment: ${env.NODE_ENV}`);
   });
+
+  initSocketServer(server);
 
   const gracefulShutdown = (signal: string) => {
     console.log(`\n${signal} received. Shutting down gracefully...`);

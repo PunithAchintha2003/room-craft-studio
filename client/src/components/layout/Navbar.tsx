@@ -28,6 +28,7 @@ import {
   Logout as LogoutIcon,
   Dashboard as DashboardIcon,
 } from '@mui/icons-material';
+import NotificationBell from '@/components/notifications/NotificationBell';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '@/app/store';
@@ -183,6 +184,7 @@ export const Navbar: React.FC = () => {
               >
                 {isAuthenticated && user ? (
                   <>
+                    <NotificationBell />
                     <IconButton
                       onClick={handleUserMenuOpen}
                       size="medium"
