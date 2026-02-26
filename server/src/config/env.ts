@@ -19,6 +19,9 @@ const envSchema = z.object({
   CLOUDINARY_API_SECRET: z.string().optional(),
   STRIPE_SECRET_KEY: z.string().optional(),
   STRIPE_WEBHOOK_SECRET: z.string().optional(),
+  VAPID_PUBLIC_KEY: z.string().optional(),
+  VAPID_PRIVATE_KEY: z.string().optional(),
+  VAPID_CONTACT_EMAIL: z.string().email().optional().default('admin@roomcraft.studio'),
 });
 
 const parsed = envSchema.safeParse(process.env);
