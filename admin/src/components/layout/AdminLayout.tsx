@@ -20,6 +20,8 @@ import {
   Button,
 } from '@mui/material';
 import {
+  DarkMode,
+  LightMode,
   Dashboard,
   People,
   DesignServices,
@@ -27,23 +29,30 @@ import {
   ChevronLeft,
   Logout,
   AdminPanelSettings,
+  Chair as ChairIcon,
 } from '@mui/icons-material';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '@/app/store';
 import { adminLogout } from '@/features/auth/authSlice';
 import { useAuth } from '@/hooks/useAuth';
+import { useThemeMode } from '@/theme/ThemeModeProvider';
 
 const DRAWER_WIDTH = 240;
 const DRAWER_COLLAPSED_WIDTH = 64;
 
 const NAV_ITEMS = [
   { label: 'Dashboard', path: '/dashboard', icon: <Dashboard /> },
+  { label: 'All Designs', path: '/designs', icon: <DesignServices /> },
+  { label: 'Furniture Management', path: '/furniture', icon: <ChairIcon /> },
   { label: 'User Management', path: '/users', icon: <People /> },
   { label: 'Designer Management', path: '/designers', icon: <DesignServices /> },
 ];
 
 const PAGE_TITLES: Record<string, string> = {
   '/dashboard': 'Dashboard',
+  '/designs': 'All Designs',
+  '/editor': 'Room Designer',
+  '/furniture': 'Furniture Management',
   '/users': 'User Management',
   '/designers': 'Designer Management',
 };
@@ -57,6 +66,7 @@ export const AdminLayout: React.FC = () => {
   const location = useLocation();
   const dispatch = useDispatch<AppDispatch>();
   const { user } = useAuth();
+  const { resolvedMode, toggleMode } = useThemeMode();
 
   const handleLogout = async () => {
     await dispatch(adminLogout());
@@ -338,7 +348,20 @@ export const AdminLayout: React.FC = () => {
               </Typography>
             </Box>
             <Box sx={{ flex: 1 }} />
-            {/* Desktop sign out */}
+            {/* Theme toggle & desktop sign out */}
+            <Tooltip title={resolvedMode === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}>
+              <IconButton
+                size="small"
+                onClick={toggleMode}
+                sx={{ color: 'text.secondary', mr: !isMobile ? 1 : 0 }}
+              >
+                {resolvedMode === 'dark' ? (
+                  <LightMode fontSize="small" />
+                ) : (
+                  <DarkMode fontSize="small" />
+                )}
+              </IconButton>
+            </Tooltip>
             {!isMobile && (
               <Button
                 variant="outlined"

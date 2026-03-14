@@ -6,8 +6,11 @@ import { AdminLayout } from '@/components/layout/AdminLayout';
 
 const LoginPage = lazy(() => import('@/pages/LoginPage'));
 const DashboardPage = lazy(() => import('@/pages/DashboardPage'));
+const DesignEditorPage = lazy(() => import('@/pages/DesignEditorPage'));
+const DesignListPage = lazy(() => import('@/pages/DesignListPage'));
 const UserManagementPage = lazy(() => import('@/pages/UserManagementPage'));
 const DesignerManagementPage = lazy(() => import('@/pages/DesignerManagementPage'));
+const FurnitureManagerPage = lazy(() => import('@/pages/FurnitureManagerPage'));
 
 const PageLoader: React.FC = () => (
   <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
@@ -36,8 +39,12 @@ export const AdminRouter: React.FC = () => (
         }
       >
         <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/designs" element={<DesignListPage />} />
+        <Route path="/editor" element={<DesignEditorPage />} />
+        <Route path="/editor/:id" element={<DesignEditorPage />} />
         <Route path="/users" element={<UserManagementPage />} />
         <Route path="/designers" element={<DesignerManagementPage />} />
+        <Route path="/furniture" element={<FurnitureManagerPage />} />
       </Route>
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
       <Route path="*" element={<Navigate to="/dashboard" replace />} />

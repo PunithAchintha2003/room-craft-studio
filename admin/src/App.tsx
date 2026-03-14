@@ -1,13 +1,12 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter } from 'react-router-dom';
-import { ThemeProvider, CssBaseline } from '@mui/material';
 import { Provider } from 'react-redux';
 import { Toaster } from 'react-hot-toast';
 import { store } from '@/app/store';
-import { adminTheme } from '@/theme/theme';
 import { AdminRouter } from '@/router/index';
 import { fetchAdminUser } from '@/features/auth/authSlice';
 import Cookies from 'js-cookie';
+import { ThemeModeProvider } from '@/theme/ThemeModeProvider';
 
 const AppContent: React.FC = () => {
   useEffect(() => {
@@ -40,12 +39,11 @@ const AppContent: React.FC = () => {
 
 const App: React.FC = () => (
   <Provider store={store}>
-    <ThemeProvider theme={adminTheme}>
-      <CssBaseline />
+    <ThemeModeProvider>
       <BrowserRouter>
         <AppContent />
       </BrowserRouter>
-    </ThemeProvider>
+    </ThemeModeProvider>
   </Provider>
 );
 
