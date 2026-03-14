@@ -20,6 +20,8 @@ import {
   EmailOutlined,
   LockOutlined,
   ArrowBack,
+  DarkMode as DarkModeIcon,
+  LightMode as LightModeIcon,
 } from '@mui/icons-material';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
@@ -30,12 +32,15 @@ import { useDispatch } from 'react-redux';
 import { AppDispatch } from '@/app/store';
 import { loginUser, clearError } from '@/features/auth/authSlice';
 import { useAuth } from '@/hooks/useAuth';
+import { useThemeMode } from '@/theme/ThemeModeProvider';
+import { BACKGROUND } from '@/theme/tokens';
 import { loginSchema, LoginFormData } from '@/utils/validators';
 
 const MotionBox = motion(Box);
 
 export const LoginPage: React.FC = () => {
   const theme = useTheme();
+  const { resolvedMode, toggleMode } = useThemeMode();
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch<AppDispatch>();
@@ -76,6 +81,11 @@ export const LoginPage: React.FC = () => {
     }
   };
 
+  const isDark = resolvedMode === 'dark';
+  const pageBg = isDark
+    ? `linear-gradient(135deg, ${BACKGROUND.dark.primary} 0%, ${BACKGROUND.dark.secondary} 50%, #020617 100%)`
+    : `linear-gradient(135deg, ${BACKGROUND.light.primary} 0%, ${BACKGROUND.light.secondary} 40%, #E5E7EB 100%)`;
+
   return (
     <Box
       sx={{
@@ -83,9 +93,10 @@ export const LoginPage: React.FC = () => {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, #1B2E42 100%)`,
+        background: pageBg,
         p: 2,
         position: 'relative',
+        overflow: 'hidden',
       }}
     >
       <Box
@@ -96,7 +107,7 @@ export const LoginPage: React.FC = () => {
           width: { xs: 280, sm: 400, md: 500 },
           height: { xs: 280, sm: 400, md: 500 },
           borderRadius: '50%',
-          background: `radial-gradient(circle, ${alpha(theme.palette.secondary.main, 0.12)} 0%, transparent 70%)`,
+          background: `radial-gradient(circle, ${alpha(theme.palette.secondary.main, isDark ? 0.15 : 0.12)} 0%, transparent 70%)`,
           pointerEvents: 'none',
         }}
       />
@@ -108,10 +119,28 @@ export const LoginPage: React.FC = () => {
           width: { xs: 200, sm: 280, md: 350 },
           height: { xs: 200, sm: 280, md: 350 },
           borderRadius: '50%',
-          background: `radial-gradient(circle, ${alpha('#3B82F6', 0.08)} 0%, transparent 70%)`,
+          background: `radial-gradient(circle, ${alpha(theme.palette.primary.main, isDark ? 0.15 : 0.08)} 0%, transparent 70%)`,
           pointerEvents: 'none',
         }}
       />
+
+      <IconButton
+        onClick={toggleMode}
+        aria-label={`Switch to ${isDark ? 'light' : 'dark'} mode`}
+        sx={{
+          position: 'absolute',
+          top: 16,
+          right: 16,
+          zIndex: 2,
+          color: isDark ? alpha('#FFFFFF', 0.8) : theme.palette.text.secondary,
+          '&:hover': {
+            color: isDark ? '#FFFFFF' : theme.palette.text.primary,
+            bgcolor: isDark ? alpha('#FFFFFF', 0.08) : alpha(theme.palette.primary.main, 0.06),
+          },
+        }}
+      >
+        {isDark ? <LightModeIcon fontSize="small" /> : <DarkModeIcon fontSize="small" />}
+      </IconButton>
 
       <MotionBox
         initial={{ opacity: 0, y: 30, scale: 0.97 }}
@@ -120,10 +149,13 @@ export const LoginPage: React.FC = () => {
         sx={{
           width: '100%',
           maxWidth: 440,
-          backgroundColor: 'background.paper',
+          backgroundColor: theme.palette.glass.background,
+          border: `1px solid ${theme.palette.glass.border}`,
+          backdropFilter: `blur(${theme.palette.glass.blur}px)`,
+          WebkitBackdropFilter: `blur(${theme.palette.glass.blur}px)`,
           borderRadius: 4,
           p: { xs: 3, sm: 5 },
-          boxShadow: `0 40px 80px ${alpha('#000000', 0.3)}`,
+          boxShadow: 'none',
           position: 'relative',
           zIndex: 1,
         }}
@@ -145,13 +177,14 @@ export const LoginPage: React.FC = () => {
                 width: 40,
                 height: 40,
                 borderRadius: '10px',
-                background: 'linear-gradient(135deg, #E8A045 0%, #F0B96A 100%)',
+                background: (theme) =>
+                  `linear-gradient(135deg, ${theme.palette.brand.navy} 0%, ${theme.palette.brand.amber} 100%)`,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 fontWeight: 800,
                 fontSize: '1rem',
-                color: '#0D1B2A',
+                color: (theme) => theme.palette.on.primary,
               }}
             >
               RC
