@@ -1,0 +1,48 @@
+export type FurnitureCategory = 'chair' | 'table' | 'sofa' | 'bed' | 'storage';
+
+export interface IRoomConfig {
+  width: number;
+  length: number;
+  height: number;
+  wallColor: string;
+  floorColor: string;
+}
+
+export interface IFurnitureItem {
+  furnitureId: string;
+  position: {
+    x: number;
+    y: number;
+  };
+  rotation: number;
+  scale: number;
+  color?: string;
+}
+
+export interface IDesignInput {
+  name: string;
+  description?: string;
+  room: IRoomConfig;
+  furniture: IFurnitureItem[];
+  isPublic?: boolean;
+}
+
+export interface IFurnitureInput {
+  name: string;
+  category: FurnitureCategory;
+  dimensions: {
+    width: number;
+    length: number;
+    height: number;
+  };
+  thumbnail: string;
+  thumbnailAlt?: string;
+  model3D: {
+    url: string;
+    format: 'gltf' | 'glb';
+  };
+  defaultColor: string;
+  isColorizable: boolean;
+  price: number;
+  stock: number;
+}

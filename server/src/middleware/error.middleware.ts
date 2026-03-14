@@ -30,6 +30,15 @@ export const errorHandler = (
   } else if (err.name === 'TokenExpiredError') {
     statusCode = 401;
     message = 'Token expired';
+  } else if (err.name === 'MulterError') {
+    statusCode = 400;
+    const multerErr = err as { code?: string; field?: string; message?: string };
+    if (multerErr.code === 'LIMIT_FILE_SIZE') message = 'File too large. Maximum size is 5MB.';
+    else if (multerErr.code === 'LIMIT_FILE_COUNT') message = 'Too many files. Upload one image.';
+    else message = multerErr.message ?? 'File upload error';
+  } else if (err.message?.startsWith('Invalid file type')) {
+    statusCode = 400;
+    message = err.message;
   }
 
   if (env.NODE_ENV === 'development') {
