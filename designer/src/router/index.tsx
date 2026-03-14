@@ -2,6 +2,7 @@ import React, { Suspense, lazy } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { Box, CircularProgress } from '@mui/material';
 import { useAuth } from '@/hooks/useAuth';
+import { DesignerLayout } from '@/components/layout/DesignerLayout';
 
 const LoginPage = lazy(() => import('@/pages/LoginPage'));
 const DashboardPage = lazy(() => import('@/pages/DashboardPage'));
@@ -29,7 +30,9 @@ export const DesignerRouter: React.FC = () => (
         path="/dashboard"
         element={
           <ProtectedRoute>
-            <DashboardPage />
+            <DesignerLayout>
+              <DashboardPage />
+            </DesignerLayout>
           </ProtectedRoute>
         }
       />
