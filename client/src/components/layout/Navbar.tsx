@@ -27,6 +27,8 @@ import {
   Person as PersonIcon,
   Logout as LogoutIcon,
   Dashboard as DashboardIcon,
+  DarkMode as DarkModeIcon,
+  LightMode as LightModeIcon,
 } from '@mui/icons-material';
 import NotificationBell from '@/components/notifications/NotificationBell';
 import { Link, useNavigate } from 'react-router-dom';
@@ -34,11 +36,12 @@ import { useDispatch } from 'react-redux';
 import { AppDispatch } from '@/app/store';
 import { logoutUser } from '@/features/auth/authSlice';
 import { useAuth } from '@/hooks/useAuth';
+import { useThemeMode } from '@/theme/ThemeModeProvider';
 
 const NAV_LINKS = [
   { label: 'Home', href: '/' },
   { label: 'Furniture', href: '/furniture' },
-  { label: 'Room Designer', href: '/designer' },
+  { label: 'My Designs', href: '/my-designs', protected: true },
   { label: 'About', href: '/about' },
 ];
 
@@ -62,13 +65,14 @@ const Logo: React.FC = () => (
         width: 32,
         height: 32,
         borderRadius: 8,
-        background: 'linear-gradient(135deg, #E8A045 0%, #F0B96A 100%)',
+        background: (theme) =>
+          `linear-gradient(135deg, ${theme.palette.brand.navy} 0%, ${theme.palette.brand.amber} 100%)`,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         fontWeight: 700,
         fontSize: '0.8125rem',
-        color: '#0D1B2A',
+        color: (theme) => theme.palette.on.primary,
         flexShrink: 0,
       }}
     >
@@ -79,7 +83,7 @@ const Logo: React.FC = () => (
       component="span"
       sx={{
         fontWeight: 600,
-        color: 'primary.main',
+        color: 'text.primary',
         letterSpacing: '-0.01em',
         display: { xs: 'none', sm: 'inline' },
       }}
@@ -95,6 +99,7 @@ const Logo: React.FC = () => (
 
 export const Navbar: React.FC = () => {
   const theme = useTheme();
+  const { resolvedMode, toggleMode } = useThemeMode();
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
   const { user, isAuthenticated } = useAuth();
@@ -119,19 +124,30 @@ export const Navbar: React.FC = () => {
           position="sticky"
           elevation={0}
           sx={{
-            backgroundColor: alpha('#FFFFFF', 0.98),
-            backdropFilter: 'blur(12px)',
-            WebkitBackdropFilter: 'blur(12px)',
-            borderBottom: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`,
+            backgroundColor: 'transparent',
+            boxShadow: 'none',
           }}
         >
-          <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3 } }}>
+          <Container
+            maxWidth="lg"
+            sx={{
+              px: { xs: 2, sm: 3 },
+              mt: 1.5,
+              mb: 1.5,
+            }}
+          >
             <Toolbar
               disableGutters
               sx={{
                 minHeight: { xs: 56, sm: 64 },
                 height: { xs: 56, sm: 64 },
                 py: 0,
+                px: 1.5,
+                borderRadius: 999,
+                backgroundColor: theme.palette.glass.background,
+                backdropFilter: `blur(${theme.palette.glass.blur}px)`,
+                WebkitBackdropFilter: `blur(${theme.palette.glass.blur}px)`,
+                border: `1px solid ${theme.palette.glass.border}`,
               }}
             >
               <Logo />
@@ -146,7 +162,7 @@ export const Navbar: React.FC = () => {
                   gap: 0.25,
                 }}
               >
-                {NAV_LINKS.map((link) => (
+                {NAV_LINKS.filter(link => !link.protected || isAuthenticated).map((link) => (
                   <Button
                     key={link.label}
                     component={Link}
@@ -154,7 +170,7 @@ export const Navbar: React.FC = () => {
                     variant="text"
                     size="medium"
                     sx={{
-                      color: 'text.primary',
+                      color: theme.palette.on.glass,
                       fontWeight: 500,
                       fontSize: '0.875rem',
                       letterSpacing: '0.01em',
@@ -162,8 +178,13 @@ export const Navbar: React.FC = () => {
                       px: 2,
                       borderRadius: 2,
                       '&:hover': {
-                        color: 'primary.main',
-                        backgroundColor: alpha(theme.palette.primary.main, 0.06),
+                        color: resolvedMode === 'dark'
+                          ? theme.palette.on.primary
+                          : theme.palette.primary.main,
+                        backgroundColor: alpha(
+                          theme.palette.primary.main,
+                          resolvedMode === 'dark' ? 0.28 : 0.10
+                        ),
                       },
                     }}
                   >
@@ -182,6 +203,22 @@ export const Navbar: React.FC = () => {
                   borderLeft: `1px solid ${alpha(theme.palette.primary.main, 0.12)}`,
                 }}
               >
+                <IconButton
+                  size="medium"
+                  onClick={toggleMode}
+                  aria-label={`Switch to ${resolvedMode === 'dark' ? 'light' : 'dark'} mode`}
+                  sx={{
+                    minWidth: 44,
+                    minHeight: 44,
+                    color:
+                      resolvedMode === 'dark'
+                        ? theme.palette.on.glass
+                        : theme.palette.text.secondary,
+                  }}
+                >
+                  {resolvedMode === 'dark' ? <LightModeIcon fontSize="small" /> : <DarkModeIcon fontSize="small" />}
+                </IconButton>
+
                 {isAuthenticated && user ? (
                   <>
                     <NotificationBell />
@@ -257,9 +294,14 @@ export const Navbar: React.FC = () => {
                       component={Link}
                       to="/login"
                       variant="text"
-                      color="primary"
                       size="medium"
-                      sx={{ minHeight: 44, fontWeight: 600, fontSize: '0.875rem' }}
+                      sx={{
+                        minHeight: 44,
+                        fontWeight: 600,
+                        fontSize: '0.875rem',
+                        color: 'text.primary',
+                        '&:hover': { color: 'primary.main', backgroundColor: alpha(theme.palette.primary.main, 0.06) },
+                      }}
                     >
                       Sign In
                     </Button>
@@ -269,7 +311,7 @@ export const Navbar: React.FC = () => {
                       variant="contained"
                       color="secondary"
                       size="medium"
-                      sx={{ minHeight: 44, fontWeight: 600, fontSize: '0.875rem' }}
+                      sx={{ minHeight: 44, fontWeight: 600, fontSize: '0.875rem', borderRadius: 999 }}
                     >
                       Get Started
                     </Button>
@@ -278,7 +320,13 @@ export const Navbar: React.FC = () => {
               </Box>
 
               <IconButton
-                sx={{ display: { md: 'none' }, ml: 0.5, minWidth: 44, minHeight: 44 }}
+                sx={{
+                  display: { md: 'none' },
+                  ml: 0.5,
+                  minWidth: 44,
+                  minHeight: 44,
+                  color: 'text.primary',
+                }}
                 onClick={() => setMobileOpen(true)}
                 aria-label="Open navigation menu"
                 size="medium"
@@ -300,6 +348,11 @@ export const Navbar: React.FC = () => {
             maxWidth: '100vw',
             borderTopLeftRadius: 0,
             borderBottomLeftRadius: 0,
+            backgroundColor: theme.palette.glass.background,
+            backdropFilter: `blur(${theme.palette.glass.blur}px)`,
+            WebkitBackdropFilter: `blur(${theme.palette.glass.blur}px)`,
+            borderLeft: `1px solid ${theme.palette.glass.border}`,
+            boxShadow: 'none',
           },
         }}
       >
@@ -324,7 +377,7 @@ export const Navbar: React.FC = () => {
         </Box>
         <Divider />
         <List sx={{ py: 1, px: 1 }}>
-          {NAV_LINKS.map((link) => (
+          {NAV_LINKS.filter(link => !link.protected || isAuthenticated).map((link) => (
             <ListItem key={link.label} disablePadding>
               <ListItemButton
                 component={Link}
@@ -347,6 +400,16 @@ export const Navbar: React.FC = () => {
         </List>
         <Divider sx={{ my: 1 }} />
         <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'center', mb: 1 }}>
+            <Button
+              variant="outlined"
+              size="small"
+              onClick={toggleMode}
+              startIcon={resolvedMode === 'dark' ? <LightModeIcon fontSize="small" /> : <DarkModeIcon fontSize="small" />}
+            >
+              {resolvedMode === 'dark' ? 'Light mode' : 'Dark mode'}
+            </Button>
+          </Box>
           {isAuthenticated ? (
             <Button
               variant="outlined"

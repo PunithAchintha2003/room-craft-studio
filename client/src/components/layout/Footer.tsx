@@ -8,8 +8,9 @@ import {
   Divider,
   IconButton,
   Stack,
-  alpha,
+  useTheme,
 } from '@mui/material';
+import { alpha } from '@mui/material/styles';
 import { Link } from 'react-router-dom';
 import {
   Facebook,
@@ -50,12 +51,21 @@ const SOCIAL_LINKS = [
 ];
 
 export const Footer: React.FC = () => {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+  const mutedText = isDark
+    ? alpha(theme.palette.text.primary, 0.7)
+    : alpha(theme.palette.text.primary, 0.7);
+  const subtleText = isDark
+    ? alpha(theme.palette.text.primary, 0.5)
+    : alpha(theme.palette.text.primary, 0.5);
+
   return (
     <Box
       component="footer"
       sx={{
-        backgroundColor: 'primary.main',
-        color: 'white',
+        backgroundColor: theme.palette.background.paper,
+        color: theme.palette.text.primary,
         pt: { xs: 6, md: 8 },
         pb: 4,
         mt: 'auto',
@@ -70,13 +80,14 @@ export const Footer: React.FC = () => {
                   width: 40,
                   height: 40,
                   borderRadius: '10px',
-                  background: 'linear-gradient(135deg, #E8A045 0%, #F0B96A 100%)',
+                  background: (theme) =>
+                    `linear-gradient(135deg, ${theme.palette.brand.navy} 0%, ${theme.palette.brand.amber} 100%)`,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   fontWeight: 800,
                   fontSize: '1rem',
-                  color: '#0D1B2A',
+                  color: (theme) => theme.palette.on.primary,
                 }}
               >
                 RC
@@ -90,7 +101,7 @@ export const Footer: React.FC = () => {
             </Box>
             <Typography
               variant="body2"
-              sx={{ color: alpha('#FFFFFF', 0.7), lineHeight: 1.8, mb: 3, maxWidth: 320 }}
+                sx={{ color: mutedText, lineHeight: 1.8, mb: 3, maxWidth: 320 }}
             >
               Transform your living spaces with our interactive 2D & 3D furniture visualisation
               tool. Design your perfect room before you buy.
@@ -103,13 +114,13 @@ export const Footer: React.FC = () => {
                   aria-label={social.label}
                   size="small"
                   sx={{
-                    color: alpha('#FFFFFF', 0.7),
-                    border: `1px solid ${alpha('#FFFFFF', 0.15)}`,
+                    color: mutedText,
+                    border: `1px solid ${alpha(theme.palette.text.primary, 0.18)}`,
                     borderRadius: '8px',
                     '&:hover': {
                       color: 'secondary.main',
                       borderColor: 'secondary.main',
-                      backgroundColor: alpha('#E8A045', 0.1),
+                      backgroundColor: alpha(theme.palette.secondary.main, 0.1),
                     },
                   }}
                 >
@@ -135,10 +146,15 @@ export const Footer: React.FC = () => {
                     component={Link}
                     to={link.href}
                     sx={{
-                      color: alpha('#FFFFFF', 0.65),
+                      color: mutedText,
                       fontSize: '0.875rem',
                       transition: 'color 0.2s',
-                      '&:hover': { color: '#FFFFFF', textDecoration: 'none' },
+                    '&:hover': {
+                      color: isDark
+                        ? theme.palette.text.primary
+                        : theme.palette.primary.main,
+                      textDecoration: 'none',
+                    },
                     }}
                   >
                     {link.label}
@@ -164,7 +180,7 @@ export const Footer: React.FC = () => {
               ].map(({ icon, text }) => (
                 <Box key={text} sx={{ display: 'flex', gap: 1.5, alignItems: 'flex-start' }}>
                   <Box sx={{ color: 'secondary.main', mt: 0.1, flexShrink: 0 }}>{icon}</Box>
-                  <Typography variant="body2" sx={{ color: alpha('#FFFFFF', 0.65) }}>
+                  <Typography variant="body2" sx={{ color: mutedText }}>
                     {text}
                   </Typography>
                 </Box>
@@ -173,7 +189,16 @@ export const Footer: React.FC = () => {
           </Grid>
         </Grid>
 
-        <Divider sx={{ borderColor: alpha('#FFFFFF', 0.1), mt: 6, mb: 3 }} />
+        <Divider
+          sx={{
+            borderColor: alpha(
+              isDark ? theme.palette.text.primary : '#FFFFFF',
+              0.12
+            ),
+            mt: 6,
+            mb: 3,
+          }}
+        />
 
         <Box
           sx={{
@@ -185,7 +210,7 @@ export const Footer: React.FC = () => {
             textAlign: { xs: 'center', sm: 'left' },
           }}
         >
-          <Typography variant="body2" sx={{ color: alpha('#FFFFFF', 0.5) }}>
+            <Typography variant="body2" sx={{ color: subtleText }}>
             © {new Date().getFullYear()} RoomCraft Studio. All rights reserved.
           </Typography>
           <Stack
@@ -200,9 +225,14 @@ export const Footer: React.FC = () => {
                 key={item}
                 href="#"
                 sx={{
-                  color: alpha('#FFFFFF', 0.5),
+                  color: subtleText,
                   fontSize: '0.8rem',
-                  '&:hover': { color: '#FFFFFF', textDecoration: 'none' },
+                    '&:hover': {
+                      color: isDark
+                        ? theme.palette.text.primary
+                        : theme.palette.primary.main,
+                      textDecoration: 'none',
+                    },
                 }}
               >
                 {item}
