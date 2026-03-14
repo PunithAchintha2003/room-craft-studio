@@ -1,225 +1,131 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import {
   Box,
+  Container,
   Typography,
   Grid,
-  Card,
-  CardContent,
-  Button,
-  Chip,
-  alpha,
-  Skeleton,
+  CircularProgress,
+  Alert,
+  Fade,
 } from '@mui/material';
+import DashboardIcon from '@mui/icons-material/Dashboard';
+import ChairIcon from '@mui/icons-material/Chair';
+import TimelineIcon from '@mui/icons-material/Timeline';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from '@/app/store';
 import {
-  People,
-  DesignServices,
-  HowToReg,
-  TrendingUp,
-  ArrowForward,
-  ViewInAr,
-} from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
-import { fetchUserStats } from '@/services/users.api';
-import { UserStats } from '@/types/user.types';
+  fetchDashboardSummary,
+  selectDashboardSummary,
+  selectDashboardLoading,
+  selectDashboardError,
+} from '@/features/dashboard/dashboardSlice';
+import KpiCard from '@/components/dashboard/KpiCard';
+import DesignsOverTimeChart from '@/components/dashboard/DesignsOverTimeChart';
+import FurnitureByCategoryChart from '@/components/dashboard/FurnitureByCategoryChart';
 
-interface StatCard {
-  label: string;
-  value: number | null;
-  icon: React.ReactNode;
-  color: string;
-  description: string;
-}
+const getLast7DaysTotal = (counts: { date: string; count: number }[]): number => {
+  if (!counts.length) return 0;
+  const now = new Date();
+  const cutoff = new Date();
+  cutoff.setDate(now.getDate() - 6);
+  cutoff.setHours(0, 0, 0, 0);
+  return counts
+    .filter((point) => new Date(point.date) >= cutoff)
+    .reduce((sum, point) => sum + point.count, 0);
+};
 
 export const DashboardPage: React.FC = () => {
-  const { user } = useAuth();
-  const navigate = useNavigate();
-  const [stats, setStats] = useState<UserStats | null>(null);
-  const [loading, setLoading] = useState(true);
+  const dispatch = useDispatch<AppDispatch>();
+  const { user } = useSelector((state: RootState) => state.auth);
+  const summary = useSelector(selectDashboardSummary as (state: RootState) => ReturnType<typeof selectDashboardSummary>);
+  const isLoading = useSelector(selectDashboardLoading as (state: RootState) => boolean);
+  const error = useSelector(selectDashboardError as (state: RootState) => string | null);
 
   useEffect(() => {
-    fetchUserStats()
-      .then(setStats)
-      .catch(() => setStats(null))
-      .finally(() => setLoading(false));
-  }, []);
+    dispatch(fetchDashboardSummary());
+  }, [dispatch]);
 
-  const statCards: StatCard[] = [
-    {
-      label: 'Total Users',
-      value: stats?.totalUsers ?? null,
-      icon: <People />,
-      color: '#10B981',
-      description: 'Registered client accounts',
-    },
-    {
-      label: 'Active Designers',
-      value: stats?.activeDesigners ?? null,
-      icon: <HowToReg />,
-      color: '#3B82F6',
-      description: 'Designers currently active',
-    },
-    {
-      label: 'Total Designers',
-      value: stats?.totalDesigners ?? null,
-      icon: <DesignServices />,
-      color: '#E8A045',
-      description: 'All designer accounts',
-    },
-    {
-      label: 'Active Users',
-      value: stats?.activeUsers ?? null,
-      icon: <TrendingUp />,
-      color: '#8B5CF6',
-      description: 'Users with active status',
-    },
-  ];
-
-  const quickLinks = [
-    {
-      label: 'User Management',
-      description: 'View, edit and manage client accounts',
-      path: '/users',
-      color: '#10B981',
-      icon: <People sx={{ fontSize: 32 }} />,
-    },
-    {
-      label: 'Designer Management',
-      description: 'Manage designer accounts and access',
-      path: '/designers',
-      color: '#3B82F6',
-      icon: <DesignServices sx={{ fontSize: 32 }} />,
-    },
-  ];
+  const totalDesigns = summary?.design.totalDesigns ?? 0;
+  const designsLast7Days = summary ? getLast7DaysTotal(summary.design.designsPerDay) : 0;
+  const totalFurnitureItems = summary?.furniture.totalFurnitureItems ?? 0;
 
   return (
-    <Box>
-      {/* Welcome header */}
-      <Box sx={{ mb: 4 }}>
-        <Typography variant="h4" fontWeight={800} gutterBottom>
-          Welcome back, {user?.name?.split(' ')[0] ?? 'Admin'}
-        </Typography>
-        <Typography variant="body1" sx={{ color: 'text.secondary' }}>
-          Here&apos;s an overview of your RoomCraft Studio platform.
-        </Typography>
-      </Box>
-
-      {/* Stat cards */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        {statCards.map((stat) => (
-          <Grid item xs={6} lg={3} key={stat.label}>
-            <Card>
-              <CardContent sx={{ p: 3 }}>
-                <Box
-                  sx={{
-                    width: 44,
-                    height: 44,
-                    borderRadius: 2,
-                    backgroundColor: alpha(stat.color, 0.12),
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: stat.color,
-                    mb: 2,
-                  }}
-                >
-                  {stat.icon}
-                </Box>
-                {loading ? (
-                  <Skeleton variant="text" width={60} height={48} />
-                ) : (
-                  <Typography variant="h4" fontWeight={800} sx={{ lineHeight: 1, mb: 0.5 }}>
-                    {stat.value ?? '—'}
-                  </Typography>
-                )}
-                <Typography variant="body2" fontWeight={600} sx={{ mb: 0.25 }}>
-                  {stat.label}
+    <Box sx={{ bgcolor: 'background.default', minHeight: '100vh', py: 4 }}>
+      <Container maxWidth="xl">
+        <Fade in timeout={500}>
+          <Box>
+            <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Box>
+                <Typography variant="h4" gutterBottom>
+                  Welcome back, {user?.name ?? 'Admin'}
                 </Typography>
-                <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                  {stat.description}
+                <Typography variant="body1" color="text.secondary">
+                  High-level overview of design activity and your furniture catalog.
                 </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-        ))}
-      </Grid>
+              </Box>
+            </Box>
 
-      {/* Quick links */}
-      <Typography variant="h6" fontWeight={700} sx={{ mb: 2 }}>
-        Quick Actions
-      </Typography>
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        {quickLinks.map((link) => (
-          <Grid item xs={12} sm={6} key={link.path}>
-            <Card
-              sx={{
-                cursor: 'pointer',
-                transition: 'all 0.2s ease',
-                '&:hover': {
-                  transform: 'translateY(-2px)',
-                  boxShadow: `0 8px 32px ${alpha(link.color, 0.2)}`,
-                  borderColor: alpha(link.color, 0.4),
-                },
-              }}
-              onClick={() => navigate(link.path)}
-            >
-              <CardContent sx={{ p: 3 }}>
-                <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
-                  <Box
-                    sx={{
-                      width: 56,
-                      height: 56,
-                      borderRadius: 2.5,
-                      backgroundColor: alpha(link.color, 0.12),
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      color: link.color,
-                      flexShrink: 0,
-                    }}
-                  >
-                    {link.icon}
-                  </Box>
-                  <Box sx={{ flex: 1, minWidth: 0 }}>
-                    <Typography variant="h6" fontWeight={700} gutterBottom>
-                      {link.label}
-                    </Typography>
-                    <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2 }}>
-                      {link.description}
-                    </Typography>
-                    <Button
-                      size="small"
-                      endIcon={<ArrowForward />}
-                      sx={{ color: link.color, p: 0, minHeight: 'auto', fontWeight: 600 }}
-                      onClick={(e) => { e.stopPropagation(); navigate(link.path); }}
-                    >
-                      Go to {link.label}
-                    </Button>
-                  </Box>
-                </Box>
-              </CardContent>
-            </Card>
-          </Grid>
-        ))}
-      </Grid>
+            {error && (
+              <Alert severity="error" sx={{ mb: 3 }}>
+                {error}
+              </Alert>
+            )}
 
-      {/* Coming soon card */}
-      <Card>
-        <CardContent sx={{ p: { xs: 3, md: 4 }, textAlign: 'center' }}>
-          <ViewInAr sx={{ fontSize: 56, color: alpha('#E8A045', 0.4), mb: 2 }} />
-          <Typography variant="h5" fontWeight={700} gutterBottom>
-            Room Designer Coming Soon
-          </Typography>
-          <Typography variant="body1" sx={{ color: 'text.secondary', mb: 3, maxWidth: 480, mx: 'auto' }}>
-            The 2D layout editor and 3D visualisation tools will be available in Phase 2.
-            Design analytics will appear here.
-          </Typography>
-          <Chip
-            label="Phase 2 — In Development"
-            sx={{ backgroundColor: alpha('#E8A045', 0.12), color: 'primary.main', fontWeight: 600 }}
-          />
-        </CardContent>
-      </Card>
+            {isLoading && !summary ? (
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  py: 8,
+                }}
+              >
+                <CircularProgress />
+              </Box>
+            ) : (
+              <>
+                <Grid container spacing={3} sx={{ mb: 3 }}>
+                  <Grid item xs={12} sm={6} md={4}>
+                    <KpiCard
+                      label="Total designs"
+                      value={totalDesigns}
+                      helperText="All room designs created across your workspace."
+                      icon={<DashboardIcon fontSize="small" />}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6} md={4}>
+                    <KpiCard
+                      label="Designs in last 7 days"
+                      value={designsLast7Days}
+                      helperText="Recent design activity to track engagement."
+                      accentColor="#FF6B6B"
+                      icon={<TimelineIcon fontSize="small" />}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6} md={4}>
+                    <KpiCard
+                      label="Furniture items"
+                      value={totalFurnitureItems}
+                      helperText="Unique furniture assets in your catalog."
+                      accentColor="#4ECDC4"
+                      icon={<ChairIcon fontSize="small" />}
+                    />
+                  </Grid>
+                </Grid>
+
+                <Grid container spacing={3}>
+                  <Grid item xs={12} md={7}>
+                    <DesignsOverTimeChart data={summary?.design.designsPerDay ?? []} />
+                  </Grid>
+                  <Grid item xs={12} md={5}>
+                    <FurnitureByCategoryChart data={summary?.furniture.furnitureByCategory ?? []} />
+                  </Grid>
+                </Grid>
+              </>
+            )}
+          </Box>
+        </Fade>
+      </Container>
     </Box>
   );
 };
