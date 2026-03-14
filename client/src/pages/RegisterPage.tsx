@@ -21,6 +21,8 @@ import {
   LockOutlined,
   CheckCircle,
   Cancel,
+  DarkMode as DarkModeIcon,
+  LightMode as LightModeIcon,
 } from '@mui/icons-material';
 import { Link, useNavigate } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
@@ -31,6 +33,8 @@ import { useDispatch } from 'react-redux';
 import { AppDispatch } from '@/app/store';
 import { registerUser, clearError } from '@/features/auth/authSlice';
 import { useAuth } from '@/hooks/useAuth';
+import { useThemeMode } from '@/theme/ThemeModeProvider';
+import { BACKGROUND } from '@/theme/tokens';
 import { registerSchema, RegisterFormData, getPasswordStrength } from '@/utils/validators';
 
 const MotionBox = motion(Box);
@@ -50,6 +54,7 @@ const PasswordRequirement: React.FC<{ met: boolean; text: string }> = ({ met, te
 
 export const RegisterPage: React.FC = () => {
   const theme = useTheme();
+  const { resolvedMode, toggleMode } = useThemeMode();
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
   const { isLoading, error, isAuthenticated } = useAuth();
@@ -103,14 +108,41 @@ export const RegisterPage: React.FC = () => {
     { met: /[^A-Za-z0-9]/.test(passwordValue), text: 'One special character' },
   ];
 
+  const isDark = resolvedMode === 'dark';
+  const pageBg = isDark
+    ? `linear-gradient(135deg, ${BACKGROUND.dark.primary} 0%, ${BACKGROUND.dark.secondary} 50%, #020617 100%)`
+    : `linear-gradient(135deg, ${BACKGROUND.light.primary} 0%, ${BACKGROUND.light.secondary} 40%, #E5E7EB 100%)`;
+  const leftPanelText = theme.palette.text.primary;
+  const leftPanelTextMuted = isDark ? alpha(theme.palette.text.primary, 0.8) : theme.palette.text.secondary;
+  const leftPanelTextSoft = alpha(theme.palette.text.primary, 0.8);
+
   return (
     <Box
       sx={{
         minHeight: '100vh',
         display: 'flex',
-        background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, #1B2E42 100%)`,
+        background: pageBg,
+        position: 'relative',
+        overflow: 'hidden',
       }}
     >
+      <IconButton
+        onClick={toggleMode}
+        aria-label={`Switch to ${isDark ? 'light' : 'dark'} mode`}
+        sx={{
+          position: 'absolute',
+          top: 16,
+          right: 16,
+          zIndex: 2,
+          color: isDark ? alpha(theme.palette.text.primary, 0.8) : theme.palette.text.secondary,
+          '&:hover': {
+            color: leftPanelText,
+            bgcolor: isDark ? alpha(theme.palette.primary.main, 0.16) : alpha(theme.palette.primary.main, 0.06),
+          },
+        }}
+      >
+        {isDark ? <LightModeIcon fontSize="small" /> : <DarkModeIcon fontSize="small" />}
+      </IconButton>
       {/* Left panel — branding */}
       <Box
         sx={{
@@ -145,28 +177,41 @@ export const RegisterPage: React.FC = () => {
                 width: 44,
                 height: 44,
                 borderRadius: '12px',
-                background: 'linear-gradient(135deg, #E8A045 0%, #F0B96A 100%)',
+                background: (theme) =>
+                  `linear-gradient(135deg, ${theme.palette.brand.navy} 0%, ${theme.palette.brand.amber} 100%)`,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 fontWeight: 800,
                 fontSize: '1.1rem',
-                color: '#0D1B2A',
+                color: (theme) => theme.palette.on.primary,
               }}
             >
               RC
             </Box>
-            <Typography variant="h5" fontWeight={800} sx={{ color: 'white' }}>
+            <Typography variant="h5" fontWeight={800} sx={{ color: leftPanelText }}>
               RoomCraft Studio
             </Typography>
           </Box>
           <Typography
             variant="h2"
-            sx={{ color: 'white', mb: 3, fontSize: '2.5rem', lineHeight: 1.2 }}
+            sx={{
+              color: leftPanelText,
+              mb: 3,
+              fontSize: '2.5rem',
+              lineHeight: 1.2,
+            }}
           >
             Design your perfect room with confidence
           </Typography>
-          <Typography variant="body1" sx={{ color: alpha('#FFFFFF', 0.7), lineHeight: 1.8, mb: 5 }}>
+          <Typography
+            variant="body1"
+            sx={{
+              color: leftPanelTextMuted,
+              lineHeight: 1.8,
+              mb: 5,
+            }}
+          >
             Join thousands of homeowners and designers who use RoomCraft Studio to visualise
             furniture layouts in stunning 2D and 3D before making a purchase.
           </Typography>
@@ -179,7 +224,10 @@ export const RegisterPage: React.FC = () => {
             ].map((item) => (
               <Box key={item} sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                 <CheckCircle sx={{ color: 'secondary.main', fontSize: 20 }} />
-                <Typography variant="body2" sx={{ color: alpha('#FFFFFF', 0.8) }}>
+                <Typography
+                  variant="body2"
+                  sx={{ color: leftPanelTextSoft }}
+                >
                   {item}
                 </Typography>
               </Box>
@@ -205,10 +253,13 @@ export const RegisterPage: React.FC = () => {
           sx={{
             width: '100%',
             maxWidth: 440,
-            backgroundColor: 'background.paper',
+            backgroundColor: theme.palette.glass.background,
+            border: `1px solid ${theme.palette.glass.border}`,
+            backdropFilter: `blur(${theme.palette.glass.blur}px)`,
+            WebkitBackdropFilter: `blur(${theme.palette.glass.blur}px)`,
             borderRadius: 4,
             p: { xs: 3, sm: 5 },
-            boxShadow: `0 40px 80px ${alpha('#000000', 0.3)}`,
+            boxShadow: 'none',
           }}
         >
           <Box sx={{ mb: 4 }}>
