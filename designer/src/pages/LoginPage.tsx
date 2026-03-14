@@ -20,6 +20,8 @@ import {
   DesignServices,
   ArrowForward,
   OpenInNew,
+  DarkMode,
+  LightMode,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
@@ -31,11 +33,14 @@ import { AppDispatch } from '@/app/store';
 import { designerLogin, clearError } from '@/features/auth/authSlice';
 import { useAuth } from '@/hooks/useAuth';
 import { loginSchema, LoginFormData } from '@/utils/validators';
+import { useThemeMode } from '@/theme/ThemeModeProvider';
+import { BACKGROUND } from '@/theme/tokens';
 
-const MotionBox = motion(Box);
+const MotionBox = motion.create(Box);
 
 export const LoginPage: React.FC = () => {
   const theme = useTheme();
+  const { resolvedMode, toggleMode } = useThemeMode();
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
   const { isLoading, error, isAuthenticated } = useAuth();
@@ -73,55 +78,63 @@ export const LoginPage: React.FC = () => {
     }
   };
 
+  const isDark = resolvedMode === 'dark';
+  const pageBg = isDark
+    ? `linear-gradient(135deg, ${BACKGROUND.dark.primary} 0%, ${BACKGROUND.dark.secondary} 50%, #020617 100%)`
+    : `linear-gradient(135deg, ${BACKGROUND.light.primary} 0%, ${BACKGROUND.light.secondary} 40%, #E5E7EB 100%)`;
+
   return (
     <Box
       sx={{
         minHeight: '100vh',
         display: 'flex',
-        backgroundColor: 'background.default',
+        background: pageBg,
         position: 'relative',
         overflow: 'hidden',
       }}
     >
-      {/* Animated background grid */}
+      {/* Top-right theme toggle */}
       <Box
         sx={{
           position: 'absolute',
-          inset: 0,
-          backgroundImage: `
-            linear-gradient(${alpha('#0EA5E9', 0.03)} 1px, transparent 1px),
-            linear-gradient(90deg, ${alpha('#0EA5E9', 0.03)} 1px, transparent 1px)
-          `,
-          backgroundSize: '40px 40px',
-          pointerEvents: 'none',
+          top: 16,
+          right: 16,
+          zIndex: 2,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1,
         }}
-      />
-
-      {/* Glow effects */}
-      <Box
-        sx={{
-          position: 'absolute',
-          top: '-15%',
-          left: '-10%',
-          width: { xs: 280, sm: 400, md: 600 },
-          height: { xs: 280, sm: 400, md: 600 },
-          borderRadius: '50%',
-          background: `radial-gradient(circle, ${alpha(theme.palette.primary.main, 0.12)} 0%, transparent 70%)`,
-          pointerEvents: 'none',
-        }}
-      />
-      <Box
-        sx={{
-          position: 'absolute',
-          bottom: '-20%',
-          right: '-10%',
-          width: { xs: 200, sm: 350, md: 500 },
-          height: { xs: 200, sm: 350, md: 500 },
-          borderRadius: '50%',
-          background: `radial-gradient(circle, ${alpha('#8B5CF6', 0.08)} 0%, transparent 70%)`,
-          pointerEvents: 'none',
-        }}
-      />
+      >
+        <IconButton
+          size="small"
+          onClick={toggleMode}
+          aria-label={`Switch to ${isDark ? 'light' : 'dark'} mode`}
+          sx={{
+            borderRadius: 999,
+            color: isDark ? alpha(theme.palette.text.primary, 0.8) : theme.palette.text.secondary,
+            border: '0 !important',
+            boxShadow: 'none !important',
+            outline: 'none !important',
+            backgroundColor: 'transparent',
+            '&:hover': {
+              color: theme.palette.text.primary,
+              bgcolor: isDark
+                ? alpha(theme.palette.primary.main, 0.16)
+                : alpha(theme.palette.primary.main, 0.06),
+              border: '0 !important',
+              boxShadow: 'none !important',
+              outline: 'none !important',
+            },
+            '&:focus, &:focus-visible, &:active': {
+              border: '0 !important',
+              boxShadow: 'none !important',
+              outline: 'none !important',
+            },
+          }}
+        >
+          {isDark ? <LightMode fontSize="small" /> : <DarkMode fontSize="small" />}
+        </IconButton>
+      </Box>
 
       {/* Left panel — branding */}
       <Box
@@ -159,7 +172,11 @@ export const LoginPage: React.FC = () => {
               RC
             </Box>
             <Box>
-              <Typography variant="h6" fontWeight={800} sx={{ color: 'text.primary', lineHeight: 1 }}>
+              <Typography
+                variant="h6"
+                fontWeight={800}
+                sx={{ color: 'text.primary', lineHeight: 1 }}
+              >
                 RoomCraft Studio
               </Typography>
               <Typography variant="caption" sx={{ color: 'primary.main', fontWeight: 600 }}>
@@ -238,6 +255,22 @@ export const LoginPage: React.FC = () => {
         </MotionBox>
       </Box>
 
+      {/* Colored divider between panels (desktop only) */}
+      <Box
+        sx={{
+          display: { xs: 'none', lg: 'block' },
+          alignSelf: 'stretch',
+          width: '1px',
+          background: `linear-gradient(
+            180deg,
+            ${alpha(theme.palette.primary.main, 0.0)} 0%,
+            ${alpha(theme.palette.primary.main, 0.7)} 40%,
+            ${alpha(theme.palette.secondary.main, 0.9)} 100%
+          )`,
+          opacity: 0.9,
+        }}
+      />
+
       {/* Right panel — login form */}
       <Box
         sx={{
@@ -248,7 +281,6 @@ export const LoginPage: React.FC = () => {
           p: { xs: 2, sm: 4 },
           position: 'relative',
           zIndex: 1,
-          borderLeft: { lg: `1px solid ${alpha('#374151', 0.5)}` },
         }}
       >
         <MotionBox
@@ -258,11 +290,16 @@ export const LoginPage: React.FC = () => {
           sx={{
             width: '100%',
             maxWidth: 420,
-            backgroundColor: 'background.paper',
+            backgroundColor:
+              resolvedMode === 'dark'
+                ? alpha('#020617', 0.9)
+                : alpha('#FFFFFF', 0.92),
             borderRadius: 4,
             p: { xs: 3, sm: 5 },
-            border: `1px solid ${alpha('#374151', 0.6)}`,
-            boxShadow: `0 40px 80px ${alpha('#000000', 0.5)}`,
+            border: `1px solid ${alpha(theme.palette.primary.main, 0.4)}`,
+            boxShadow: 'none',
+            backdropFilter: 'blur(22px)',
+            WebkitBackdropFilter: 'blur(22px)',
           }}
         >
           {/* Mobile logo */}
@@ -406,7 +443,7 @@ export const LoginPage: React.FC = () => {
             </Stack>
           </Box>
 
-          <Divider sx={{ my: 3, borderColor: alpha('#374151', 0.6) }} />
+          <Divider sx={{ my: 3, borderColor: alpha(theme.palette.divider, 0.6) }} />
 
           <Box sx={{ textAlign: 'center' }}>
             <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1 }}>
@@ -431,7 +468,7 @@ export const LoginPage: React.FC = () => {
               p: 2,
               borderRadius: 2,
               backgroundColor: alpha(theme.palette.primary.main, 0.06),
-              border: `1px solid ${alpha(theme.palette.primary.main, 0.15)}`,
+              border: `1px solid ${alpha(theme.palette.divider, 0.8)}`,
             }}
           >
             <Typography
