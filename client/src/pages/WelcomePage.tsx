@@ -11,7 +11,6 @@ import {
   Stack,
   Avatar,
   Rating,
-  alpha,
   useTheme,
 } from '@mui/material';
 import {
@@ -28,6 +27,9 @@ import {
 import { Link } from 'react-router-dom';
 import { motion, useInView } from 'framer-motion';
 import { useRef } from 'react';
+import { alpha } from '@mui/material/styles';
+import { BACKGROUND, GLASS, FEATURE_ICON_COLORS } from '@/theme/tokens';
+import { TwoTonePageLayout } from '@/components/layout/TwoTonePageLayout';
 
 const MotionBox = motion(Box);
 const MotionCard = motion(Card);
@@ -62,42 +64,36 @@ const FEATURES = [
     title: '2D Layout Editor',
     description:
       'Drag and drop furniture pieces onto a top-down floor plan. Precisely position every item to match your room dimensions.',
-    color: '#3B82F6',
   },
   {
     icon: <ViewInAr sx={{ fontSize: 32 }} />,
     title: '3D Visualisation',
     description:
       'Instantly convert your 2D layout into a photorealistic 3D scene. Rotate, zoom, and explore your room from any angle.',
-    color: '#8B5CF6',
   },
   {
     icon: <Palette sx={{ fontSize: 32 }} />,
     title: 'Colour & Style',
     description:
       'Experiment with wall colours, furniture finishes, and materials. See how different combinations look in real time.',
-    color: '#EC4899',
   },
   {
     icon: <Speed sx={{ fontSize: 32 }} />,
     title: 'Instant Preview',
     description:
       'Changes render immediately with no waiting. Our optimised Three.js engine delivers smooth, real-time graphics.',
-    color: '#F59E0B',
   },
   {
     icon: <Security sx={{ fontSize: 32 }} />,
     title: 'Save & Share',
     description:
       'Save unlimited designs to your account. Share with family, friends, or your interior designer with a single link.',
-    color: '#10B981',
   },
   {
     icon: <Star sx={{ fontSize: 32 }} />,
     title: 'Expert Guidance',
     description:
       'Our professional designers are available in-store to help you create the perfect room using the visualisation tool.',
-    color: '#EF4444',
   },
 ];
 
@@ -157,47 +153,27 @@ const HOW_IT_WORKS = [
 
 export const WelcomePage: React.FC = () => {
   const theme = useTheme();
+  const mode = theme.palette.mode;
+  const glass = mode === 'dark' ? GLASS.dark : GLASS.light;
+  const featureIconColors =
+    mode === 'dark' ? FEATURE_ICON_COLORS.dark : FEATURE_ICON_COLORS.light;
 
-  return (
-    <Box>
+  const background = mode === 'dark' ? BACKGROUND.dark : BACKGROUND.light;
+
+  const heroAndTopContent = (
+    <>
       {/* Hero Section */}
       <Box
         sx={{
-          minHeight: { xs: '85vh', sm: '90vh', md: '92vh' },
-          background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, #1B2E42 40%, #243447 70%, #1a2535 100%)`,
+          pt: { xs: 10, md: 12 },
+          pb: { xs: 8, md: 10 },
           display: 'flex',
           alignItems: 'center',
           position: 'relative',
           overflow: 'hidden',
         }}
       >
-        {/* Decorative background elements — scale down on small screens */}
-        <Box
-          sx={{
-            position: 'absolute',
-            top: '-20%',
-            right: '-10%',
-            width: { xs: '280px', sm: '400px', md: '600px' },
-            height: { xs: '280px', sm: '400px', md: '600px' },
-            borderRadius: '50%',
-            background: `radial-gradient(circle, ${alpha(theme.palette.secondary.main, 0.15)} 0%, transparent 70%)`,
-            pointerEvents: 'none',
-          }}
-        />
-        <Box
-          sx={{
-            position: 'absolute',
-            bottom: '-15%',
-            left: '-5%',
-            width: { xs: '200px', sm: '300px', md: '400px' },
-            height: { xs: '200px', sm: '300px', md: '400px' },
-            borderRadius: '50%',
-            background: `radial-gradient(circle, ${alpha('#3B82F6', 0.1)} 0%, transparent 70%)`,
-            pointerEvents: 'none',
-          }}
-        />
-
-        <Container maxWidth="xl" sx={{ position: 'relative', zIndex: 1, px: { xs: 2, sm: 3 } }}>
+        <Container maxWidth="xl" sx={{ position: 'relative', zIndex: 1, px: { xs: 0 } }}>
           <Grid container spacing={{ xs: 4, md: 6 }} alignItems="center">
             <Grid item xs={12} md={6}>
               <MotionBox
@@ -220,7 +196,7 @@ export const WelcomePage: React.FC = () => {
                   variant="h1"
                   sx={{
                     fontSize: { xs: '2.5rem', sm: '3.5rem', md: '4rem', lg: '4.5rem' },
-                    color: 'white',
+                    color: mode === 'dark' ? theme.palette.text.primary : theme.palette.text.primary,
                     mb: 3,
                     lineHeight: 1.05,
                   }}
@@ -241,7 +217,10 @@ export const WelcomePage: React.FC = () => {
                 <Typography
                   variant="h6"
                   sx={{
-                    color: alpha('#FFFFFF', 0.75),
+                    color:
+                      mode === 'dark'
+                        ? alpha(theme.palette.text.primary, 0.8)
+                        : theme.palette.text.secondary,
                     mb: 5,
                     fontWeight: 400,
                     lineHeight: 1.7,
@@ -273,11 +252,14 @@ export const WelcomePage: React.FC = () => {
                       px: 4,
                       py: 1.75,
                       fontSize: '1rem',
-                      color: 'white',
-                      borderColor: alpha('#FFFFFF', 0.4),
+                      color: theme.palette.text.primary,
+                      borderColor: alpha(theme.palette.text.primary, 0.25),
                       '&:hover': {
-                        borderColor: 'white',
-                        backgroundColor: alpha('#FFFFFF', 0.08),
+                        borderColor: alpha(theme.palette.text.primary, 0.4),
+                        backgroundColor:
+                          mode === 'dark'
+                            ? alpha(theme.palette.primary.main, 0.22)
+                            : alpha(theme.palette.primary.main, 0.06),
                       },
                     }}
                   >
@@ -292,7 +274,15 @@ export const WelcomePage: React.FC = () => {
                         sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}
                       >
                         <CheckCircle sx={{ color: 'secondary.main', fontSize: 18 }} />
-                        <Typography variant="body2" sx={{ color: alpha('#FFFFFF', 0.7) }}>
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            color:
+                              mode === 'dark'
+                                ? alpha(theme.palette.text.primary, 0.75)
+                                : alpha(theme.palette.text.primary, 0.7),
+                          }}
+                        >
                           {item}
                         </Typography>
                       </Box>
@@ -313,21 +303,51 @@ export const WelcomePage: React.FC = () => {
                     position: 'relative',
                     borderRadius: 4,
                     overflow: 'hidden',
-                    boxShadow: `0 40px 80px ${alpha('#000000', 0.5)}`,
-                    border: `1px solid ${alpha('#FFFFFF', 0.1)}`,
+                    boxShadow: 'none',
+                    border: `1px solid ${alpha(
+                      mode === 'dark' ? theme.palette.on.glass : theme.palette.text.primary,
+                      0.16
+                    )}`,
                     aspectRatio: '16/10',
-                    background: `linear-gradient(135deg, ${alpha('#1B2E42', 0.8)} 0%, ${alpha('#243447', 0.9)} 100%)`,
+                    backgroundColor:
+                      mode === 'dark'
+                        ? alpha(theme.palette.background.paper, 0.96)
+                        : alpha(theme.palette.background.paper, 0.98),
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                   }}
                 >
                   <Box sx={{ textAlign: 'center', p: 4 }}>
-                    <ViewInAr sx={{ fontSize: 80, color: alpha(theme.palette.secondary.main, 0.6), mb: 2 }} />
-                    <Typography variant="h6" sx={{ color: alpha('#FFFFFF', 0.5), fontWeight: 400 }}>
+                    <ViewInAr
+                      sx={{
+                        fontSize: 80,
+                        color: alpha(theme.palette.secondary.main, 0.7),
+                        mb: 2,
+                      }}
+                    />
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        color:
+                          mode === 'dark'
+                            ? alpha(theme.palette.text.primary, 0.7)
+                            : alpha(theme.palette.text.primary, 0.7),
+                        fontWeight: 500,
+                      }}
+                    >
                       3D Room Preview
                     </Typography>
-                    <Typography variant="body2" sx={{ color: alpha('#FFFFFF', 0.3), mt: 1 }}>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        color:
+                          mode === 'dark'
+                            ? alpha(theme.palette.text.secondary, 0.7)
+                            : alpha(theme.palette.text.secondary, 0.8),
+                        mt: 1,
+                      }}
+                    >
                       Interactive visualisation loads here
                     </Typography>
                   </Box>
@@ -347,8 +367,14 @@ export const WelcomePage: React.FC = () => {
                         label={tab}
                         size="small"
                         sx={{
-                          backgroundColor: i === 1 ? 'secondary.main' : alpha('#FFFFFF', 0.1),
-                          color: i === 1 ? 'primary.main' : alpha('#FFFFFF', 0.7),
+                              backgroundColor:
+                                i === 1
+                                  ? 'secondary.main'
+                                  : alpha(theme.palette.text.primary, 0.08),
+                          color:
+                            i === 1
+                              ? 'primary.main'
+                              : alpha(theme.palette.text.primary, 0.8),
                           fontWeight: 600,
                           fontSize: '0.75rem',
                         }}
@@ -363,32 +389,64 @@ export const WelcomePage: React.FC = () => {
       </Box>
 
       {/* Stats Bar */}
-      <Box sx={{ backgroundColor: 'secondary.main', py: { xs: 3, md: 4 } }}>
-        <Container maxWidth="xl" sx={{ px: { xs: 2, sm: 3 } }}>
-          <Grid container spacing={2} justifyContent="center">
-            {STATS.map((stat) => (
-              <Grid item xs={6} sm={3} key={stat.label}>
-                <Box sx={{ textAlign: 'center' }}>
-                  <Typography
-                    variant="h4"
-                    fontWeight={800}
-                    sx={{ color: 'primary.main', lineHeight: 1 }}
-                  >
-                    {stat.value}
-                  </Typography>
-                  <Typography variant="body2" sx={{ color: alpha('#0D1B2A', 0.7), mt: 0.5, fontWeight: 500 }}>
-                    {stat.label}
-                  </Typography>
-                </Box>
-              </Grid>
-            ))}
-          </Grid>
+      <Box
+        sx={{
+          pb: { xs: 6, md: 8 },
+          backgroundColor: 'transparent',
+        }}
+      >
+        <Container maxWidth="xl" sx={{ px: { xs: 0 } }}>
+          <Box
+            className="glass-surface"
+            sx={{
+              borderRadius: 999,
+              px: { xs: 2.5, sm: 3.5 },
+              py: { xs: 2.5, md: 3 },
+              backdropFilter: `blur(${glass.blur}px)`,
+              WebkitBackdropFilter: `blur(${glass.blur}px)`,
+              backgroundColor: glass.background,
+              border: `1px solid ${glass.border}`,
+            }}
+          >
+            <Grid container spacing={2} justifyContent="center">
+              {STATS.map((stat) => (
+                <Grid item xs={6} sm={3} key={stat.label}>
+                  <Box sx={{ textAlign: 'center' }}>
+                    <Typography
+                      variant="h4"
+                      fontWeight={800}
+                      sx={{
+                        color: theme.palette.on.glass,
+                        lineHeight: 1,
+                      }}
+                    >
+                      {stat.value}
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        color: alpha(theme.palette.on.glass, 0.8),
+                        mt: 0.5,
+                        fontWeight: 500,
+                      }}
+                    >
+                      {stat.label}
+                    </Typography>
+                  </Box>
+                </Grid>
+              ))}
+            </Grid>
+          </Box>
         </Container>
       </Box>
+    </>
+  );
 
+  const lowerContent = (
+    <>
       {/* Features Section */}
-      <Box sx={{ py: { xs: 8, md: 12 }, backgroundColor: 'background.default' }}>
-        <Container maxWidth="xl" sx={{ px: { xs: 2, sm: 3 } }}>
+      <Box sx={{ py: { xs: 8, md: 12 } }}>
+        <Container maxWidth="xl" sx={{ px: { xs: 0 } }}>
           <AnimatedSection>
             <MotionBox variants={fadeInUp} sx={{ textAlign: 'center', mb: 8 }}>
               <Chip
@@ -413,8 +471,10 @@ export const WelcomePage: React.FC = () => {
             </MotionBox>
 
             <Grid container spacing={3}>
-              {FEATURES.map((feature) => (
-                <Grid item xs={12} sm={6} lg={4} key={feature.title}>
+              {FEATURES.map((feature, index) => {
+                const color = featureIconColors[index];
+                return (
+                  <Grid item xs={12} sm={6} lg={4} key={feature.title}>
                   <MotionCard
                     variants={fadeInUp}
                     whileHover={{ y: -6, transition: { duration: 0.2 } }}
@@ -426,11 +486,11 @@ export const WelcomePage: React.FC = () => {
                           width: 56,
                           height: 56,
                           borderRadius: 3,
-                          backgroundColor: alpha(feature.color, 0.1),
+                          backgroundColor: alpha(color, mode === 'dark' ? 0.2 : 0.12),
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          color: feature.color,
+                          color,
                           mb: 2.5,
                         }}
                       >
@@ -444,8 +504,9 @@ export const WelcomePage: React.FC = () => {
                       </Typography>
                     </CardContent>
                   </MotionCard>
-                </Grid>
-              ))}
+                  </Grid>
+                );
+              })}
             </Grid>
           </AnimatedSection>
         </Container>
@@ -455,10 +516,9 @@ export const WelcomePage: React.FC = () => {
       <Box
         sx={{
           py: { xs: 8, md: 12 },
-          background: `linear-gradient(180deg, ${alpha(theme.palette.primary.main, 0.03)} 0%, ${alpha(theme.palette.secondary.main, 0.05)} 100%)`,
         }}
       >
-        <Container maxWidth="xl" sx={{ px: { xs: 2, sm: 3 } }}>
+        <Container maxWidth="xl" sx={{ px: { xs: 0 } }}>
           <AnimatedSection>
             <MotionBox variants={fadeInUp} sx={{ textAlign: 'center', mb: 8 }}>
               <Chip
@@ -506,7 +566,7 @@ export const WelcomePage: React.FC = () => {
                         mb: 3,
                         position: 'relative',
                         zIndex: 1,
-                        boxShadow: `0 8px 24px ${alpha(theme.palette.secondary.main, 0.4)}`,
+                        boxShadow: 'none',
                       }}
                     >
                       <Typography variant="h6" fontWeight={800} sx={{ color: 'primary.main' }}>
@@ -528,8 +588,8 @@ export const WelcomePage: React.FC = () => {
       </Box>
 
       {/* Testimonials */}
-      <Box sx={{ py: { xs: 8, md: 12 }, backgroundColor: 'background.default' }}>
-        <Container maxWidth="xl" sx={{ px: { xs: 2, sm: 3 } }}>
+      <Box sx={{ py: { xs: 8, md: 12 } }}>
+        <Container maxWidth="xl" sx={{ px: { xs: 0 } }}>
           <AnimatedSection>
             <MotionBox variants={fadeInUp} sx={{ textAlign: 'center', mb: 8 }}>
               <Chip
@@ -552,7 +612,14 @@ export const WelcomePage: React.FC = () => {
                   <MotionCard
                     variants={fadeInUp}
                     whileHover={{ y: -4, transition: { duration: 0.2 } }}
-                    sx={{ height: '100%' }}
+                    className="glass-surface"
+                    sx={{
+                      height: '100%',
+                      backdropFilter: `blur(${glass.blur}px)`,
+                      WebkitBackdropFilter: `blur(${glass.blur}px)`,
+                      backgroundColor: glass.background,
+                      border: `1px solid ${glass.border}`,
+                    }}
                   >
                     <CardContent sx={{ p: 4 }}>
                       <FormatQuote
@@ -606,27 +673,20 @@ export const WelcomePage: React.FC = () => {
       <Box
         sx={{
           py: { xs: 10, md: 14 },
-          background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, #1B2E42 100%)`,
           position: 'relative',
           overflow: 'hidden',
+          borderRadius: 4,
+          px: { xs: 2, sm: 3 },
+          bgcolor: background.primary,
         }}
       >
-        <Box
-          sx={{
-            position: 'absolute',
-            inset: 0,
-            backgroundImage:
-              'radial-gradient(circle at 20% 50%, rgba(232,160,69,0.1) 0%, transparent 50%), radial-gradient(circle at 80% 50%, rgba(59,130,246,0.08) 0%, transparent 50%)',
-            pointerEvents: 'none',
-          }}
-        />
-        <Container maxWidth="md" sx={{ position: 'relative', textAlign: 'center', px: { xs: 2, sm: 3 } }}>
+        <Container maxWidth="md" sx={{ position: 'relative', textAlign: 'center', px: { xs: 0 } }}>
           <AnimatedSection>
             <MotionBox variants={fadeInUp}>
               <Typography
                 variant="h2"
                 sx={{
-                  color: 'white',
+                  color: mode === 'dark' ? theme.palette.text.primary : theme.palette.text.primary,
                   fontSize: { xs: '2rem', md: '3rem' },
                   mb: 2.5,
                 }}
@@ -636,7 +696,10 @@ export const WelcomePage: React.FC = () => {
               <Typography
                 variant="h6"
                 sx={{
-                  color: alpha('#FFFFFF', 0.7),
+                  color:
+                    mode === 'dark'
+                      ? alpha(theme.palette.text.primary, 0.8)
+                      : alpha(theme.palette.text.secondary, 0.9),
                   mb: 5,
                   fontWeight: 400,
                   lineHeight: 1.7,
@@ -670,11 +733,14 @@ export const WelcomePage: React.FC = () => {
                     px: 5,
                     py: 1.75,
                     fontSize: '1rem',
-                    color: 'white',
-                    borderColor: alpha('#FFFFFF', 0.4),
+                    color: theme.palette.text.primary,
+                    borderColor: alpha(theme.palette.text.primary, 0.25),
                     '&:hover': {
-                      borderColor: 'white',
-                      backgroundColor: alpha('#FFFFFF', 0.08),
+                      borderColor: alpha(theme.palette.text.primary, 0.4),
+                      backgroundColor:
+                        mode === 'dark'
+                          ? alpha(theme.palette.primary.main, 0.22)
+                          : alpha(theme.palette.primary.main, 0.06),
                     },
                   }}
                 >
@@ -685,7 +751,23 @@ export const WelcomePage: React.FC = () => {
           </AnimatedSection>
         </Container>
       </Box>
-    </Box>
+    </>
+  );
+
+  return (
+    <TwoTonePageLayout
+      top={
+        <Box sx={{ maxWidth: '100%', mx: 'auto', bgcolor: background.primary }}>
+          {heroAndTopContent}
+        </Box>
+      }
+      bottom={
+        <Box sx={{ maxWidth: '100%', mx: 'auto' }}>
+          {lowerContent}
+        </Box>
+      }
+      variant="default"
+    />
   );
 };
 

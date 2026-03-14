@@ -8,6 +8,9 @@ import Footer from '@/components/layout/Footer';
 const WelcomePage = lazy(() => import('@/pages/WelcomePage'));
 const LoginPage = lazy(() => import('@/pages/LoginPage'));
 const RegisterPage = lazy(() => import('@/pages/RegisterPage'));
+const FurnitureCatalogPage = lazy(() => import('@/pages/FurnitureCatalogPage'));
+const MyDesignsPage = lazy(() => import('@/pages/MyDesignsPage'));
+const DesignViewerPage = lazy(() => import('@/pages/DesignViewerPage'));
 
 const PageLoader: React.FC = () => (
   <Box
@@ -87,14 +90,42 @@ export const AppRouter: React.FC = () => {
             </MainLayout>
           }
         />
+        
+        <Route
+          path="/furniture"
+          element={
+            <MainLayout>
+              <FurnitureCatalogPage />
+            </MainLayout>
+          }
+        />
 
-        {/* Protected routes (placeholder pages for future phases) */}
+        <Route
+          path="/design-viewer/:id"
+          element={
+            <MainLayout>
+              <DesignViewerPage />
+            </MainLayout>
+          }
+        />
+
+        {/* Protected routes */}
+        <Route
+          path="/my-designs"
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+                <MyDesignsPage />
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/designer"
           element={
             <ProtectedRoute>
               <MainLayout>
-                <Box sx={{ p: { xs: 2, sm: 4 }, textAlign: 'center' }}>Room Designer — Coming in Phase 2</Box>
+                <Box sx={{ p: { xs: 2, sm: 4 }, textAlign: 'center' }}>Room Designer — Coming in Phase 3</Box>
               </MainLayout>
             </ProtectedRoute>
           }

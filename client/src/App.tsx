@@ -1,11 +1,10 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter } from 'react-router-dom';
-import { ThemeProvider, CssBaseline } from '@mui/material';
 import { Provider, useSelector } from 'react-redux';
 import { HelmetProvider } from 'react-helmet-async';
 import { Toaster } from 'react-hot-toast';
 import { store, RootState } from '@/app/store';
-import { theme } from '@/theme/theme';
+import { ThemeModeProvider } from '@/theme/ThemeModeProvider';
 import { AppRouter } from '@/router/index';
 import { fetchCurrentUser } from '@/features/auth/authSlice';
 import { useNotificationSocket } from '@/lib/socket';
@@ -53,12 +52,11 @@ const App: React.FC = () => {
   return (
     <HelmetProvider>
       <Provider store={store}>
-        <ThemeProvider theme={theme}>
-          <CssBaseline />
+        <ThemeModeProvider>
           <BrowserRouter>
             <AppContent />
           </BrowserRouter>
-        </ThemeProvider>
+        </ThemeModeProvider>
       </Provider>
     </HelmetProvider>
   );
