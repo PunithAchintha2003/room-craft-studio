@@ -23,6 +23,7 @@ import {
   LightMode,
   Logout,
   Menu as MenuIcon,
+  ChevronLeft,
   Dashboard as DashboardIcon,
   DesignServices,
 } from '@mui/icons-material';
@@ -34,6 +35,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useThemeMode } from '@/theme/ThemeModeProvider';
 
 const DRAWER_WIDTH = 240;
+const DRAWER_COLLAPSED_WIDTH = 64;
 
 const NAV_ITEMS = [
   { label: 'Dashboard', path: '/dashboard', icon: <DashboardIcon /> },
@@ -51,12 +53,14 @@ export const DesignerLayout: React.FC<DesignerLayoutProps> = ({ children }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch<AppDispatch>();
   const { user } = useAuth();
   const { resolvedMode, toggleMode } = useThemeMode();
 
+  const drawerWidth = isMobile ? DRAWER_WIDTH : collapsed ? DRAWER_COLLAPSED_WIDTH : DRAWER_WIDTH;
   const pageTitle = PAGE_TITLES[location.pathname] ?? 'Designer Portal';
 
   const handleLogout = async () => {
@@ -77,15 +81,36 @@ export const DesignerLayout: React.FC<DesignerLayoutProps> = ({ children }) => {
       {/* Brand */}
       <Box
         sx={{
-          px: 2.5,
-          py: 2.5,
+          px: collapsed && !isMobile ? 1 : 2,
+          py: 1,
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'space-between',
-          minHeight: 64,
+          justifyContent: collapsed && !isMobile ? 'center' : 'space-between',
+          minHeight: 48,
         }}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, minWidth: 0 }}>
+        {(!collapsed || isMobile) && (
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, minWidth: 0 }}>
+            <Box
+              component="img"
+              src="/rcs_logo_circular.svg"
+              alt="RoomCraft Studio"
+              sx={{
+                width: 48,
+                height: 48,
+                borderRadius: '50%',
+                objectFit: 'cover',
+                flexShrink: 0,
+              }}
+            />
+            <Box sx={{ minWidth: 0 }}>
+              <Typography variant="caption" sx={{ color: 'primary.main', fontWeight: 600 }}>
+                Designer Portal
+              </Typography>
+            </Box>
+          </Box>
+        )}
+        {collapsed && !isMobile && (
           <Box
             sx={{
               width: 34,
@@ -96,68 +121,81 @@ export const DesignerLayout: React.FC<DesignerLayoutProps> = ({ children }) => {
               alignItems: 'center',
               justifyContent: 'center',
               fontWeight: 800,
-              color: '#FFFFFF',
+              color: '#0D1B2A',
               fontSize: '0.85rem',
-              flexShrink: 0,
             }}
           >
             RC
           </Box>
-          <Box sx={{ minWidth: 0 }}>
-            <Typography variant="subtitle2" fontWeight={800} noWrap>
-              RoomCraft Studio
-            </Typography>
-            <Typography variant="caption" sx={{ color: 'primary.main', fontWeight: 600 }}>
-              Designer Portal
-            </Typography>
-          </Box>
-        </Box>
+        )}
+        {!isMobile && (
+          <IconButton
+            size="small"
+            onClick={() => setCollapsed((c) => !c)}
+            sx={{ color: 'text.secondary', ml: collapsed ? 0 : 1 }}
+          >
+            <ChevronLeft
+              sx={{
+                transition: 'transform 0.2s',
+                transform: collapsed ? 'rotate(180deg)' : 'rotate(0deg)',
+              }}
+            />
+          </IconButton>
+        )}
       </Box>
 
       <Divider sx={{ borderColor: alpha(theme.palette.divider, 0.5) }} />
 
       {/* Nav items */}
-      <List sx={{ px: 1, py: 1.5, flex: 1 }}>
+      <List sx={{ px: 1, py: 1, flex: 1 }}>
         {NAV_ITEMS.map((item) => {
           const isActive = location.pathname === item.path;
           return (
-            <ListItemButton
+            <Tooltip
               key={item.path}
-              onClick={() => {
-                navigate(item.path);
-                if (isMobile) setMobileOpen(false);
-              }}
-              sx={{
-                borderRadius: 2,
-                mb: 0.5,
-                px: 1.5,
-                backgroundColor: isActive ? alpha(theme.palette.primary.main, 0.12) : 'transparent',
-                color: isActive ? 'primary.main' : 'text.secondary',
-                '&:hover': {
-                  backgroundColor: isActive
-                    ? alpha(theme.palette.primary.main, 0.18)
-                    : alpha(theme.palette.action.hover, 0.08),
-                  color: isActive ? 'primary.main' : 'text.primary',
-                },
-              }}
+              title={collapsed && !isMobile ? item.label : ''}
+              placement="right"
             >
-              <ListItemIcon
+              <ListItemButton
+                onClick={() => {
+                  navigate(item.path);
+                  if (isMobile) setMobileOpen(false);
+                }}
                 sx={{
-                  minWidth: 36,
-                  color: 'inherit',
-                  justifyContent: 'center',
+                  borderRadius: 2,
+                  mb: 0.5,
+                  px: 1.5,
+                  justifyContent: collapsed && !isMobile ? 'center' : 'flex-start',
+                  backgroundColor: isActive ? alpha(theme.palette.primary.main, 0.12) : 'transparent',
+                  color: isActive ? 'primary.main' : 'text.secondary',
+                  '&:hover': {
+                    backgroundColor: isActive
+                      ? alpha(theme.palette.primary.main, 0.18)
+                      : alpha(theme.palette.action.hover, 0.08),
+                    color: isActive ? 'primary.main' : 'text.primary',
+                  },
                 }}
               >
-                {item.icon}
-              </ListItemIcon>
-              <ListItemText
-                primary={item.label}
-                primaryTypographyProps={{
-                  fontSize: '0.875rem',
-                  fontWeight: isActive ? 600 : 400,
-                }}
-              />
-            </ListItemButton>
+                <ListItemIcon
+                  sx={{
+                    minWidth: collapsed && !isMobile ? 0 : 36,
+                    color: 'inherit',
+                    justifyContent: 'center',
+                  }}
+                >
+                  {item.icon}
+                </ListItemIcon>
+                {(!collapsed || isMobile) && (
+                  <ListItemText
+                    primary={item.label}
+                    primaryTypographyProps={{
+                      fontSize: '0.875rem',
+                      fontWeight: isActive ? 600 : 400,
+                    }}
+                  />
+                )}
+              </ListItemButton>
+            </Tooltip>
           );
         })}
       </List>
@@ -167,39 +205,44 @@ export const DesignerLayout: React.FC<DesignerLayoutProps> = ({ children }) => {
       {/* User info at bottom */}
       <Box
         sx={{
-          px: 2,
-          py: 2,
+          px: collapsed && !isMobile ? 1 : 2,
+          py: 1.5,
           display: 'flex',
           alignItems: 'center',
           gap: 1.5,
+          justifyContent: collapsed && !isMobile ? 'center' : 'flex-start',
         }}
       >
         <Avatar
           sx={{
-            width: 34,
-            height: 34,
+            width: 32,
+            height: 32,
             bgcolor: alpha(theme.palette.primary.main, 0.2),
             color: 'primary.main',
             fontWeight: 700,
-            fontSize: '0.875rem',
+            fontSize: '0.8rem',
             flexShrink: 0,
           }}
         >
           {user?.name?.charAt(0).toUpperCase() ?? 'D'}
         </Avatar>
-        <Box sx={{ minWidth: 0, flex: 1 }}>
-          <Typography variant="body2" fontWeight={600} noWrap>
-            {user?.name ?? 'Designer'}
-          </Typography>
-          <Typography variant="caption" sx={{ color: 'text.secondary' }} noWrap>
-            Designer
-          </Typography>
-        </Box>
-        <Tooltip title="Sign out">
-          <IconButton size="small" onClick={handleLogout} sx={{ color: 'text.secondary' }}>
-            <Logout fontSize="small" />
-          </IconButton>
-        </Tooltip>
+        {(!collapsed || isMobile) && (
+          <Box sx={{ minWidth: 0, flex: 1 }}>
+            <Typography variant="body2" fontWeight={600} noWrap>
+              {user?.name ?? 'Designer'}
+            </Typography>
+            <Typography variant="caption" sx={{ color: 'text.secondary' }} noWrap>
+              Designer
+            </Typography>
+          </Box>
+        )}
+        {(!collapsed || isMobile) && (
+          <Tooltip title="Sign out">
+            <IconButton size="small" onClick={handleLogout} sx={{ color: 'text.secondary' }}>
+              <Logout fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        )}
       </Box>
     </Box>
   );
@@ -211,17 +254,19 @@ export const DesignerLayout: React.FC<DesignerLayoutProps> = ({ children }) => {
         <Box
           component="nav"
           sx={{
-            width: DRAWER_WIDTH,
+            width: drawerWidth,
             flexShrink: 0,
+            transition: 'width 0.2s ease',
           }}
         >
           <Box
             sx={{
-              width: DRAWER_WIDTH,
+              width: drawerWidth,
               position: 'fixed',
               top: 0,
               left: 0,
               height: '100vh',
+              transition: 'width 0.2s ease',
               overflow: 'hidden',
             }}
           >
@@ -251,13 +296,14 @@ export const DesignerLayout: React.FC<DesignerLayoutProps> = ({ children }) => {
 
       {/* Main content area */}
       <Box
-        component="main"
-        sx={{
-          flex: 1,
-          display: 'flex',
-          flexDirection: 'column',
-          minWidth: 0,
-        }}
+component="main"
+      sx={{
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        minWidth: 0,
+        transition: 'margin 0.2s ease',
+      }}
       >
         {/* Top bar */}
         <AppBar

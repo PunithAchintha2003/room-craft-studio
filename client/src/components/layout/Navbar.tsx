@@ -61,23 +61,17 @@ const HideOnScroll: React.FC<HideOnScrollProps> = ({ children }) => {
 const Logo: React.FC = () => (
   <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 10 }}>
     <Box
+      component="img"
+      src="/rcs_logo_circular.svg"
+      alt="RoomCraft Studio"
       sx={{
-        width: 32,
-        height: 32,
-        borderRadius: 8,
-        background: (theme) =>
-          `linear-gradient(135deg, ${theme.palette.brand.navy} 0%, ${theme.palette.brand.amber} 100%)`,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontWeight: 700,
-        fontSize: '0.8125rem',
-        color: (theme) => theme.palette.on.primary,
+        width: 72,
+        height: 72,
+        borderRadius: '50%',
+        objectFit: 'cover',
         flexShrink: 0,
       }}
-    >
-      RC
-    </Box>
+    />
     <Typography
       variant="subtitle1"
       component="span"

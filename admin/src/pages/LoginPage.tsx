@@ -155,21 +155,17 @@ export const LoginPage: React.FC = () => {
         >
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 6 }}>
             <Box
+              component="img"
+              src="/rcs_logo_circular.svg"
+              alt="RoomCraft Studio"
               sx={{
-                width: 48,
-                height: 48,
-                borderRadius: '14px',
-                background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.light} 100%)`,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontWeight: 800,
-                fontSize: '1.2rem',
-                color: '#0D1B2A',
+                width: 80,
+                height: 80,
+                borderRadius: '50%',
+                objectFit: 'cover',
+                flexShrink: 0,
               }}
-            >
-              RC
-            </Box>
+            />
             <Box>
               <Typography variant="h6" fontWeight={800} sx={{ color: 'text.primary', lineHeight: 1 }}>
                 RoomCraft Studio
@@ -306,20 +302,17 @@ export const LoginPage: React.FC = () => {
             }}
           >
             <Box
+              component="img"
+              src="/rcs_logo_circular.svg"
+              alt="RoomCraft Studio"
               sx={{
-                width: 40,
-                height: 40,
-                borderRadius: '10px',
-                background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.light} 100%)`,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontWeight: 800,
-                color: '#0D1B2A',
+                width: 80,
+                height: 80,
+                borderRadius: '50%',
+                objectFit: 'cover',
+                flexShrink: 0,
               }}
-            >
-              RC
-            </Box>
+            />
             <Box>
               <Typography variant="subtitle1" fontWeight={800} sx={{ lineHeight: 1 }}>
                 RoomCraft Studio
