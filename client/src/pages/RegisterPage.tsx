@@ -173,22 +173,17 @@ export const RegisterPage: React.FC = () => {
         >
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 6 }}>
             <Box
+              component="img"
+              src="/rcs_logo_circular.svg"
+              alt="RoomCraft Studio"
               sx={{
-                width: 44,
-                height: 44,
-                borderRadius: '12px',
-                background: (theme) =>
-                  `linear-gradient(135deg, ${theme.palette.brand.navy} 0%, ${theme.palette.brand.amber} 100%)`,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontWeight: 800,
-                fontSize: '1.1rem',
-                color: (theme) => theme.palette.on.primary,
+                width: 96,
+                height: 96,
+                borderRadius: '50%',
+                objectFit: 'cover',
+                flexShrink: 0,
               }}
-            >
-              RC
-            </Box>
+            />
             <Typography variant="h5" fontWeight={800} sx={{ color: leftPanelText }}>
               RoomCraft Studio
             </Typography>

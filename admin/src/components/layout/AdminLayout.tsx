@@ -89,37 +89,29 @@ export const AdminLayout: React.FC = () => {
       {/* Brand */}
       <Box
         sx={{
-          px: collapsed && !isMobile ? 1 : 2.5,
-          py: 2.5,
+          px: collapsed && !isMobile ? 1 : 2,
+          py: 1,
           display: 'flex',
           alignItems: 'center',
           justifyContent: collapsed && !isMobile ? 'center' : 'space-between',
-          minHeight: 64,
+          minHeight: 48,
         }}
       >
         {(!collapsed || isMobile) && (
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, minWidth: 0 }}>
             <Box
+              component="img"
+              src="/rcs_logo_circular.svg"
+              alt="RoomCraft Studio"
               sx={{
-                width: 34,
-                height: 34,
-                borderRadius: '10px',
-                background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.light} 100%)`,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontWeight: 800,
-                color: '#0D1B2A',
-                fontSize: '0.85rem',
+                width: 48,
+                height: 48,
+                borderRadius: '50%',
+                objectFit: 'cover',
                 flexShrink: 0,
               }}
-            >
-              RC
-            </Box>
+            />
             <Box sx={{ minWidth: 0 }}>
-              <Typography variant="subtitle2" fontWeight={800} noWrap>
-                RoomCraft Studio
-              </Typography>
               <Typography variant="caption" sx={{ color: 'primary.main', fontWeight: 600 }}>
                 Admin Portal
               </Typography>
@@ -163,7 +155,7 @@ export const AdminLayout: React.FC = () => {
       <Divider sx={{ borderColor: alpha(theme.palette.divider, 0.5) }} />
 
       {/* Nav items */}
-      <List sx={{ px: 1, py: 1.5, flex: 1 }}>
+      <List sx={{ px: 1, py: 1, flex: 1 }}>
         {NAV_ITEMS.map((item) => {
           const isActive = location.pathname === item.path;
           return (
@@ -222,7 +214,7 @@ export const AdminLayout: React.FC = () => {
       <Box
         sx={{
           px: collapsed && !isMobile ? 1 : 2,
-          py: 2,
+          py: 1.5,
           display: 'flex',
           alignItems: 'center',
           gap: 1.5,
@@ -231,12 +223,12 @@ export const AdminLayout: React.FC = () => {
       >
         <Avatar
           sx={{
-            width: 34,
-            height: 34,
+            width: 32,
+            height: 32,
             bgcolor: alpha(theme.palette.primary.main, 0.2),
             color: 'primary.main',
             fontWeight: 700,
-            fontSize: '0.875rem',
+            fontSize: '0.8rem',
             flexShrink: 0,
           }}
         >
