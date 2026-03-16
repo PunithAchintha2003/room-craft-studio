@@ -6,6 +6,8 @@ import { DesignerLayout } from '@/components/layout/DesignerLayout';
 
 const LoginPage = lazy(() => import('@/pages/LoginPage'));
 const DashboardPage = lazy(() => import('@/pages/DashboardPage'));
+const DesignEditorPage = lazy(() => import('@/pages/DesignEditorPage'));
+const DesignListPage = lazy(() => import('@/pages/DesignListPage'));
 
 const PageLoader: React.FC = () => (
   <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
@@ -27,17 +29,19 @@ export const DesignerRouter: React.FC = () => (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
       <Route
-        path="/dashboard"
         element={
           <ProtectedRoute>
-            <DesignerLayout>
-              <DashboardPage />
-            </DesignerLayout>
+            <DesignerLayout />
           </ProtectedRoute>
         }
-      />
-      <Route path="/" element={<Navigate to="/login" replace />} />
-      <Route path="*" element={<Navigate to="/login" replace />} />
+      >
+        <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/designs" element={<DesignListPage />} />
+        <Route path="/editor" element={<DesignEditorPage />} />
+        <Route path="/editor/:id" element={<DesignEditorPage />} />
+      </Route>
+      <Route path="/" element={<Navigate to="/dashboard" replace />} />
+      <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
   </Suspense>
 );

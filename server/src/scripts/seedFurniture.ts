@@ -9,7 +9,7 @@ const furnitureData = [
     thumbnail: 'https://images.unsplash.com/photo-1506439773649-6e0eb8cfb237?w=400&h=300&fit=crop',
     thumbnailAlt: 'Modern Dining Chair',
     model3D: {
-      url: 'https://res.cloudinary.com/dzwhbpmlf/raw/upload/v1/roomcraft/models/chair_modern.glb',
+      url: 'https://vazxmixjsiawhamofees.supabase.co/storage/v1/object/public/models/chair.glb',
       format: 'glb' as const,
     },
     defaultColor: '#8B4513',
@@ -24,7 +24,7 @@ const furnitureData = [
     thumbnail: 'https://images.unsplash.com/photo-1617806118233-18e1de247200?w=400&h=300&fit=crop',
     thumbnailAlt: 'Dining Table',
     model3D: {
-      url: 'https://res.cloudinary.com/dzwhbpmlf/raw/upload/v1/roomcraft/models/table_dining.glb',
+      url: 'https://vazxmixjsiawhamofees.supabase.co/storage/v1/object/public/models/table.glb',
       format: 'glb' as const,
     },
     defaultColor: '#654321',
@@ -39,7 +39,7 @@ const furnitureData = [
     thumbnail: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400&h=300&fit=crop',
     thumbnailAlt: 'Three-Seater Sofa',
     model3D: {
-      url: 'https://res.cloudinary.com/dzwhbpmlf/raw/upload/v1/roomcraft/models/sofa_three_seater.glb',
+      url: 'https://vazxmixjsiawhamofees.supabase.co/storage/v1/object/public/models/sofa.glb',
       format: 'glb' as const,
     },
     defaultColor: '#4A4A4A',
@@ -54,7 +54,7 @@ const furnitureData = [
     thumbnail: 'https://images.unsplash.com/photo-1532372320572-cda25653a26d?w=400&h=300&fit=crop',
     thumbnailAlt: 'Side Table',
     model3D: {
-      url: 'https://res.cloudinary.com/dzwhbpmlf/raw/upload/v1/roomcraft/models/table_side.glb',
+      url: 'https://vazxmixjsiawhamofees.supabase.co/storage/v1/object/public/models/table.glb',
       format: 'glb' as const,
     },
     defaultColor: '#8B7355',
@@ -69,7 +69,7 @@ const furnitureData = [
     thumbnail: 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=400&h=300&fit=crop',
     thumbnailAlt: 'Queen Bed',
     model3D: {
-      url: 'https://res.cloudinary.com/dzwhbpmlf/raw/upload/v1/roomcraft/models/bed_queen.glb',
+      url: 'https://vazxmixjsiawhamofees.supabase.co/storage/v1/object/public/models/bed.glb',
       format: 'glb' as const,
     },
     defaultColor: '#F5F5DC',
@@ -84,7 +84,7 @@ const furnitureData = [
     thumbnail: 'https://images.unsplash.com/photo-1594620302200-9a762244a156?w=400&h=300&fit=crop',
     thumbnailAlt: 'Bookshelf',
     model3D: {
-      url: 'https://res.cloudinary.com/dzwhbpmlf/raw/upload/v1/roomcraft/models/bookshelf.glb',
+      url: 'https://vazxmixjsiawhamofees.supabase.co/storage/v1/object/public/models/shelf.glb',
       format: 'glb' as const,
     },
     defaultColor: '#8B4513',
@@ -99,7 +99,7 @@ const furnitureData = [
     thumbnail: 'https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=400&h=300&fit=crop',
     thumbnailAlt: 'Coffee Table',
     model3D: {
-      url: 'https://res.cloudinary.com/dzwhbpmlf/raw/upload/v1/roomcraft/models/table_coffee.glb',
+      url: 'https://vazxmixjsiawhamofees.supabase.co/storage/v1/object/public/models/table.glb',
       format: 'glb' as const,
     },
     defaultColor: '#D2691E',

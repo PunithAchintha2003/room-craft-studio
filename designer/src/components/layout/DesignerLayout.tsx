@@ -28,7 +28,7 @@ import {
   DesignServices,
 } from '@mui/icons-material';
 import { useDispatch } from 'react-redux';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { AppDispatch } from '@/app/store';
 import { designerLogout } from '@/features/auth/authSlice';
 import { useAuth } from '@/hooks/useAuth';
@@ -39,17 +39,16 @@ const DRAWER_COLLAPSED_WIDTH = 64;
 
 const NAV_ITEMS = [
   { label: 'Dashboard', path: '/dashboard', icon: <DashboardIcon /> },
+  { label: 'All Designs', path: '/designs', icon: <DesignServices /> },
 ];
 
 const PAGE_TITLES: Record<string, string> = {
   '/dashboard': 'Designer Dashboard',
+  '/designs': 'All Designs',
+  '/editor': 'Room Designer',
 };
 
-interface DesignerLayoutProps {
-  children: React.ReactNode;
-}
-
-export const DesignerLayout: React.FC<DesignerLayoutProps> = ({ children }) => {
+export const DesignerLayout: React.FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -61,7 +60,9 @@ export const DesignerLayout: React.FC<DesignerLayoutProps> = ({ children }) => {
   const { resolvedMode, toggleMode } = useThemeMode();
 
   const drawerWidth = isMobile ? DRAWER_WIDTH : collapsed ? DRAWER_COLLAPSED_WIDTH : DRAWER_WIDTH;
-  const pageTitle = PAGE_TITLES[location.pathname] ?? 'Designer Portal';
+  const pageTitle =
+    PAGE_TITLES[location.pathname] ??
+    (location.pathname.startsWith('/editor') ? 'Room Designer' : 'Designer Portal');
 
   const handleLogout = async () => {
     await dispatch(designerLogout());
@@ -380,7 +381,9 @@ component="main"
         </AppBar>
 
         {/* Page content */}
-        <Box sx={{ flex: 1, p: { xs: 2, sm: 3, md: 4 } }}>{children}</Box>
+        <Box sx={{ flex: 1, p: { xs: 2, sm: 3, md: 4 } }}>
+          <Outlet />
+        </Box>
       </Box>
     </Box>
   );

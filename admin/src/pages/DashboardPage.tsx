@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Box,
   Container,
@@ -7,10 +8,13 @@ import {
   CircularProgress,
   Alert,
   Fade,
+  Button,
 } from '@mui/material';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import ChairIcon from '@mui/icons-material/Chair';
 import TimelineIcon from '@mui/icons-material/Timeline';
+import AddIcon from '@mui/icons-material/Add';
+import DesignServicesIcon from '@mui/icons-material/DesignServices';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/app/store';
 import {
@@ -35,6 +39,7 @@ const getLast7DaysTotal = (counts: { date: string; count: number }[]): number =>
 };
 
 export const DashboardPage: React.FC = () => {
+  const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
   const { user } = useSelector((state: RootState) => state.auth);
   const summary = useSelector(selectDashboardSummary as (state: RootState) => ReturnType<typeof selectDashboardSummary>);
@@ -54,7 +59,7 @@ export const DashboardPage: React.FC = () => {
       <Container maxWidth="xl">
         <Fade in timeout={500}>
           <Box>
-            <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
               <Box>
                 <Typography variant="h4" gutterBottom>
                   Welcome back, {user?.name ?? 'Admin'}
@@ -62,6 +67,24 @@ export const DashboardPage: React.FC = () => {
                 <Typography variant="body1" color="text.secondary">
                   High-level overview of design activity and your furniture catalog.
                 </Typography>
+              </Box>
+              <Box sx={{ display: 'flex', gap: 1, flexShrink: 0 }}>
+                <Button
+                  variant="contained"
+                  startIcon={<AddIcon />}
+                  onClick={() => navigate('/editor')}
+                  sx={{ textTransform: 'none' }}
+                >
+                  New Design
+                </Button>
+                <Button
+                  variant="outlined"
+                  startIcon={<DesignServicesIcon />}
+                  onClick={() => navigate('/designs')}
+                  sx={{ textTransform: 'none' }}
+                >
+                  All Designs
+                </Button>
               </Box>
             </Box>
 
