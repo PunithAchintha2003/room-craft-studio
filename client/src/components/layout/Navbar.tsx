@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   AppBar,
   Toolbar,
@@ -20,6 +20,7 @@ import {
   alpha,
   useTheme,
   Typography,
+  Badge,
 } from '@mui/material';
 import {
   Menu as MenuIcon,
@@ -29,14 +30,20 @@ import {
   Dashboard as DashboardIcon,
   DarkMode as DarkModeIcon,
   LightMode as LightModeIcon,
+  ShoppingCart as ShoppingCartIcon,
+  FavoriteBorder as FavoriteBorderIcon,
 } from '@mui/icons-material';
 import NotificationBell from '@/components/notifications/NotificationBell';
+import { CartDrawer } from '@/components/cart/CartDrawer';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '@/app/store';
 import { logoutUser } from '@/features/auth/authSlice';
+import { fetchCart } from '@/features/cart/cartSlice';
+import { fetchWishlist } from '@/features/wishlist/wishlistSlice';
 import { useAuth } from '@/hooks/useAuth';
 import { useThemeMode } from '@/theme/ThemeModeProvider';
+import { useAppSelector } from '@/app/hooks';
 
 const NAV_LINKS = [
   { label: 'Home', href: '/' },
@@ -96,9 +103,20 @@ export const Navbar: React.FC = () => {
   const { resolvedMode, toggleMode } = useThemeMode();
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, accessToken } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [cartDrawerOpen, setCartDrawerOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+
+  const cart = useAppSelector((state) => state.cart.cart);
+  const itemCount = cart?.items?.reduce((sum, item) => sum + item.quantity, 0) ?? 0;
+
+  useEffect(() => {
+    if (isAuthenticated && accessToken) {
+      dispatch(fetchCart());
+      dispatch(fetchWishlist());
+    }
+  }, [isAuthenticated, accessToken, dispatch]);
 
   const handleUserMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -199,6 +217,24 @@ export const Navbar: React.FC = () => {
               >
                 <IconButton
                   size="medium"
+                  onClick={() => setCartDrawerOpen(true)}
+                  aria-label={`Shopping cart with ${itemCount} items`}
+                  sx={{
+                    minWidth: 44,
+                    minHeight: 44,
+                    color:
+                      resolvedMode === 'dark'
+                        ? theme.palette.on.glass
+                        : theme.palette.text.secondary,
+                  }}
+                >
+                  <Badge badgeContent={itemCount} color="error">
+                    <ShoppingCartIcon fontSize="small" />
+                  </Badge>
+                </IconButton>
+                
+                <IconButton
+                  size="medium"
                   onClick={toggleMode}
                   aria-label={`Switch to ${resolvedMode === 'dark' ? 'light' : 'dark'} mode`}
                   sx={{
@@ -268,6 +304,10 @@ export const Navbar: React.FC = () => {
                       <MenuItem onClick={() => { handleUserMenuClose(); navigate('/profile'); }} sx={{ py: 1.25 }}>
                         <PersonIcon fontSize="small" sx={{ mr: 1.5 }} />
                         <Typography variant="body2">Profile</Typography>
+                      </MenuItem>
+                      <MenuItem onClick={() => { handleUserMenuClose(); navigate('/wishlist'); }} sx={{ py: 1.25 }}>
+                        <FavoriteBorderIcon fontSize="small" sx={{ mr: 1.5 }} />
+                        <Typography variant="body2">Wishlist</Typography>
                       </MenuItem>
                       {user.role === 'admin' && (
                         <MenuItem onClick={() => { handleUserMenuClose(); navigate('/dashboard'); }} sx={{ py: 1.25 }}>
@@ -439,6 +479,8 @@ export const Navbar: React.FC = () => {
           )}
         </Box>
       </Drawer>
+      
+      <CartDrawer open={cartDrawerOpen} onClose={() => setCartDrawerOpen(false)} />
     </>
   );
 };

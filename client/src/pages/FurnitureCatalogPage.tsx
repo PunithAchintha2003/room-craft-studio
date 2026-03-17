@@ -4,9 +4,9 @@ import {
   Container,
   Typography,
   Grid,
-  Card,
   CardContent,
   CardMedia,
+  CardActionArea,
   Chip,
   TextField,
   InputAdornment,
@@ -31,6 +31,7 @@ import {
   setSearchTerm,
 } from '@/features/furniture/furnitureSlice';
 import type { FurnitureCategory } from '@/types/design.types';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 type CategoryToggleValue = FurnitureCategory | 'all';
 
@@ -45,6 +46,8 @@ const CATEGORY_CONFIG: { value: CategoryToggleValue; label: string; icon: React.
 
 const FurnitureCatalogPage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { furniture, selectedCategory, searchTerm, loading, error } = useSelector(
     (state: RootState) => state.furniture
   );
@@ -52,6 +55,13 @@ const FurnitureCatalogPage: React.FC = () => {
   useEffect(() => {
     dispatch(fetchFurniture());
   }, [dispatch]);
+
+  useEffect(() => {
+    const categoryFromUrl = searchParams.get('category') as FurnitureCategory | null;
+    if (categoryFromUrl && ['chair', 'sofa', 'bed', 'table', 'storage'].includes(categoryFromUrl)) {
+      dispatch(setSelectedCategory(categoryFromUrl));
+    }
+  }, [searchParams, dispatch]);
 
   const handleCategoryChange = (_event: React.MouseEvent<HTMLElement>, value: CategoryToggleValue | null) => {
     // When "All" is selected or toggle cleared, we store null in Redux
@@ -179,42 +189,44 @@ const FurnitureCatalogPage: React.FC = () => {
                     },
                   }}
                 >
-                  <CardMedia
-                    component="img"
-                    image={item.thumbnail}
-                    alt={item.thumbnailAlt ?? item.name}
-                    loading="lazy"
-                    sx={{
-                      height: 180,
-                      objectFit: 'cover',
-                      bgcolor: 'grey.200',
-                    }}
-                  />
-                  <CardContent sx={{ flex: 1 }}>
-                    <Typography variant="h6" gutterBottom noWrap>
-                      {item.name}
-                    </Typography>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                      <Chip
-                        size="small"
-                        label={item.category}
-                        sx={{ textTransform: 'capitalize' }}
-                      />
-                      <Typography variant="body2" color="text.secondary">
-                        {item.dimensions.width} × {item.dimensions.length} × {item.dimensions.height} m
+                  <CardActionArea onClick={() => navigate(`/furniture/${item._id}`)}>
+                    <CardMedia
+                      component="img"
+                      image={item.thumbnail}
+                      alt={item.thumbnailAlt ?? item.name}
+                      loading="lazy"
+                      sx={{
+                        height: 180,
+                        objectFit: 'cover',
+                        bgcolor: 'grey.200',
+                      }}
+                    />
+                    <CardContent sx={{ flex: 1 }}>
+                      <Typography variant="h6" gutterBottom noWrap>
+                        {item.name}
                       </Typography>
-                    </Box>
-                    {item.price != null && (
-                      <Typography variant="body2" fontWeight="medium">
-                        ${item.price.toFixed(2)}
-                      </Typography>
-                    )}
-                    {item.stock != null && (
-                      <Typography variant="caption" color="text.secondary" display="block">
-                        {item.stock > 0 ? `${item.stock} in stock` : 'Out of stock'}
-                      </Typography>
-                    )}
-                  </CardContent>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                        <Chip
+                          size="small"
+                          label={item.category}
+                          sx={{ textTransform: 'capitalize' }}
+                        />
+                        <Typography variant="body2" color="text.secondary">
+                          {item.dimensions.width} × {item.dimensions.length} × {item.dimensions.height} m
+                        </Typography>
+                      </Box>
+                      {item.price != null && (
+                        <Typography variant="body2" fontWeight="medium">
+                          ${item.price.toFixed(2)}
+                        </Typography>
+                      )}
+                      {item.stock != null && (
+                        <Typography variant="caption" color="text.secondary" display="block">
+                          {item.stock > 0 ? `${item.stock} in stock` : 'Out of stock'}
+                        </Typography>
+                      )}
+                    </CardContent>
+                  </CardActionArea>
                 </GlassCard>
               </Grid>
             ))}

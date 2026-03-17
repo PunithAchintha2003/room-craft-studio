@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
   Box,
   Container,
@@ -12,6 +12,7 @@ import {
   Avatar,
   Rating,
   useTheme,
+  CircularProgress,
 } from '@mui/material';
 import {
   ViewInAr,
@@ -23,16 +24,42 @@ import {
   ArrowForward,
   CheckCircle,
   FormatQuote,
+  LocalShipping,
+  AssignmentReturn,
+  Lock,
+  ShoppingCart,
+  Chair as ChairIcon,
+  Weekend as SofaIcon,
+  Bed as BedIcon,
+  TableBar as TableIcon,
+  Inventory2 as StorageIcon,
 } from '@mui/icons-material';
 import { Link } from 'react-router-dom';
 import { motion, useInView } from 'framer-motion';
-import { useRef } from 'react';
 import { alpha } from '@mui/material/styles';
 import { BACKGROUND, GLASS, FEATURE_ICON_COLORS } from '@/theme/tokens';
 import { TwoTonePageLayout } from '@/components/layout/TwoTonePageLayout';
+import { useAppDispatch, useAppSelector } from '@/app/hooks';
+import { fetchFeaturedFurniture } from '@/features/furniture/furnitureSlice';
+import { ProductCard } from '@/components/product/ProductCard';
+import type { FurnitureCategory } from '@/types/design.types';
 
-const MotionBox = motion(Box);
-const MotionCard = motion(Card);
+const SHOP_CATEGORIES: { value: FurnitureCategory; label: string; icon: React.ReactNode }[] = [
+  { value: 'chair', label: 'Chairs', icon: <ChairIcon /> },
+  { value: 'sofa', label: 'Sofas', icon: <SofaIcon /> },
+  { value: 'bed', label: 'Beds', icon: <BedIcon /> },
+  { value: 'table', label: 'Tables', icon: <TableIcon /> },
+  { value: 'storage', label: 'Storage', icon: <StorageIcon /> },
+];
+
+const TRUST_ITEMS = [
+  { icon: LocalShipping, text: 'Free delivery on orders over £50' },
+  { icon: AssignmentReturn, text: '30-day return policy' },
+  { icon: Lock, text: 'Secure checkout' },
+];
+
+const MotionBox = motion.create(Box);
+const MotionCard = motion.create(Card);
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 40 },
@@ -157,8 +184,13 @@ export const WelcomePage: React.FC = () => {
   const glass = mode === 'dark' ? GLASS.dark : GLASS.light;
   const featureIconColors =
     mode === 'dark' ? FEATURE_ICON_COLORS.dark : FEATURE_ICON_COLORS.light;
-
   const background = mode === 'dark' ? BACKGROUND.dark : BACKGROUND.light;
+  const dispatch = useAppDispatch();
+  const { featuredFurniture, loading: featuredLoading } = useAppSelector((state) => state.furniture);
+
+  useEffect(() => {
+    dispatch(fetchFeaturedFurniture(8));
+  }, [dispatch]);
 
   const heroAndTopContent = (
     <>
@@ -182,7 +214,7 @@ export const WelcomePage: React.FC = () => {
                 transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
               >
                 <Chip
-                  label="✨ New: 3D Room Visualisation"
+                  label="Furniture & room design"
                   sx={{
                     mb: 3,
                     backgroundColor: alpha(theme.palette.secondary.main, 0.15),
@@ -201,7 +233,7 @@ export const WelcomePage: React.FC = () => {
                     lineHeight: 1.05,
                   }}
                 >
-                  Design Your{' '}
+                  Shop{' '}
                   <Box
                     component="span"
                     sx={{
@@ -210,9 +242,9 @@ export const WelcomePage: React.FC = () => {
                       WebkitTextFillColor: 'transparent',
                     }}
                   >
-                    Dream Room
+                    Furniture
                   </Box>{' '}
-                  Before You Buy
+                  — Design Your Room in 3D
                 </Typography>
                 <Typography
                   variant="h6"
@@ -228,26 +260,27 @@ export const WelcomePage: React.FC = () => {
                     fontSize: { xs: '1rem', md: '1.125rem' },
                   }}
                 >
-                  Visualise any furniture in your actual room using our interactive 2D & 3D
-                  designer. Make confident purchasing decisions — no more guessing if it will fit.
+                  Browse our collection and visualise any piece in your room with our 2D & 3D
+                  designer. Buy with confidence — no more guessing if it will fit.
                 </Typography>
                 <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 5 }}>
                   <Button
                     component={Link}
-                    to="/register"
+                    to="/furniture"
                     variant="contained"
                     color="secondary"
                     size="large"
-                    endIcon={<ArrowForward />}
+                    startIcon={<ShoppingCart />}
                     sx={{ px: 4, py: 1.75, fontSize: '1rem' }}
                   >
-                    Start Designing Free
+                    Shop Furniture
                   </Button>
                   <Button
                     component={Link}
-                    to="/designer"
+                    to="/register"
                     variant="outlined"
                     size="large"
+                    endIcon={<ArrowForward />}
                     sx={{
                       px: 4,
                       py: 1.75,
@@ -263,7 +296,7 @@ export const WelcomePage: React.FC = () => {
                       },
                     }}
                   >
-                    View Demo
+                    Design in 3D
                   </Button>
                 </Stack>
                 <Stack direction="row" spacing={{ xs: 2, sm: 3 }} flexWrap="wrap" useFlexGap>
@@ -385,6 +418,140 @@ export const WelcomePage: React.FC = () => {
               </MotionBox>
             </Grid>
           </Grid>
+        </Container>
+      </Box>
+
+      {/* Trust / services bar */}
+      <Box sx={{ pb: { xs: 4, md: 5 } }}>
+        <Container maxWidth="xl" sx={{ px: { xs: 0 } }}>
+          <Stack
+            direction={{ xs: 'column', sm: 'row' }}
+            spacing={3}
+            justifyContent="center"
+            alignItems="center"
+            sx={{
+              flexWrap: 'wrap',
+              gap: 2,
+              py: 2,
+              px: 2,
+            }}
+          >
+            {TRUST_ITEMS.map(({ icon: Icon, text }) => (
+              <Stack key={text} direction="row" alignItems="center" spacing={1.5}>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: 'secondary.main',
+                  }}
+                >
+                  <Icon sx={{ fontSize: 28 }} />
+                </Box>
+                <Typography variant="body2" fontWeight={500} sx={{ color: 'text.primary' }}>
+                  {text}
+                </Typography>
+              </Stack>
+            ))}
+          </Stack>
+        </Container>
+      </Box>
+
+      {/* Shop by category */}
+      <Box sx={{ pb: { xs: 6, md: 8 } }}>
+        <Container maxWidth="xl" sx={{ px: { xs: 0 } }}>
+          <Typography variant="h6" fontWeight={700} sx={{ mb: 2, textAlign: 'center' }}>
+            Shop by category
+          </Typography>
+          <Stack
+            direction="row"
+            spacing={1}
+            justifyContent="center"
+            flexWrap="wrap"
+            useFlexGap
+            sx={{ gap: 1 }}
+          >
+            {SHOP_CATEGORIES.map((cat) => (
+              <Button
+                key={cat.value}
+                component={Link}
+                to={`/furniture?category=${cat.value}`}
+                variant="outlined"
+                size="medium"
+                startIcon={cat.icon}
+                sx={{
+                  textTransform: 'none',
+                  borderRadius: 2,
+                  borderColor: alpha(theme.palette.primary.main, 0.3),
+                  color: 'text.primary',
+                  '&:hover': {
+                    borderColor: 'secondary.main',
+                    backgroundColor: alpha(theme.palette.secondary.main, 0.08),
+                  },
+                }}
+              >
+                {cat.label}
+              </Button>
+            ))}
+          </Stack>
+        </Container>
+      </Box>
+
+      {/* Featured products */}
+      <Box sx={{ pb: { xs: 6, md: 8 } }}>
+        <Container maxWidth="xl" sx={{ px: { xs: 0 } }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, flexWrap: 'wrap', gap: 2 }}>
+            <Typography variant="h5" fontWeight={700}>
+              Featured furniture
+            </Typography>
+            <Button
+              component={Link}
+              to="/furniture"
+              endIcon={<ArrowForward />}
+              sx={{ textTransform: 'none', fontWeight: 600 }}
+            >
+              View all
+            </Button>
+          </Box>
+          {featuredLoading ? (
+            <Box display="flex" justifyContent="center" py={6}>
+              <CircularProgress />
+            </Box>
+          ) : featuredFurniture.length > 0 ? (
+            <Grid container spacing={3}>
+              {featuredFurniture.slice(0, 8).map((item) => (
+                <Grid item xs={12} sm={6} md={4} lg={3} key={item._id}>
+                  <ProductCard
+                    furniture={{
+                      _id: item._id,
+                      name: item.name,
+                      category: item.category,
+                      price: item.price ?? 0,
+                      thumbnail: item.thumbnail,
+                      stock: item.stock,
+                      featured: (item as { featured?: boolean }).featured,
+                    }}
+                  />
+                </Grid>
+              ))}
+            </Grid>
+          ) : (
+            <Box
+              sx={{
+                py: 6,
+                textAlign: 'center',
+                color: 'text.secondary',
+                border: '1px dashed',
+                borderColor: 'divider',
+                borderRadius: 2,
+              }}
+            >
+              <Typography variant="body1">No featured items right now. Browse our full catalog.</Typography>
+              <Button component={Link} to="/furniture" variant="contained" color="secondary" sx={{ mt: 2 }}>
+                Shop furniture
+              </Button>
+            </Box>
+          )}
         </Container>
       </Box>
 
@@ -691,7 +858,7 @@ export const WelcomePage: React.FC = () => {
                   mb: 2.5,
                 }}
               >
-                Ready to design your perfect room?
+                Ready to shop or design your room?
               </Typography>
               <Typography
                 variant="h6"
@@ -712,12 +879,24 @@ export const WelcomePage: React.FC = () => {
                 direction={{ xs: 'column', sm: 'row' }}
                 spacing={2}
                 justifyContent="center"
+                flexWrap="wrap"
+                useFlexGap
               >
+                <Button
+                  component={Link}
+                  to="/furniture"
+                  variant="contained"
+                  color="secondary"
+                  size="large"
+                  startIcon={<ShoppingCart />}
+                  sx={{ px: 5, py: 1.75, fontSize: '1rem' }}
+                >
+                  Shop Furniture
+                </Button>
                 <Button
                   component={Link}
                   to="/register"
                   variant="contained"
-                  color="secondary"
                   size="large"
                   endIcon={<ArrowForward />}
                   sx={{ px: 5, py: 1.75, fontSize: '1rem' }}
