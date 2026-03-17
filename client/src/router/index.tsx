@@ -9,8 +9,12 @@ const WelcomePage = lazy(() => import('@/pages/WelcomePage'));
 const LoginPage = lazy(() => import('@/pages/LoginPage'));
 const RegisterPage = lazy(() => import('@/pages/RegisterPage'));
 const FurnitureCatalogPage = lazy(() => import('@/pages/FurnitureCatalogPage'));
+const ProductDetailPage = lazy(() => import('@/pages/ProductDetailPage'));
 const MyDesignsPage = lazy(() => import('@/pages/MyDesignsPage'));
 const DesignViewerPage = lazy(() => import('@/pages/DesignViewerPage'));
+const CartPage = lazy(() => import('@/pages/CartPage'));
+const OrderHistoryPage = lazy(() => import('@/pages/OrderHistoryPage'));
+const WishlistPage = lazy(() => import('@/pages/WishlistPage'));
 
 const PageLoader: React.FC = () => (
   <Box
@@ -101,6 +105,24 @@ export const AppRouter: React.FC = () => {
         />
 
         <Route
+          path="/furniture/:id"
+          element={
+            <MainLayout>
+              <ProductDetailPage />
+            </MainLayout>
+          }
+        />
+
+        <Route
+          path="/cart"
+          element={
+            <MainLayout>
+              <CartPage />
+            </MainLayout>
+          }
+        />
+
+        <Route
           path="/design-viewer/:id"
           element={
             <MainLayout>
@@ -120,6 +142,29 @@ export const AppRouter: React.FC = () => {
             </ProtectedRoute>
           }
         />
+        
+        <Route
+          path="/orders"
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+                <OrderHistoryPage />
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
+        
+        <Route
+          path="/wishlist"
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+                <WishlistPage />
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
+        
         <Route
           path="/designer"
           element={
