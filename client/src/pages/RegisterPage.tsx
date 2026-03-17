@@ -28,7 +28,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { motion } from 'framer-motion';
-import toast from 'react-hot-toast';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '@/app/store';
 import { registerUser, clearError } from '@/features/auth/authSlice';
@@ -36,8 +35,9 @@ import { useAuth } from '@/hooks/useAuth';
 import { useThemeMode } from '@/theme/ThemeModeProvider';
 import { BACKGROUND } from '@/theme/tokens';
 import { registerSchema, RegisterFormData, getPasswordStrength } from '@/utils/validators';
+import { notify } from '@/lib/notifications';
 
-const MotionBox = motion(Box);
+const MotionBox = motion.create(Box);
 
 const PasswordRequirement: React.FC<{ met: boolean; text: string }> = ({ met, text }) => (
   <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
@@ -77,7 +77,7 @@ export const RegisterPage: React.FC = () => {
 
   useEffect(() => {
     if (error) {
-      toast.error(error);
+      notify.error(error);
       dispatch(clearError());
     }
   }, [error, dispatch]);
@@ -95,7 +95,7 @@ export const RegisterPage: React.FC = () => {
       registerUser({ name: data.name, email: data.email, password: data.password })
     );
     if (registerUser.fulfilled.match(result)) {
-      toast.success('Account created successfully. Welcome!');
+      notify.success('Account created successfully. Welcome!');
       navigate('/');
     }
   };
