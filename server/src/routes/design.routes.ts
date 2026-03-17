@@ -37,6 +37,7 @@ const updateDesignSchema = createDesignSchema.partial();
 
 router.post('/', protect, validate(createDesignSchema), designController.createDesign);
 router.get('/', protect, designController.getUserDesigns);
+router.get('/preview', designController.getPreviewDesign);
 router.get(
   '/dashboard-summary',
   protect,

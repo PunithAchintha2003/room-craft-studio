@@ -11,6 +11,9 @@ export interface IFurniture extends Document {
   };
   thumbnail: string;
   thumbnailAlt?: string;
+  images: string[];
+  description: string;
+  specifications: Map<string, string>;
   model3D: {
     url: string;
     format: 'gltf' | 'glb';
@@ -19,6 +22,10 @@ export interface IFurniture extends Document {
   isColorizable: boolean;
   price: number;
   stock: number;
+  averageRating: number;
+  reviewCount: number;
+  tags: string[];
+  featured: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -71,6 +78,23 @@ const furnitureSchema = new Schema<IFurniture>(
       trim: true,
       maxlength: [200, 'Alt text cannot exceed 200 characters'],
     },
+    images: {
+      type: [String],
+      default: function() {
+        return [this.thumbnail];
+      },
+    },
+    description: {
+      type: String,
+      trim: true,
+      maxlength: [2000, 'Description cannot exceed 2000 characters'],
+      default: '',
+    },
+    specifications: {
+      type: Map,
+      of: String,
+      default: new Map(),
+    },
     model3D: {
       url: {
         type: String,
@@ -108,6 +132,26 @@ const furnitureSchema = new Schema<IFurniture>(
       min: [0, 'Stock cannot be negative'],
       default: 0,
     },
+    averageRating: {
+      type: Number,
+      default: 0,
+      min: [0, 'Rating cannot be negative'],
+      max: [5, 'Rating cannot exceed 5'],
+    },
+    reviewCount: {
+      type: Number,
+      default: 0,
+      min: [0, 'Review count cannot be negative'],
+    },
+    tags: {
+      type: [String],
+      default: [],
+    },
+    featured: {
+      type: Boolean,
+      default: false,
+      index: true,
+    },
   },
   {
     timestamps: true,
@@ -122,5 +166,8 @@ const furnitureSchema = new Schema<IFurniture>(
 
 furnitureSchema.index({ category: 1, price: 1 });
 furnitureSchema.index({ stock: 1 });
+furnitureSchema.index({ featured: 1, createdAt: -1 });
+furnitureSchema.index({ averageRating: -1 });
+furnitureSchema.index({ tags: 1 });
 
 export const Furniture = mongoose.model<IFurniture>('Furniture', furnitureSchema);
