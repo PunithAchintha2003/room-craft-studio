@@ -1,5 +1,5 @@
 import React, { useEffect, useState, Suspense, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Box,
   Container,
@@ -25,14 +25,16 @@ import GridOnIcon from '@mui/icons-material/GridOn';
 import CameraAltIcon from '@mui/icons-material/CameraAlt';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState, AppDispatch } from '@/app/store';
-import { fetchDesignById, fetchPublicDesign } from '@/features/design/designSlice';
+import { fetchDesignById, fetchPublicDesign, fetchPreviewDesign } from '@/features/design/designSlice';
 import { fetchFurniture } from '@/features/furniture/furnitureSlice';
+import { addDesignToCart } from '@/features/cart/cartSlice';
 import { ReadOnlyCanvas2DViewer } from '@/components/design/ReadOnlyCanvas2DViewer';
 import { Canvas3DViewer, Canvas3DViewerHandle } from '@/components/design/Canvas3DViewer';
 import toast from 'react-hot-toast';
 
 export const DesignViewerPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
 
@@ -45,15 +47,20 @@ export const DesignViewerPage: React.FC = () => {
   const canvas3DRef = useRef<Canvas3DViewerHandle>(null);
 
   useEffect(() => {
-    if (id) {
+    if (id === 'preview') {
+      const furnitureId = searchParams.get('furniture');
+      if (furnitureId) {
+        dispatch(fetchPreviewDesign(furnitureId));
+      }
+    } else if (id) {
       if (user) {
         dispatch(fetchDesignById(id));
       } else {
         dispatch(fetchPublicDesign(id));
       }
-      dispatch(fetchFurniture());
     }
-  }, [id, user, dispatch]);
+    dispatch(fetchFurniture());
+  }, [id, user, dispatch, searchParams]);
 
   useEffect(() => {
     if (currentDesign && user) {
@@ -67,9 +74,21 @@ export const DesignViewerPage: React.FC = () => {
     toast.success('Share link copied to clipboard');
   };
 
-  const handleBuyAllItems = () => {
+  const handleBuyAllItems = async () => {
     if (!currentDesign) return;
-    toast.success(`${currentDesign.furniture.length} items added to cart`);
+    if (!user) {
+      toast.error('Please log in to add items to cart');
+      navigate('/login');
+      return;
+    }
+    
+    try {
+      await dispatch(addDesignToCart(currentDesign._id)).unwrap();
+      toast.success(`${currentDesign.furnitureItems?.length || 0} items added to cart! 🛒`);
+      navigate('/cart');
+    } catch (error) {
+      toast.error('Failed to add items to cart');
+    }
   };
 
   const handleViewModeChange = (
@@ -185,7 +204,7 @@ export const DesignViewerPage: React.FC = () => {
                   startIcon={<ShoppingCartIcon />}
                   onClick={handleBuyAllItems}
                 >
-                  Buy All Items
+                  Shop This Design
                 </Button>
               )}
             </Box>

@@ -26,9 +26,11 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import SearchIcon from '@mui/icons-material/Search';
 import ShareIcon from '@mui/icons-material/Share';
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState, AppDispatch } from '@/app/store';
 import { fetchDesigns, deleteDesign } from '@/features/design/designSlice';
+import { addDesignToCart } from '@/features/cart/cartSlice';
 import toast from 'react-hot-toast';
 
 export const MyDesignsPage: React.FC = () => {
@@ -73,6 +75,17 @@ export const MyDesignsPage: React.FC = () => {
     const shareUrl = `${window.location.origin}/design-viewer/${id}`;
     navigator.clipboard.writeText(shareUrl);
     toast.success(`Share link for "${name}" copied to clipboard`);
+  };
+
+  const handleShopDesign = async (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      await dispatch(addDesignToCart(id)).unwrap();
+      toast.success('All items from design added to cart! 🛒');
+      navigate('/cart');
+    } catch (error) {
+      toast.error('Failed to add items to cart');
+    }
   };
 
   const filteredDesigns = designs.filter((design) =>
@@ -244,10 +257,11 @@ export const MyDesignsPage: React.FC = () => {
                     <CardActions sx={{ justifyContent: 'space-between', px: 2, pb: 2 }}>
                       <Button
                         size="small"
-                        startIcon={<EditIcon />}
-                        onClick={() => handleViewDesign(design._id)}
+                        variant="outlined"
+                        startIcon={<ShoppingCartIcon />}
+                        onClick={(e) => handleShopDesign(design._id, e)}
                       >
-                        View
+                        Shop Design
                       </Button>
                       <Box>
                         <IconButton

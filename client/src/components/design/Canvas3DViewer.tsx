@@ -166,59 +166,60 @@ export const Canvas3DViewer = forwardRef<Canvas3DViewerHandle, Canvas3DViewerPro
       },
     }));
 
-  return (
-    <Box
-      sx={{
-        width,
-        height,
-        position: 'relative',
-        bgcolor: 'background.paper',
-        borderRadius: 1,
-        overflow: 'hidden',
-      }}
-    >
-      <Canvas
-        ref={canvasRef}
-        shadows
-        camera={{
-          position: cameraPosition,
-          fov: 50,
-        }}
-        gl={{
-          antialias: true,
-          alpha: true,
+    return (
+      <Box
+        sx={{
+          width,
+          height,
+          position: 'relative',
+          bgcolor: 'background.paper',
+          borderRadius: 1,
+          overflow: 'hidden',
         }}
       >
-        <Suspense fallback={null}>
-          <PerspectiveCamera makeDefault position={cameraPosition} />
-          
-          {enableControls && (
-            <OrbitControls
-              enablePan
-              enableZoom
-              enableRotate
-              minDistance={2}
-              maxDistance={cameraDistance * 2}
-              maxPolarAngle={Math.PI / 2 - 0.1}
-              target={[0, 0, 0]}
+        <Canvas
+          ref={canvasRef}
+          shadows
+          camera={{
+            position: cameraPosition,
+            fov: 50,
+          }}
+          gl={{
+            antialias: true,
+            alpha: true,
+          }}
+        >
+          <Suspense fallback={null}>
+            <PerspectiveCamera makeDefault position={cameraPosition} />
+
+            {enableControls && (
+              <OrbitControls
+                enablePan
+                enableZoom
+                enableRotate
+                minDistance={2}
+                maxDistance={cameraDistance * 2}
+                maxPolarAngle={Math.PI / 2 - 0.1}
+                target={[0, 0, 0]}
+              />
+            )}
+
+            <Scene
+              design={design}
+              furniture={furniture}
+              onFurnitureClick={onFurnitureClick}
+              selectedFurnitureIds={selectedFurnitureIds}
             />
-          )}
+          </Suspense>
 
-          <Scene
-            design={design}
-            furniture={furniture}
-            onFurnitureClick={onFurnitureClick}
-            selectedFurnitureIds={selectedFurnitureIds}
-          />
-        </Suspense>
+          {/* Performance stats (optional) */}
+          {showStats && <axesHelper args={[5]} />}
+        </Canvas>
 
-        {/* Performance stats (optional) */}
-        {showStats && <axesHelper args={[5]} />}
-      </Canvas>
-
-      {isLoading && <LoadingFallback />}
-    </Box>
-  )
+        {isLoading && <LoadingFallback />}
+      </Box>
+    );
+  }
 );
 
 Canvas3DViewer.displayName = 'Canvas3DViewer';

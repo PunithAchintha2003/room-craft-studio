@@ -63,6 +63,21 @@ export const fetchPublicDesign = createAsyncThunk(
   }
 );
 
+export const fetchPreviewDesign = createAsyncThunk(
+  'design/fetchPreviewDesign',
+  async (furnitureId: string, { rejectWithValue }) => {
+    try {
+      const response = await api.get(`/designs/preview?furnitureId=${furnitureId}`);
+      return response.data.data.design;
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        return rejectWithValue(error.message);
+      }
+      return rejectWithValue('Failed to fetch preview design');
+    }
+  }
+);
+
 export const createDesign = createAsyncThunk(
   'design/createDesign',
   async (input: CreateDesignInput, { rejectWithValue }) => {
@@ -151,6 +166,18 @@ const designSlice = createSlice({
         state.currentDesign = action.payload;
       })
       .addCase(fetchPublicDesign.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+      .addCase(fetchPreviewDesign.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchPreviewDesign.fulfilled, (state, action) => {
+        state.loading = false;
+        state.currentDesign = action.payload;
+      })
+      .addCase(fetchPreviewDesign.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       })
