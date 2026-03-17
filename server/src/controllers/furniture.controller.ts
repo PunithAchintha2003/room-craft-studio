@@ -139,3 +139,76 @@ export const getFurnitureDashboardSummary = async (
   }
 };
 
+export const getFeaturedFurniture = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const limit = req.query.limit ? parseInt(req.query.limit as string) : 8;
+    const furniture = await furnitureService.getFeaturedFurniture(limit);
+    sendSuccess(res, { furniture }, 'Featured furniture retrieved successfully');
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getRelatedFurniture = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+    const limit = req.query.limit ? parseInt(req.query.limit as string) : 4;
+    const furniture = await furnitureService.getRelatedFurniture(id, limit);
+    sendSuccess(res, { furniture }, 'Related furniture retrieved successfully');
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const advancedSearch = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const {
+      search,
+      category,
+      minPrice,
+      maxPrice,
+      minRating,
+      inStock,
+      tags,
+      sortBy = 'createdAt',
+      sortOrder = 'desc',
+      page = 1,
+      limit = 20,
+    } = req.query;
+
+    const filters = {
+      search: search as string,
+      category: category as FurnitureCategory,
+      minPrice: minPrice ? parseFloat(minPrice as string) : undefined,
+      maxPrice: maxPrice ? parseFloat(maxPrice as string) : undefined,
+      minRating: minRating ? parseFloat(minRating as string) : undefined,
+      inStock: inStock === 'true',
+      tags: tags ? (tags as string).split(',') : undefined,
+    };
+
+    const options = {
+      sortBy: sortBy as string,
+      sortOrder: sortOrder as 'asc' | 'desc',
+      page: parseInt(page as string),
+      limit: parseInt(limit as string),
+    };
+
+    const result = await furnitureService.advancedSearch(filters, options);
+    sendSuccess(res, result, 'Search results retrieved successfully');
+  } catch (error) {
+    next(error);
+  }
+};
+

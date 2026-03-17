@@ -31,6 +31,8 @@ const updateFurnitureSchema = createFurnitureSchema.partial();
 
 router.get('/', furnitureController.getAllFurniture);
 router.get('/search', furnitureController.searchFurniture);
+router.get('/advanced-search', furnitureController.advancedSearch);
+router.get('/featured', furnitureController.getFeaturedFurniture);
 router.get(
   '/dashboard-summary',
   protect,
@@ -38,6 +40,7 @@ router.get(
   furnitureController.getFurnitureDashboardSummary
 );
 router.get('/:id', furnitureController.getFurnitureById);
+router.get('/:id/related', furnitureController.getRelatedFurniture);
 
 router.post(
   '/',

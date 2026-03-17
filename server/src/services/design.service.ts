@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import { Design, IDesign } from '../models/design.model';
+import { Furniture } from '../models/furniture.model';
 import { AppError } from '../utils/AppError';
 import { IDesignInput } from '../types/design.types';
 
@@ -117,6 +118,44 @@ export const duplicateDesign = async (
 
   const newDesign = await Design.create(duplicateData);
   return newDesign;
+};
+
+export const getPreviewDesign = async (furnitureId: string): Promise<IDesign> => {
+  if (!mongoose.Types.ObjectId.isValid(furnitureId)) {
+    throw new AppError('Invalid furniture ID for preview', 400);
+  }
+
+  const furniture = await Furniture.findById(furnitureId);
+
+  if (!furniture) {
+    throw new AppError('Furniture not found for preview', 404);
+  }
+
+  const previewDesign = new Design({
+    userId: new mongoose.Types.ObjectId(),
+    name: `${furniture.name} Preview`,
+    description:
+      'Temporary preview layout for viewing this furniture item in a sample room. This design is not saved.',
+    room: {
+      width: 5,
+      length: 4,
+      height: 3,
+      wallColor: '#F5F5F5',
+      floorColor: '#D2B48C',
+    },
+    furniture: [
+      {
+        furnitureId: furniture._id,
+        position: { x: 2, y: 2 },
+        rotation: 0,
+        scale: 1,
+        color: furniture.defaultColor,
+      },
+    ],
+    isPublic: true,
+  });
+
+  return previewDesign;
 };
 
 export interface DesignSummaryPoint {

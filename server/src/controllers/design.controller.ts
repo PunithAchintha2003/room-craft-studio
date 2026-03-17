@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import * as designService from '../services/design.service';
 import { sendSuccess, sendCreated } from '../utils/response.util';
+import { AppError } from '../utils/AppError';
 
 export const createDesign = async (
   req: Request,
@@ -104,6 +105,25 @@ export const duplicateDesign = async (
     const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
     const design = await designService.duplicateDesign(id, req.user!.id);
     sendCreated(res, { design }, 'Design duplicated successfully');
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getPreviewDesign = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const furnitureId = req.query.furnitureId as string | undefined;
+
+    if (!furnitureId) {
+      throw new AppError('furnitureId query parameter is required for preview', 400);
+    }
+
+    const design = await designService.getPreviewDesign(furnitureId);
+    sendSuccess(res, { design }, 'Preview design generated successfully');
   } catch (error) {
     next(error);
   }
