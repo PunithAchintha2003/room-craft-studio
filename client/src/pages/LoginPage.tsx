@@ -27,7 +27,6 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { motion } from 'framer-motion';
-import toast from 'react-hot-toast';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '@/app/store';
 import { loginUser, clearError } from '@/features/auth/authSlice';
@@ -35,8 +34,9 @@ import { useAuth } from '@/hooks/useAuth';
 import { useThemeMode } from '@/theme/ThemeModeProvider';
 import { BACKGROUND } from '@/theme/tokens';
 import { loginSchema, LoginFormData } from '@/utils/validators';
+import { notify } from '@/lib/notifications';
 
-const MotionBox = motion(Box);
+const MotionBox = motion.create(Box);
 
 export const LoginPage: React.FC = () => {
   const theme = useTheme();
@@ -51,7 +51,7 @@ export const LoginPage: React.FC = () => {
 
   useEffect(() => {
     if (error) {
-      toast.error(error);
+      notify.error(error);
       dispatch(clearError());
     }
   }, [error, dispatch]);
@@ -77,7 +77,7 @@ export const LoginPage: React.FC = () => {
   const onSubmit = async (data: LoginFormData) => {
     const result = await dispatch(loginUser(data));
     if (loginUser.fulfilled.match(result)) {
-      toast.success('Welcome back!');
+      notify.success('Welcome back!');
     }
   };
 
