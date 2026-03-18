@@ -37,7 +37,7 @@ export class CartController {
   static async updateItem(req: Request, res: Response, next: NextFunction) {
     try {
       const userId = req.user!.id;
-      const { furnitureId } = req.params;
+      const furnitureId = Array.isArray(req.params.furnitureId) ? req.params.furnitureId[0] : req.params.furnitureId;
       const { quantity, selectedColor } = req.body;
 
       if (!quantity || quantity < 1) {
@@ -56,7 +56,7 @@ export class CartController {
   static async removeItem(req: Request, res: Response, next: NextFunction) {
     try {
       const userId = req.user!.id;
-      const { furnitureId } = req.params;
+      const furnitureId = Array.isArray(req.params.furnitureId) ? req.params.furnitureId[0] : req.params.furnitureId;
 
       const cart = await CartService.removeItem(userId, furnitureId);
       
@@ -82,7 +82,7 @@ export class CartController {
   static async addDesignToCart(req: Request, res: Response, next: NextFunction) {
     try {
       const userId = req.user!.id;
-      const { designId } = req.params;
+      const designId = Array.isArray(req.params.designId) ? req.params.designId[0] : req.params.designId;
 
       const result = await CartService.addDesignToCart(userId, designId);
       

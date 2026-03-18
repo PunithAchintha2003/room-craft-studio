@@ -159,9 +159,9 @@ export class CartService {
           addedCount++;
         }
       } else {
-        // Add new item
+        // Add new item (design stores furnitureId as string; cart expects ObjectId)
         cart.items.push({
-          furnitureId: designItem.furnitureId,
+          furnitureId: new mongoose.Types.ObjectId(designItem.furnitureId.toString()),
           quantity: 1,
           selectedColor: designItem.color || furniture.defaultColor,
           priceSnapshot: furniture.price,

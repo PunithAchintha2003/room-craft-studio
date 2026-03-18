@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Request, Response, Router } from 'express';
 import authRoutes from './auth.routes';
 import designRoutes from './design.routes';
 import userRoutes from './user.routes';
@@ -25,7 +25,7 @@ router.use('/payment', paymentRoutes);
 router.use('/notifications', notificationRoutes);
 router.use('/admin', adminRoutes);
 
-router.get('/health', (_req, res) => {
+router.get('/health', (_req: Request, res: Response) => {
   res.json({ success: true, message: 'RoomCraft Studio API is running', timestamp: new Date().toISOString() });
 });
 

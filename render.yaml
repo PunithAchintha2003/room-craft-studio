@@ -11,7 +11,8 @@ services:
     # App lives in server/
     rootDir: server
 
-    buildCommand: npm install && npm run build
+    # Install devDependencies so TypeScript and @types/* are available for the build
+    buildCommand: NPM_CONFIG_PRODUCTION=false npm install && npm run build
     startCommand: npm start
 
     # Render sets PORT automatically; no need to add it here.

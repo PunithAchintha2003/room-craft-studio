@@ -130,7 +130,7 @@ export class PaymentController {
   // GET /api/payment/intent/:paymentIntentId
   static async getPaymentIntent(req: Request, res: Response, next: NextFunction) {
     try {
-      const { paymentIntentId } = req.params;
+      const paymentIntentId = Array.isArray(req.params.paymentIntentId) ? req.params.paymentIntentId[0] : req.params.paymentIntentId;
       const paymentIntent = await PaymentService.getPaymentIntent(paymentIntentId);
 
       sendSuccess(res, { paymentIntent }, 'Payment intent retrieved successfully');
