@@ -46,6 +46,7 @@ import { ProductCard } from '@/components/product/ProductCard';
 import type { FurnitureCategory } from '@/types/design.types';
 import { fetchPublicReviews, type Review } from '@/services/reviews.api';
 import { formatCurrencyLKR } from '@/utils/currency';
+import { HeroRoomPreview } from '@/components/preview/HeroRoomPreview';
 
 const SHOP_CATEGORIES: { value: FurnitureCategory; label: string; icon: React.ReactNode }[] = [
   { value: 'chair', label: 'Chairs', icon: <ChairIcon /> },
@@ -171,7 +172,8 @@ export const WelcomePage: React.FC = () => {
   const [, setReviewsError] = useState<string | null>(null);
 
   useEffect(() => {
-    dispatch(fetchFeaturedFurniture(8));
+    // Load a small curated set of featured items for the homepage grid
+    dispatch(fetchFeaturedFurniture(4));
   }, [dispatch]);
 
   useEffect(() => {
@@ -354,53 +356,16 @@ export const WelcomePage: React.FC = () => {
                     borderRadius: 4,
                     overflow: 'hidden',
                     boxShadow: 'none',
-                    border: `1px solid ${alpha(
-                      mode === 'dark' ? theme.palette.on.glass : theme.palette.text.primary,
-                      0.16
-                    )}`,
                     aspectRatio: '16/10',
+                    width: '100%',
+                    minHeight: 0,
                     backgroundColor:
                       mode === 'dark'
                         ? alpha(theme.palette.background.paper, 0.96)
                         : alpha(theme.palette.background.paper, 0.98),
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
                   }}
                 >
-                  <Box sx={{ textAlign: 'center', p: 4 }}>
-                    <ViewInAr
-                      sx={{
-                        fontSize: 80,
-                        color: alpha(theme.palette.secondary.main, 0.7),
-                        mb: 2,
-                      }}
-                    />
-                    <Typography
-                      variant="h6"
-                      sx={{
-                        color:
-                          mode === 'dark'
-                            ? alpha(theme.palette.text.primary, 0.7)
-                            : alpha(theme.palette.text.primary, 0.7),
-                        fontWeight: 500,
-                      }}
-                    >
-                      3D Room Preview
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        color:
-                          mode === 'dark'
-                            ? alpha(theme.palette.text.secondary, 0.7)
-                            : alpha(theme.palette.text.secondary, 0.8),
-                        mt: 1,
-                      }}
-                    >
-                      Interactive visualisation loads here
-                    </Typography>
-                  </Box>
+                  <HeroRoomPreview />
                   <Box
                     sx={{
                       position: 'absolute',
@@ -536,8 +501,8 @@ export const WelcomePage: React.FC = () => {
             </Box>
           ) : featuredFurniture.length > 0 ? (
             <Grid container spacing={3}>
-              {featuredFurniture.slice(0, 8).map((item) => (
-                <Grid item xs={12} sm={6} md={4} lg={3} key={item._id}>
+              {featuredFurniture.slice(0, 4).map((item) => (
+                <Grid item xs={12} sm={6} md={3} lg={3} key={item._id}>
                   <ProductCard
                     furniture={{
                       _id: item._id,
@@ -548,6 +513,7 @@ export const WelcomePage: React.FC = () => {
                       stock: item.stock,
                       featured: (item as { featured?: boolean }).featured,
                     }}
+                    compact
                   />
                 </Grid>
               ))}

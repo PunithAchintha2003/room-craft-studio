@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -15,6 +15,7 @@ import ChairIcon from '@mui/icons-material/Chair';
 import TimelineIcon from '@mui/icons-material/Timeline';
 import AddIcon from '@mui/icons-material/Add';
 import DesignServicesIcon from '@mui/icons-material/DesignServices';
+import ViewInArIcon from '@mui/icons-material/ViewInAr';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/app/store';
 import {
@@ -26,6 +27,7 @@ import {
 import KpiCard from '@/components/dashboard/KpiCard';
 import DesignsOverTimeChart from '@/components/dashboard/DesignsOverTimeChart';
 import FurnitureByCategoryChart from '@/components/dashboard/FurnitureByCategoryChart';
+import HeroModelUploadDialog from '@/components/models/HeroModelUploadDialog';
 
 const getLast7DaysTotal = (counts: { date: string; count: number }[]): number => {
   if (!counts.length) return 0;
@@ -41,6 +43,7 @@ const getLast7DaysTotal = (counts: { date: string; count: number }[]): number =>
 export const DashboardPage: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
+  const [heroDialogOpen, setHeroDialogOpen] = useState(false);
   const { user } = useSelector((state: RootState) => state.auth);
   const summary = useSelector(selectDashboardSummary as (state: RootState) => ReturnType<typeof selectDashboardSummary>);
   const isLoading = useSelector(selectDashboardLoading as (state: RootState) => boolean);
@@ -84,6 +87,17 @@ export const DashboardPage: React.FC = () => {
                   sx={{ textTransform: 'none' }}
                 >
                   All Designs
+                </Button>
+                <Button
+                  variant="outlined"
+                  startIcon={<ViewInArIcon />}
+                  onClick={(event) => {
+                    event.currentTarget.blur();
+                    setHeroDialogOpen(true);
+                  }}
+                  sx={{ textTransform: 'none' }}
+                >
+                  Upload 3D model
                 </Button>
               </Box>
             </Box>
@@ -146,6 +160,10 @@ export const DashboardPage: React.FC = () => {
                 </Grid>
               </>
             )}
+            <HeroModelUploadDialog
+              open={heroDialogOpen}
+              onClose={() => setHeroDialogOpen(false)}
+            />
           </Box>
         </Fade>
       </Container>

@@ -153,10 +153,16 @@ export const getFurnitureDashboardSummary = async (): Promise<FurnitureDashboard
 };
 
 export const getFeaturedFurniture = async (limit = 8): Promise<IFurniture[]> => {
-  const furniture = await Furniture.find({ featured: true })
+  const featured = await Furniture.find({ featured: true })
     .sort({ createdAt: -1 })
     .limit(limit);
-  return furniture;
+  if (featured.length > 0) {
+    return featured;
+  }
+  // Fallback: show latest catalog items (e.g. added by admin) when none are marked featured
+  return Furniture.find()
+    .sort({ createdAt: -1 })
+    .limit(limit);
 };
 
 export const getRelatedFurniture = async (furnitureId: string, limit = 4): Promise<IFurniture[]> => {

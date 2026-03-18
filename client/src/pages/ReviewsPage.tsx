@@ -137,7 +137,7 @@ export const ReviewsPage: React.FC = () => {
           flexDirection: 'column',
           justifyContent: 'flex-start',
           px: 8,
-          pt: 15,
+          pt: 11,
           position: 'relative',
           overflow: 'hidden',
         }}
