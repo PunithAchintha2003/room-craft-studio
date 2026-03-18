@@ -15,8 +15,6 @@ import {
   Menu,
   MenuItem,
   Divider,
-  useScrollTrigger,
-  Slide,
   alpha,
   useTheme,
   Typography,
@@ -52,19 +50,6 @@ const NAV_LINKS = [
   { label: 'Reviews', href: '/reviews' },
   { label: 'About', href: '/about' },
 ];
-
-interface HideOnScrollProps {
-  children: React.ReactElement;
-}
-
-const HideOnScroll: React.FC<HideOnScrollProps> = ({ children }) => {
-  const trigger = useScrollTrigger();
-  return (
-    <Slide appear={false} direction="down" in={!trigger}>
-      {children}
-    </Slide>
-  );
-};
 
 const Logo: React.FC = () => (
   <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -132,37 +117,43 @@ export const Navbar: React.FC = () => {
 
   return (
     <>
-      <HideOnScroll>
-        <AppBar
-          position="sticky"
-          elevation={0}
+      <AppBar
+        position="fixed"
+        elevation={0}
+        sx={{
+          backgroundColor: 'transparent',
+          boxShadow: 'none',
+        }}
+      >
+        <Container
+          maxWidth="lg"
           sx={{
-            backgroundColor: 'transparent',
-            boxShadow: 'none',
+            px: { xs: 2, sm: 3 },
+            mt: 1.5,
+            mb: 1.5,
           }}
         >
-          <Container
-            maxWidth="lg"
+          <Toolbar
+            disableGutters
             sx={{
-              px: { xs: 2, sm: 3 },
-              mt: 1.5,
-              mb: 1.5,
+              minHeight: { xs: 56, sm: 64 },
+              height: { xs: 56, sm: 64 },
+              py: 0,
+              px: 1.5,
+              borderRadius: 999,
+              background: `linear-gradient(120deg, ${alpha(
+                theme.palette.background.paper,
+                0.18
+              )}, ${alpha(theme.palette.background.paper, 0.04)})`,
+              backdropFilter: `blur(${theme.palette.glass.blur * 1.4}px) saturate(140%)`,
+              WebkitBackdropFilter: `blur(${theme.palette.glass.blur * 1.4}px) saturate(140%)`,
+              border: `1px solid ${alpha(theme.palette.glass.border, 0.9)}`,
+              boxShadow:
+                theme.palette.mode === 'dark'
+                  ? '0 18px 45px rgba(15, 23, 42, 0.65)'
+                  : '0 18px 45px rgba(15, 23, 42, 0.16)',
             }}
           >
-            <Toolbar
-              disableGutters
-              sx={{
-                minHeight: { xs: 56, sm: 64 },
-                height: { xs: 56, sm: 64 },
-                py: 0,
-                px: 1.5,
-                borderRadius: 999,
-                backgroundColor: theme.palette.glass.background,
-                backdropFilter: `blur(${theme.palette.glass.blur}px)`,
-                WebkitBackdropFilter: `blur(${theme.palette.glass.blur}px)`,
-                border: `1px solid ${theme.palette.glass.border}`,
-              }}
-            >
               <Logo />
 
               <Box sx={{ flexGrow: 1 }} />
@@ -371,7 +362,6 @@ export const Navbar: React.FC = () => {
             </Toolbar>
           </Container>
         </AppBar>
-      </HideOnScroll>
 
       <Drawer
         anchor="right"

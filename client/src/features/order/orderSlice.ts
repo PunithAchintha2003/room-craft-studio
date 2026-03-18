@@ -1,7 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import axios from 'axios';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+import { api } from '@/services/api';
 
 export type OrderStatus = 'pending' | 'processing' | 'confirmed' | 'shipped' | 'delivered' | 'cancelled' | 'failed' | 'refunded';
 
@@ -63,7 +61,7 @@ export const createOrder = createAsyncThunk(
   'orders/createOrder',
   async (orderData: { shippingAddress: any; billingAddress?: any }, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${API_URL}/orders`, orderData, { withCredentials: true });
+      const response = await api.post('/orders', orderData);
       return response.data.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || 'Failed to create order');
@@ -80,9 +78,7 @@ export const fetchOrders = createAsyncThunk(
       if (params.page) queryParams.append('page', params.page.toString());
       if (params.limit) queryParams.append('limit', params.limit.toString());
 
-      const response = await axios.get(`${API_URL}/orders?${queryParams.toString()}`, {
-        withCredentials: true,
-      });
+      const response = await api.get(`/orders?${queryParams.toString()}`);
       return response.data.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || 'Failed to fetch orders');
@@ -94,7 +90,7 @@ export const fetchOrderById = createAsyncThunk(
   'orders/fetchOrderById',
   async (orderId: string, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${API_URL}/orders/${orderId}`, { withCredentials: true });
+      const response = await api.get(`/orders/${orderId}`);
       return response.data.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || 'Failed to fetch order');
@@ -106,9 +102,7 @@ export const fetchOrderByNumber = createAsyncThunk(
   'orders/fetchOrderByNumber',
   async (orderNumber: string, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${API_URL}/orders/number/${orderNumber}`, {
-        withCredentials: true,
-      });
+      const response = await api.get(`/orders/number/${orderNumber}`);
       return response.data.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || 'Failed to fetch order');
@@ -120,11 +114,7 @@ export const cancelOrder = createAsyncThunk(
   'orders/cancelOrder',
   async (orderId: string, { rejectWithValue }) => {
     try {
-      const response = await axios.patch(
-        `${API_URL}/orders/${orderId}/cancel`,
-        {},
-        { withCredentials: true }
-      );
+      const response = await api.patch(`/orders/${orderId}/cancel`, {});
       return response.data.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || 'Failed to cancel order');

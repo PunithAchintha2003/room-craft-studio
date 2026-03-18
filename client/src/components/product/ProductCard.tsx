@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { addToCart } from '@/features/cart/cartSlice';
 import { addToWishlist, removeFromWishlist, selectWishlistItems } from '@/features/wishlist/wishlistSlice';
+import { formatCurrencyLKR } from '@/utils/currency';
 
 interface ProductCardProps {
   furniture: {
@@ -211,7 +212,7 @@ export function ProductCard({ furniture, onQuickView }: ProductCardProps) {
 
         {/* Price */}
         <Typography variant="h5" color="primary" fontWeight="bold" sx={{ mt: 'auto', mb: 2 }}>
-          £{furniture.price.toFixed(2)}
+          {formatCurrencyLKR(furniture.price)}
         </Typography>
 
         {/* Add to Cart Button */}

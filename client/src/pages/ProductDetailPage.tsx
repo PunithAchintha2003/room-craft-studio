@@ -31,6 +31,7 @@ import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { fetchFurnitureById, fetchRelatedFurniture } from '@/features/furniture/furnitureSlice';
 import { addToCart } from '@/features/cart/cartSlice';
 import { addToWishlist, removeFromWishlist, selectWishlistItems } from '@/features/wishlist/wishlistSlice';
+import { formatCurrencyLKR } from '@/utils/currency';
 
 export default function ProductDetailPage() {
   const theme = useTheme();
@@ -189,7 +190,7 @@ export default function ProductDetailPage() {
                 fontWeight="bold"
                 sx={{ ml: { xs: 0, md: 1 } }}
               >
-                £{furniture.price.toFixed(2)}
+                {formatCurrencyLKR(furniture.price)}
               </Typography>
             )}
           </Stack>
@@ -410,7 +411,7 @@ export default function ProductDetailPage() {
                     <Stack direction="row" spacing={1} alignItems="center">
                       <LocalShipping fontSize="small" color="primary" />
                       <Typography variant="body2" color="text.secondary">
-                        Free delivery on orders over £50
+                        Free delivery on orders over {formatCurrencyLKR(50)}
                       </Typography>
                     </Stack>
                     <Stack direction="row" spacing={1} alignItems="center">

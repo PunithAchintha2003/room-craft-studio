@@ -46,6 +46,7 @@ import {
 import { FurnitureThumbnailUploader } from '@/components/furniture/FurnitureThumbnailUploader';
 import { Furniture, FurnitureCategory } from '@/types/design.types';
 import { FurnitureFormDialog } from '@/components/furniture/FurnitureFormDialog';
+import { formatCurrencyLKR } from '@/utils/currency';
 
 export const FurnitureManagerPage: React.FC = () => {
   const theme = useTheme();
@@ -309,7 +310,9 @@ export const FurnitureManagerPage: React.FC = () => {
                       </Typography>
                     </TableCell>
                     <TableCell align="right">
-                      <Typography variant="body2">${item.price.toFixed(2)}</Typography>
+                      <Typography variant="body2">
+                        {formatCurrencyLKR(item.price)}
+                      </Typography>
                     </TableCell>
                     <TableCell align="center">
                       <Typography variant="body2">{item.stock}</Typography>

@@ -31,6 +31,7 @@ import { addDesignToCart } from '@/features/cart/cartSlice';
 import { ReadOnlyCanvas2DViewer } from '@/components/design/ReadOnlyCanvas2DViewer';
 import { Canvas3DViewer, Canvas3DViewerHandle } from '@/components/design/Canvas3DViewer';
 import toast from 'react-hot-toast';
+import { formatCurrencyLKR } from '@/utils/currency';
 
 export const DesignViewerPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -356,9 +357,9 @@ export const DesignViewerPage: React.FC = () => {
                           <Typography variant="caption" color="text.secondary" display="block">
                             Scale: {item.scale.toFixed(2)}x
                           </Typography>
-                          {furnitureData?.price && (
+                          {furnitureData?.price != null && (
                             <Typography variant="body2" color="primary" sx={{ mt: 1 }}>
-                              ${furnitureData.price.toFixed(2)}
+                              {formatCurrencyLKR(furnitureData.price)}
                             </Typography>
                           )}
                         </GlassCard>

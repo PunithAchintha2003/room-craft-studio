@@ -24,7 +24,7 @@ import { useAppSelector, useAppDispatch } from '@/app/hooks';
 import { fetchCart, clearCart, addDesignToCart } from '@/features/cart/cartSlice';
 import { useAuth } from '@/hooks/useAuth';
 import type { IDesign } from '@/types/design.types';
-import axiosInstance from '@/lib/axios';
+import api from '@/services/api';
 
 export default function CartPage() {
   const navigate = useNavigate();
@@ -48,8 +48,9 @@ export default function CartPage() {
   useEffect(() => {
     const fetchDesigns = async () => {
       try {
-        const response = await axiosInstance.get('/designs');
-        setDesigns(response.data.designs || []);
+        const response = await api.get('/designs');
+        // @ts-expect-error API typing is loose here
+        setDesigns(response.data.designs || response.data.data?.designs || []);
       } catch (err) {
         console.error('Failed to fetch designs:', err);
       }
@@ -58,7 +59,7 @@ export default function CartPage() {
   }, []);
 
   const handleProceedToCheckout = () => {
-    navigate('/checkout');
+    navigate('/payment');
   };
 
   const handleContinueShopping = () => {
@@ -81,13 +82,19 @@ export default function CartPage() {
 
   return (
     <TwoTonePageLayout
-      title="Shopping Cart"
-      subtitle={
-        itemCount > 0
-          ? `You have ${itemCount} ${itemCount === 1 ? 'item' : 'items'} in your cart`
-          : 'Your cart is empty'
+      top={
+        <Box sx={{ py: { xs: 3, md: 4 } }}>
+          <Typography variant="h4" fontWeight={700} gutterBottom>
+            Shopping Cart
+          </Typography>
+          <Typography variant="body1" color="text.secondary">
+            {itemCount > 0
+              ? `You have ${itemCount} ${itemCount === 1 ? 'item' : 'items'} in your cart`
+              : 'Your cart is empty'}
+          </Typography>
+        </Box>
       }
-    >
+      bottom={
       <Box sx={{ maxWidth: 1400, mx: 'auto', px: 3, py: 4 }}>
         {/* Back Button */}
         <Button
@@ -271,6 +278,7 @@ export default function CartPage() {
           </DialogActions>
         </Dialog>
       </Box>
-    </TwoTonePageLayout>
+      }
+    />
   );
 }

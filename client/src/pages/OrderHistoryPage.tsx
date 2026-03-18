@@ -33,6 +33,7 @@ import { GlassCard } from '@/components/common/GlassCard';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { fetchOrders, cancelOrder } from '@/features/order/orderSlice';
 import type { IOrder } from '@/features/order/orderSlice';
+import { formatCurrencyLKR } from '@/utils/currency';
 
 const getStatusIcon = (status: string) => {
   switch (status) {
@@ -207,7 +208,7 @@ export default function OrderHistoryPage() {
 
                   <Box sx={{ textAlign: 'right' }}>
                     <Typography variant="h5" color="primary" fontWeight="bold">
-                      £{order.total.toFixed(2)}
+                      {formatCurrencyLKR(order.total)}
                     </Typography>
                     <Stack direction="row" spacing={1} sx={{ mt: 2 }}>
                       <Button
@@ -295,11 +296,11 @@ export default function OrderHistoryPage() {
                               Quantity: {item.quantity}
                             </Typography>
                             <Typography variant="body2" color="primary" fontWeight="medium">
-                              £{item.priceSnapshot.toFixed(2)} each
+                              {formatCurrencyLKR(item.priceSnapshot)} each
                             </Typography>
                           </Box>
                           <Typography variant="h6" color="primary">
-                            £{(item.priceSnapshot * item.quantity).toFixed(2)}
+                            {formatCurrencyLKR(item.priceSnapshot * item.quantity)}
                           </Typography>
                         </Box>
                       ))}
@@ -338,20 +339,29 @@ export default function OrderHistoryPage() {
                       <TableBody>
                         <TableRow>
                           <TableCell>Subtotal:</TableCell>
-                          <TableCell align="right">£{selectedOrder.subtotal.toFixed(2)}</TableCell>
+                          <TableCell align="right">
+                            {formatCurrencyLKR(selectedOrder.subtotal)}
+                          </TableCell>
                         </TableRow>
                         <TableRow>
                           <TableCell>Tax:</TableCell>
-                          <TableCell align="right">£{selectedOrder.tax.toFixed(2)}</TableCell>
+                          <TableCell align="right">
+                            {formatCurrencyLKR(selectedOrder.tax)}
+                          </TableCell>
                         </TableRow>
                         <TableRow>
                           <TableCell>Shipping:</TableCell>
-                          <TableCell align="right">£{selectedOrder.shippingCost.toFixed(2)}</TableCell>
+                          <TableCell align="right">
+                            {formatCurrencyLKR(selectedOrder.shippingCost)}
+                          </TableCell>
                         </TableRow>
                         <TableRow>
                           <TableCell sx={{ fontWeight: 'bold', fontSize: '1.1rem' }}>Total:</TableCell>
-                          <TableCell align="right" sx={{ fontWeight: 'bold', fontSize: '1.1rem', color: 'primary.main' }}>
-                            £{selectedOrder.total.toFixed(2)}
+                          <TableCell
+                            align="right"
+                            sx={{ fontWeight: 'bold', fontSize: '1.1rem', color: 'primary.main' }}
+                          >
+                            {formatCurrencyLKR(selectedOrder.total)}
                           </TableCell>
                         </TableRow>
                       </TableBody>

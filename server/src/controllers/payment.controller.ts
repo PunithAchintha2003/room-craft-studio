@@ -1,14 +1,14 @@
 import { Request, Response, NextFunction } from 'express';
 import { PaymentService } from '../services/payment.service';
 import { OrderService } from '../services/order.service';
-import { successResponse } from '../utils/response.util';
+import { sendSuccess } from '../utils/response.util';
 import { AppError } from '../utils/AppError';
 
 export class PaymentController {
   // POST /api/payment/create-intent
   static async createPaymentIntent(req: Request, res: Response, next: NextFunction) {
     try {
-      const userId = req.user!._id;
+      const userId = req.user!.id;
       const { orderId } = req.body;
 
       if (!orderId) {
@@ -36,7 +36,7 @@ export class PaymentController {
         paymentIntent.status
       );
 
-      successResponse(
+      sendSuccess(
         res,
         {
           clientSecret: paymentIntent.client_secret,
@@ -133,7 +133,7 @@ export class PaymentController {
       const { paymentIntentId } = req.params;
       const paymentIntent = await PaymentService.getPaymentIntent(paymentIntentId);
 
-      successResponse(res, { paymentIntent }, 'Payment intent retrieved successfully');
+      sendSuccess(res, { paymentIntent }, 'Payment intent retrieved successfully');
     } catch (error) {
       next(error);
     }
@@ -162,7 +162,7 @@ export class PaymentController {
         amount
       );
 
-      successResponse(res, { refund }, 'Refund processed successfully');
+      sendSuccess(res, { refund }, 'Refund processed successfully');
     } catch (error) {
       next(error);
     }

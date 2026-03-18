@@ -1,8 +1,9 @@
-import { Box, Typography, Button, IconButton, Stack, Chip } from '@mui/material';
+import { Box, Typography, IconButton, Stack, Chip } from '@mui/material';
 import { Add, Remove, Delete } from '@mui/icons-material';
 import { useAppDispatch } from '@/app/hooks';
 import { updateCartItem, removeFromCart } from '@/features/cart/cartSlice';
 import type { ICartItem } from '@/features/cart/cartSlice';
+import { formatCurrencyLKR } from '@/utils/currency';
 
 interface CartItemProps {
   item: ICartItem;
@@ -48,9 +49,24 @@ export function CartItem({ item, readonly = false }: CartItemProps) {
         bgcolor: 'background.paper',
         border: '1px solid',
         borderColor: 'divider',
+        position: 'relative',
+        overflow: 'hidden',
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          inset: 0,
+          opacity: 0,
+          background:
+            'radial-gradient(circle at top left, rgba(59,130,246,0.14), transparent 55%)',
+          transition: 'opacity 0.25s ease',
+          pointerEvents: 'none',
+        },
         '&:hover': {
           borderColor: 'primary.main',
-          boxShadow: 1,
+          boxShadow: 2,
+          '&::before': {
+            opacity: 1,
+          },
         },
       }}
     >
@@ -60,10 +76,10 @@ export function CartItem({ item, readonly = false }: CartItemProps) {
         src={item.furnitureId.thumbnail}
         alt={`${item.furnitureId.name} - ${item.furnitureId.category}`}
         sx={{
-          width: 100,
-          height: 100,
+          width: 96,
+          height: 96,
           objectFit: 'cover',
-          borderRadius: 1,
+          borderRadius: 1.5,
           flexShrink: 0,
         }}
       />
@@ -71,30 +87,28 @@ export function CartItem({ item, readonly = false }: CartItemProps) {
       {/* Product Info */}
       <Stack spacing={1} sx={{ flex: 1 }}>
         <Box>
-          <Typography variant="h6" component="h3" gutterBottom>
+          <Typography
+            variant="subtitle1"
+            component="h3"
+            gutterBottom
+            sx={{ fontWeight: 600, lineHeight: 1.2 }}
+          >
             {item.furnitureId.name}
           </Typography>
           <Chip 
             label={item.furnitureId.category} 
             size="small" 
-            sx={{ mr: 1 }} 
+            sx={{ mr: 1, mb: 1 }} 
           />
-          {item.selectedColor && (
-            <Chip
-              label={item.selectedColor}
-              size="small"
-              sx={{
-                bgcolor: item.selectedColor.toLowerCase(),
-                color: 'white',
-                textTransform: 'capitalize',
-              }}
-            />
-          )}
+          <Typography
+            variant="h6"
+            color="primary.main"
+            fontWeight="bold"
+            sx={{ lineHeight: 1.2 }}
+          >
+            {formatCurrencyLKR(itemTotal)}
+          </Typography>
         </Box>
-
-        <Typography variant="body2" color="text.secondary">
-          £{item.priceSnapshot.toFixed(2)} each
-        </Typography>
 
         {/* Quantity Controls */}
         {!readonly ? (
@@ -133,12 +147,9 @@ export function CartItem({ item, readonly = false }: CartItemProps) {
         )}
       </Stack>
 
-      {/* Price and Remove */}
-      <Stack spacing={1} alignItems="flex-end">
-        <Typography variant="h6" color="primary" fontWeight="bold">
-          £{itemTotal.toFixed(2)}
-        </Typography>
-        {!readonly && (
+      {/* Remove Button */}
+      {!readonly && (
+        <Stack spacing={1} alignItems="flex-end">
           <IconButton
             size="small"
             color="error"
@@ -147,8 +158,8 @@ export function CartItem({ item, readonly = false }: CartItemProps) {
           >
             <Delete />
           </IconButton>
-        )}
-      </Stack>
+        </Stack>
+      )}
     </Box>
   );
 }

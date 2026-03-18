@@ -4,6 +4,7 @@ import designReducer from '@/features/design/designSlice';
 import furnitureReducer from '@/features/furniture/furnitureSlice';
 import editorReducer from '@/features/editor/editorSlice';
 import dashboardReducer from '@/features/dashboard/dashboardSlice';
+import adminOrdersReducer from '@/features/orders/adminOrderSlice';
 
 export const store = configureStore({
   reducer: {
@@ -12,6 +13,7 @@ export const store = configureStore({
     furniture: furnitureReducer,
     editor: editorReducer,
     dashboard: dashboardReducer,
+    adminOrders: adminOrdersReducer,
   },
 });
 

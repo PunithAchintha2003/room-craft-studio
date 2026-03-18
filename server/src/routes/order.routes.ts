@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { OrderController } from '../controllers/order.controller';
-import { protect } from '../middleware/auth.middleware';
+import { protect, restrictTo } from '../middleware/auth.middleware';
 
 const router = Router();
 
@@ -12,6 +12,9 @@ router.post('/', OrderController.createOrder);
 
 // GET /api/orders - Get user's order history
 router.get('/', OrderController.getUserOrders);
+
+// GET /api/orders/admin - Get all orders (admin)
+router.get('/admin', restrictTo('admin'), OrderController.getAllOrders);
 
 // GET /api/orders/number/:orderNumber - Get order by order number
 router.get('/number/:orderNumber', OrderController.getOrderByNumber);
