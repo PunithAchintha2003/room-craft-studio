@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   AppBar,
   Avatar,
@@ -59,10 +59,27 @@ export const DesignerLayout: React.FC = () => {
   const { user } = useAuth();
   const { resolvedMode, toggleMode } = useThemeMode();
 
-  const drawerWidth = isMobile ? DRAWER_WIDTH : collapsed ? DRAWER_COLLAPSED_WIDTH : DRAWER_WIDTH;
+  const isEditorRoute = location.pathname.startsWith('/editor');
+
+  // Auto-hide sidebar on editor routes (desktop only) for maximum canvas space.
+  useEffect(() => {
+    if (isMobile) return;
+    if (isEditorRoute) {
+      setCollapsed(true);
+      return;
+    }
+  }, [isMobile, isEditorRoute]);
+
+  const drawerWidth = isMobile
+    ? DRAWER_WIDTH
+    : isEditorRoute
+      ? 0
+      : collapsed
+        ? DRAWER_COLLAPSED_WIDTH
+        : DRAWER_WIDTH;
   const pageTitle =
     PAGE_TITLES[location.pathname] ??
-    (location.pathname.startsWith('/editor') ? 'Room Designer' : 'Designer Portal');
+    (isEditorRoute ? 'Room Designer' : 'Designer Portal');
 
   const handleLogout = async () => {
     await dispatch(designerLogout());
@@ -249,9 +266,16 @@ export const DesignerLayout: React.FC = () => {
   );
 
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh', backgroundColor: 'background.default' }}>
+    <Box
+      sx={{
+        display: 'flex',
+        minHeight: '100dvh',
+        backgroundColor: 'background.default',
+        overflow: isEditorRoute ? 'hidden' : 'auto',
+      }}
+    >
       {/* Sidebar — desktop */}
-      {!isMobile && (
+      {!isMobile && !isEditorRoute && (
         <Box
           component="nav"
           sx={{
@@ -297,14 +321,17 @@ export const DesignerLayout: React.FC = () => {
 
       {/* Main content area */}
       <Box
-component="main"
-      sx={{
-        flex: 1,
-        display: 'flex',
-        flexDirection: 'column',
-        minWidth: 0,
-        transition: 'margin 0.2s ease',
-      }}
+        component="main"
+        sx={{
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          minWidth: 0,
+          height: isEditorRoute ? '100dvh' : 'auto',
+          minHeight: 0,
+          overflow: isEditorRoute ? 'hidden' : 'visible',
+          transition: 'margin 0.2s ease',
+        }}
       >
         {/* Top bar */}
         <AppBar
@@ -381,7 +408,14 @@ component="main"
         </AppBar>
 
         {/* Page content */}
-        <Box sx={{ flex: 1, p: { xs: 2, sm: 3, md: 4 } }}>
+        <Box
+          sx={{
+            flex: 1,
+            minHeight: 0,
+            overflow: isEditorRoute ? 'hidden' : 'visible',
+            p: isEditorRoute ? 0 : { xs: 2, sm: 3, md: 4 },
+          }}
+        >
           <Outlet />
         </Box>
       </Box>

@@ -12,12 +12,14 @@ import {
   MenuItem,
   Select,
   IconButton,
+  Tooltip,
 } from '@mui/material';
 import { useForm, Controller, useFieldArray } from 'react-hook-form';
 import { HexColorPicker } from 'react-colorful';
 import { RoomConfig, RoomOpening } from '@/types/design.types';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 
 interface RoomConfigFormProps {
   initialConfig: RoomConfig;
@@ -69,15 +71,33 @@ export const RoomConfigForm: React.FC<RoomConfigFormProps> = ({ initialConfig, o
       <Box component="form" onSubmit={handleSubmit(onSubmit)}>
         <Stack spacing={3}>
           <Box>
-            <Typography variant="subtitle2" gutterBottom>
-              Dimensions (meters)
-            </Typography>
-            <Grid container spacing={2}>
+            <Box display="flex" alignItems="center" gap={1}>
+              <Typography variant="subtitle2">Dimensions (meters)</Typography>
+              <Tooltip
+                arrow
+                placement="right"
+                title={
+                  <Box>
+                    <Typography variant="body2">
+                      Width/Length: Minimum 2m, Maximum 30m
+                    </Typography>
+                    <Typography variant="body2">
+                      Height: Minimum 1m, Maximum 5m
+                    </Typography>
+                  </Box>
+                }
+              >
+                <IconButton size="small" aria-label="Dimension limits">
+                  <InfoOutlinedIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+            </Box>
+            <Grid container spacing={2} sx={{ mt: 0.5 }}>
               <Grid item xs={12}>
                 <Controller
                   name="width"
                   control={control}
-                  rules={{ min: 1, max: 20 }}
+                  rules={{ min: 2, max: 30 }}
                   render={({ field }) => (
                     <TextField
                       {...field}
@@ -85,7 +105,7 @@ export const RoomConfigForm: React.FC<RoomConfigFormProps> = ({ initialConfig, o
                       type="number"
                       fullWidth
                       size="small"
-                      inputProps={{ min: 1, max: 20, step: 0.1 }}
+                      inputProps={{ min: 2, max: 30, step: 0.1 }}
                     />
                   )}
                 />
@@ -94,7 +114,7 @@ export const RoomConfigForm: React.FC<RoomConfigFormProps> = ({ initialConfig, o
                 <Controller
                   name="length"
                   control={control}
-                  rules={{ min: 1, max: 20 }}
+                  rules={{ min: 2, max: 30 }}
                   render={({ field }) => (
                     <TextField
                       {...field}
@@ -102,7 +122,7 @@ export const RoomConfigForm: React.FC<RoomConfigFormProps> = ({ initialConfig, o
                       type="number"
                       fullWidth
                       size="small"
-                      inputProps={{ min: 1, max: 20, step: 0.1 }}
+                      inputProps={{ min: 2, max: 30, step: 0.1 }}
                     />
                   )}
                 />
@@ -111,7 +131,7 @@ export const RoomConfigForm: React.FC<RoomConfigFormProps> = ({ initialConfig, o
                 <Controller
                   name="height"
                   control={control}
-                  rules={{ min: 2, max: 5 }}
+                  rules={{ min: 1, max: 5 }}
                   render={({ field }) => (
                     <TextField
                       {...field}
@@ -119,7 +139,7 @@ export const RoomConfigForm: React.FC<RoomConfigFormProps> = ({ initialConfig, o
                       type="number"
                       fullWidth
                       size="small"
-                      inputProps={{ min: 2, max: 5, step: 0.1 }}
+                      inputProps={{ min: 1, max: 5, step: 0.1 }}
                     />
                   )}
                 />
