@@ -57,7 +57,7 @@ export class OrderController {
   static async getOrderById(req: Request, res: Response, next: NextFunction) {
     try {
       const userId = req.user!.id;
-      const { orderId } = req.params;
+      const orderId = Array.isArray(req.params.orderId) ? req.params.orderId[0] : req.params.orderId;
 
       const order = await OrderService.getOrderById(orderId, userId);
       
@@ -71,7 +71,7 @@ export class OrderController {
   static async getOrderByNumber(req: Request, res: Response, next: NextFunction) {
     try {
       const userId = req.user!.id;
-      const { orderNumber } = req.params;
+      const orderNumber = Array.isArray(req.params.orderNumber) ? req.params.orderNumber[0] : req.params.orderNumber;
 
       const order = await OrderService.getOrderByNumber(orderNumber, userId);
       
@@ -85,7 +85,7 @@ export class OrderController {
   static async cancelOrder(req: Request, res: Response, next: NextFunction) {
     try {
       const userId = req.user!.id;
-      const { orderId } = req.params;
+      const orderId = Array.isArray(req.params.orderId) ? req.params.orderId[0] : req.params.orderId;
 
       const order = await OrderService.cancelOrder(orderId, userId);
       
@@ -98,7 +98,7 @@ export class OrderController {
   // PATCH /api/orders/:orderId/status (Admin only - will be protected)
   static async updateOrderStatus(req: Request, res: Response, next: NextFunction) {
     try {
-      const { orderId } = req.params;
+      const orderId = Array.isArray(req.params.orderId) ? req.params.orderId[0] : req.params.orderId;
       const { status, note } = req.body;
 
       if (!status) {

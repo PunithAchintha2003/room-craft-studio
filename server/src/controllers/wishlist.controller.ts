@@ -19,7 +19,7 @@ export class WishlistController {
   static async addItem(req: Request, res: Response, next: NextFunction) {
     try {
       const userId = req.user!.id;
-      const { furnitureId } = req.params;
+      const furnitureId = Array.isArray(req.params.furnitureId) ? req.params.furnitureId[0] : req.params.furnitureId;
 
       const wishlist = await WishlistService.addItem(userId, furnitureId);
       
@@ -33,7 +33,7 @@ export class WishlistController {
   static async removeItem(req: Request, res: Response, next: NextFunction) {
     try {
       const userId = req.user!.id;
-      const { furnitureId } = req.params;
+      const furnitureId = Array.isArray(req.params.furnitureId) ? req.params.furnitureId[0] : req.params.furnitureId;
 
       const wishlist = await WishlistService.removeItem(userId, furnitureId);
       
@@ -47,7 +47,7 @@ export class WishlistController {
   static async checkItem(req: Request, res: Response, next: NextFunction) {
     try {
       const userId = req.user!.id;
-      const { furnitureId } = req.params;
+      const furnitureId = Array.isArray(req.params.furnitureId) ? req.params.furnitureId[0] : req.params.furnitureId;
 
       const isInWishlist = await WishlistService.isInWishlist(userId, furnitureId);
       
