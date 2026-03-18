@@ -32,79 +32,86 @@ export default function WishlistPage() {
 
   return (
     <TwoTonePageLayout
-      title="My Wishlist"
-      subtitle={
-        hasItems
-          ? 'All the pieces you\'ve saved for later.'
-          : 'You haven\'t added any items to your wishlist yet.'
+      top={
+        <Box sx={{ py: { xs: 3, md: 4 } }}>
+          <Typography variant="h4" fontWeight={700} gutterBottom>
+            My Wishlist
+          </Typography>
+          <Typography variant="body1" color="text.secondary">
+            {hasItems
+              ? 'All the pieces you\'ve saved for later.'
+              : 'You haven\'t added any items to your wishlist yet.'}
+          </Typography>
+        </Box>
       }
-    >
-      <Box sx={{ maxWidth: 1400, mx: 'auto', px: 3, py: 4 }}>
-        {error && (
-          <Alert severity="error" sx={{ mb: 3 }}>
-            {error}
-          </Alert>
-        )}
+      bottom={
+        <Box sx={{ maxWidth: 1400, mx: 'auto', px: 3, py: 4 }}>
+          {error && (
+            <Alert severity="error" sx={{ mb: 3 }}>
+              {error}
+            </Alert>
+          )}
 
-        {loading && !hasItems ? (
-          <Box display="flex" justifyContent="center" py={8}>
-            <CircularProgress />
-          </Box>
-        ) : !hasItems ? (
-          <Box
-            sx={{
-              textAlign: 'center',
-              py: 8,
-              px: 2,
-            }}
-          >
-            <FavoriteBorder sx={{ fontSize: 120, color: 'text.disabled', mb: 3 }} />
-            <Typography variant="h4" gutterBottom>
-              Your wishlist is empty
-            </Typography>
-            <Typography variant="body1" color="text.secondary" paragraph>
-              Tap the heart icon on any product to save it here for later.
-            </Typography>
-            <Stack
-              direction={{ xs: 'column', sm: 'row' }}
-              spacing={2}
-              justifyContent="center"
-              sx={{ mt: 4 }}
+          {loading && !hasItems ? (
+            <Box display="flex" justifyContent="center" py={8}>
+              <CircularProgress />
+            </Box>
+          ) : !hasItems ? (
+            <Box
+              sx={{
+                textAlign: 'center',
+                py: 8,
+                px: 2,
+              }}
             >
-              <Button
-                variant="contained"
-                size="large"
-                onClick={() => navigate('/furniture')}
+              <FavoriteBorder sx={{ fontSize: 120, color: 'text.disabled', mb: 3 }} />
+              <Typography variant="h4" gutterBottom>
+                Your wishlist is empty
+              </Typography>
+              <Typography variant="body1" color="text.secondary" paragraph>
+                Tap the heart icon on any product to save it here for later.
+              </Typography>
+              <Stack
+                direction={{ xs: 'column', sm: 'row' }}
+                spacing={2}
+                justifyContent="center"
+                sx={{ mt: 4 }}
               >
-                Browse Furniture
-              </Button>
-            </Stack>
-          </Box>
-        ) : (
-          <Grid container spacing={3}>
-            {items.map((item) => {
-              const furniture =
-                typeof item.furnitureId === 'object'
-                  ? item.furnitureId
-                  : // Fallback shape if backend returns just an ID (should normally be populated)
-                    {
-                      _id: String(item.furnitureId),
-                      name: 'Saved item',
-                      category: '',
-                      price: 0,
-                      thumbnail: '',
-                    };
+                <Button
+                  variant="contained"
+                  size="large"
+                  onClick={() => navigate('/furniture')}
+                >
+                  Browse Furniture
+                </Button>
+              </Stack>
+            </Box>
+          ) : (
+            <Grid container spacing={3}>
+              {items.map((item) => {
+                const furniture =
+                  typeof item.furnitureId === 'object'
+                    ? item.furnitureId
+                    : // Fallback shape if backend returns just an ID (should normally be populated)
+                      {
+                        _id: String(item.furnitureId),
+                        name: 'Saved item',
+                        category: '',
+                        price: 0,
+                        thumbnail: '',
+                      };
 
-              return (
-                <Grid key={furniture._id} item xs={12} sm={6} md={4} lg={3}>
-                  <ProductCard furniture={furniture} />
-                </Grid>
-              );
-            })}
-          </Grid>
-        )}
-      </Box>
-    </TwoTonePageLayout>
+                return (
+                  <Grid key={furniture._id} item xs={12} sm={6} md={4} lg={3}>
+                    <ProductCard furniture={furniture} />
+                  </Grid>
+                );
+              })}
+            </Grid>
+          )}
+        </Box>
+      }
+    />
   );
 }
 
