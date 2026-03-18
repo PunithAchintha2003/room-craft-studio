@@ -2,6 +2,7 @@ import { Order, OrderStatus } from '../models/order.model';
 import { Cart } from '../models/cart.model';
 import { Furniture } from '../models/furniture.model';
 import { AppError } from '../utils/AppError';
+import * as notificationService from '../services/notification.service';
 
 export class OrderService {
   // Generate unique order number
@@ -46,14 +47,15 @@ export class OrderService {
     });
 
     // Create order (payment will be added separately)
+    const orderNumber = this.generateOrderNumber();
     const order = await Order.create({
       userId,
-      orderNumber: this.generateOrderNumber(),
+      orderNumber,
       items: orderItems,
       shippingAddress,
       billingAddress: billingAddress || shippingAddress,
       paymentDetails: {
-        stripePaymentIntentId: 'pending', // Will be updated after payment intent creation
+        stripePaymentIntentId: `pending_${orderNumber}`, // Unique placeholder until real Stripe payment intent
         amount: cart.total + shippingCost,
         currency: 'usd',
         status: 'pending',
@@ -143,6 +145,35 @@ export class OrderService {
     };
   }
 
+  // Get all orders (admin)
+  static async getAllOrders(status?: OrderStatus, page = 1, limit = 10) {
+    const query: any = {};
+    if (status) {
+      query.status = status;
+    }
+
+    const skip = (page - 1) * limit;
+
+    const [orders, total] = await Promise.all([
+      Order.find(query)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .populate('items.furnitureId'),
+      Order.countDocuments(query),
+    ]);
+
+    return {
+      orders,
+      pagination: {
+        page,
+        limit,
+        total,
+        pages: Math.ceil(total / limit),
+      },
+    };
+  }
+
   // Get order by ID
   static async getOrderById(orderId: string, userId: string) {
     const order = await Order.findOne({ _id: orderId, userId }).populate('items.furnitureId');
@@ -202,6 +233,23 @@ export class OrderService {
       order.notes = note;
     }
     await order.save();
+
+    // Send user notifications for key status changes
+    const userId = String(order.userId);
+    if (status === 'confirmed') {
+      await notificationService.createForUser(userId, {
+        title: 'Order accepted',
+        body: `Your order ${order.orderNumber} has been accepted and is being prepared.`,
+        type: 'success',
+      });
+    }
+    if (status === 'delivered') {
+      await notificationService.createForUser(userId, {
+        title: 'Order delivered',
+        body: `Your furniture order ${order.orderNumber} has been marked as delivered.`,
+        type: 'info',
+      });
+    }
 
     return order;
   }

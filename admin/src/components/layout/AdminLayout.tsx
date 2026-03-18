@@ -31,6 +31,7 @@ import {
   AdminPanelSettings,
   Chair as ChairIcon,
   RateReview,
+  LocalShipping,
 } from '@mui/icons-material';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '@/app/store';
@@ -45,6 +46,7 @@ const NAV_ITEMS = [
   { label: 'Dashboard', path: '/dashboard', icon: <Dashboard /> },
   { label: 'All Designs', path: '/designs', icon: <DesignServices /> },
   { label: 'Furniture Management', path: '/furniture', icon: <ChairIcon /> },
+  { label: 'Order Management', path: '/orders', icon: <LocalShipping /> },
   { label: 'User Management', path: '/users', icon: <People /> },
   { label: 'Designer Management', path: '/designers', icon: <DesignServices /> },
   { label: 'Review Management', path: '/reviews', icon: <RateReview /> },
@@ -55,6 +57,7 @@ const PAGE_TITLES: Record<string, string> = {
   '/designs': 'All Designs',
   '/editor': 'Room Designer',
   '/furniture': 'Furniture Management',
+  '/orders': 'Order Management',
   '/users': 'User Management',
   '/designers': 'Designer Management',
   '/reviews': 'Review Management',

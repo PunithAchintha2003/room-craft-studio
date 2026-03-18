@@ -24,6 +24,7 @@ import { RootState, AppDispatch } from '@/app/store';
 import { fetchFurniture, setSelectedCategory, setSearchTerm } from '@/features/furniture/furnitureSlice';
 import { addFurnitureToDesign } from '@/features/design/designSlice';
 import { FurnitureCategory } from '@/types/design.types';
+import { formatCurrencyLKR } from '@/utils/currency';
 
 const categories: Array<{ value: FurnitureCategory | 'all'; label: string }> = [
   { value: 'all', label: 'All' },
@@ -259,9 +260,9 @@ export const FurnitureLibraryPanel: React.FC = () => {
                             size="small"
                             sx={{ textTransform: 'capitalize', height: 20, fontSize: '0.7rem' }}
                           />
-                          {item.price && (
+                          {item.price != null && (
                             <Chip
-                              label={`$${item.price.toFixed(2)}`}
+                              label={formatCurrencyLKR(item.price)}
                               size="small"
                               color="primary"
                               sx={{ height: 20, fontSize: '0.7rem' }}

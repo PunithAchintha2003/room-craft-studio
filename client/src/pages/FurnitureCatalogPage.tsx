@@ -32,6 +32,7 @@ import {
 } from '@/features/furniture/furnitureSlice';
 import type { FurnitureCategory } from '@/types/design.types';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { formatCurrencyLKR } from '@/utils/currency';
 
 type CategoryToggleValue = FurnitureCategory | 'all';
 
@@ -217,7 +218,7 @@ const FurnitureCatalogPage: React.FC = () => {
                       </Box>
                       {item.price != null && (
                         <Typography variant="body2" fontWeight="medium">
-                          ${item.price.toFixed(2)}
+                          {formatCurrencyLKR(item.price)}
                         </Typography>
                       )}
                       {item.stock != null && (

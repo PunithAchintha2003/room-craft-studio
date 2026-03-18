@@ -1,5 +1,6 @@
 import { Box, Typography, Divider, Stack, Button } from '@mui/material';
 import { GlassCard } from '@/components/common/GlassCard';
+import { formatCurrencyLKR } from '@/utils/currency';
 
 interface CartSummaryProps {
   subtotal: number;
@@ -43,7 +44,7 @@ export function CartSummary({
         <Box display="flex" justifyContent="space-between">
           <Typography variant="body1">Subtotal:</Typography>
           <Typography variant="body1" fontWeight="medium">
-            £{subtotal.toFixed(2)}
+            {formatCurrencyLKR(subtotal)}
           </Typography>
         </Box>
 
@@ -53,7 +54,7 @@ export function CartSummary({
             Tax (VAT 10%):
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            £{tax.toFixed(2)}
+            {formatCurrencyLKR(tax)}
           </Typography>
         </Box>
 
@@ -69,7 +70,7 @@ export function CartSummary({
               </Typography>
             ) : (
               <Typography variant="body2" color="text.secondary">
-                £{shippingCost.toFixed(2)}
+                {formatCurrencyLKR(shippingCost)}
               </Typography>
             )}
           </Box>
@@ -78,7 +79,7 @@ export function CartSummary({
         {/* Free shipping message */}
         {showShipping && !isFreeShipping && (
           <Typography variant="caption" color="info.main">
-            Add £{(freeShippingThreshold - subtotal).toFixed(2)} more for free shipping
+            Add {formatCurrencyLKR(freeShippingThreshold - subtotal)} more for free shipping
           </Typography>
         )}
 
@@ -88,7 +89,7 @@ export function CartSummary({
         <Box display="flex" justifyContent="space-between" alignItems="center">
           <Typography variant="h6">Total:</Typography>
           <Typography variant="h5" color="primary" fontWeight="bold">
-            £{total.toFixed(2)}
+            {formatCurrencyLKR(total)}
           </Typography>
         </Box>
       </Stack>

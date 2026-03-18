@@ -12,6 +12,7 @@ const UserManagementPage = lazy(() => import('@/pages/UserManagementPage'));
 const DesignerManagementPage = lazy(() => import('@/pages/DesignerManagementPage'));
 const FurnitureManagerPage = lazy(() => import('@/pages/FurnitureManagerPage'));
 const ReviewManagementPage = lazy(() => import('@/pages/ReviewManagementPage'));
+const OrderManagementPage = lazy(() => import('@/pages/OrderManagementPage'));
 
 const PageLoader: React.FC = () => (
   <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
@@ -47,6 +48,7 @@ export const AdminRouter: React.FC = () => (
         <Route path="/designers" element={<DesignerManagementPage />} />
         <Route path="/furniture" element={<FurnitureManagerPage />} />
         <Route path="/reviews" element={<ReviewManagementPage />} />
+        <Route path="/orders" element={<OrderManagementPage />} />
       </Route>
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
       <Route path="*" element={<Navigate to="/dashboard" replace />} />

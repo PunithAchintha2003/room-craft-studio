@@ -45,6 +45,7 @@ import { fetchFeaturedFurniture } from '@/features/furniture/furnitureSlice';
 import { ProductCard } from '@/components/product/ProductCard';
 import type { FurnitureCategory } from '@/types/design.types';
 import { fetchPublicReviews, type Review } from '@/services/reviews.api';
+import { formatCurrencyLKR } from '@/utils/currency';
 
 const SHOP_CATEGORIES: { value: FurnitureCategory; label: string; icon: React.ReactNode }[] = [
   { value: 'chair', label: 'Chairs', icon: <ChairIcon /> },
@@ -55,7 +56,7 @@ const SHOP_CATEGORIES: { value: FurnitureCategory; label: string; icon: React.Re
 ];
 
 const TRUST_ITEMS = [
-  { icon: LocalShipping, text: 'Free delivery on orders over £50' },
+  { icon: LocalShipping, text: `Free delivery on orders over ${formatCurrencyLKR(50)}` },
   { icon: AssignmentReturn, text: '30-day return policy' },
   { icon: Lock, text: 'Secure checkout' },
 ];
@@ -167,7 +168,7 @@ export const WelcomePage: React.FC = () => {
   const { featuredFurniture, loading: featuredLoading } = useAppSelector((state) => state.furniture);
   const [publicReviews, setPublicReviews] = useState<Review[]>([]);
   const [reviewsLoading, setReviewsLoading] = useState<boolean>(true);
-  const [reviewsError, setReviewsError] = useState<string | null>(null);
+  const [, setReviewsError] = useState<string | null>(null);
 
   useEffect(() => {
     dispatch(fetchFeaturedFurniture(8));

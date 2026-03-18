@@ -1,13 +1,13 @@
 import { Request, Response, NextFunction } from 'express';
 import { OrderService } from '../services/order.service';
 import { OrderStatus } from '../models/order.model';
-import { successResponse } from '../utils/response.util';
+import { sendSuccess } from '../utils/response.util';
 
 export class OrderController {
   // POST /api/orders
   static async createOrder(req: Request, res: Response, next: NextFunction) {
     try {
-      const userId = req.user!._id;
+      const userId = req.user!.id;
       const { shippingAddress, billingAddress } = req.body;
 
       if (!shippingAddress) {
@@ -16,7 +16,7 @@ export class OrderController {
 
       const order = await OrderService.createOrderFromCart(userId, shippingAddress, billingAddress);
       
-      successResponse(res, order, 'Order created successfully', 201);
+      sendSuccess(res, order, 'Order created successfully', 201);
     } catch (error) {
       next(error);
     }
@@ -25,14 +25,29 @@ export class OrderController {
   // GET /api/orders
   static async getUserOrders(req: Request, res: Response, next: NextFunction) {
     try {
-      const userId = req.user!._id;
+      const userId = req.user!.id;
       const status = req.query.status as OrderStatus | undefined;
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 10;
 
       const result = await OrderService.getUserOrders(userId, status, page, limit);
       
-      successResponse(res, result, 'Orders retrieved successfully');
+      sendSuccess(res, result, 'Orders retrieved successfully');
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // GET /api/orders/admin (Admin: all orders)
+  static async getAllOrders(req: Request, res: Response, next: NextFunction) {
+    try {
+      const status = req.query.status as OrderStatus | undefined;
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 10;
+
+      const result = await OrderService.getAllOrders(status, page, limit);
+
+      sendSuccess(res, result, 'All orders retrieved successfully');
     } catch (error) {
       next(error);
     }
@@ -41,12 +56,12 @@ export class OrderController {
   // GET /api/orders/:orderId
   static async getOrderById(req: Request, res: Response, next: NextFunction) {
     try {
-      const userId = req.user!._id;
+      const userId = req.user!.id;
       const { orderId } = req.params;
 
       const order = await OrderService.getOrderById(orderId, userId);
       
-      successResponse(res, order, 'Order retrieved successfully');
+      sendSuccess(res, order, 'Order retrieved successfully');
     } catch (error) {
       next(error);
     }
@@ -55,12 +70,12 @@ export class OrderController {
   // GET /api/orders/number/:orderNumber
   static async getOrderByNumber(req: Request, res: Response, next: NextFunction) {
     try {
-      const userId = req.user!._id;
+      const userId = req.user!.id;
       const { orderNumber } = req.params;
 
       const order = await OrderService.getOrderByNumber(orderNumber, userId);
       
-      successResponse(res, order, 'Order retrieved successfully');
+      sendSuccess(res, order, 'Order retrieved successfully');
     } catch (error) {
       next(error);
     }
@@ -69,12 +84,12 @@ export class OrderController {
   // PATCH /api/orders/:orderId/cancel
   static async cancelOrder(req: Request, res: Response, next: NextFunction) {
     try {
-      const userId = req.user!._id;
+      const userId = req.user!.id;
       const { orderId } = req.params;
 
       const order = await OrderService.cancelOrder(orderId, userId);
       
-      successResponse(res, order, 'Order cancelled successfully');
+      sendSuccess(res, order, 'Order cancelled successfully');
     } catch (error) {
       next(error);
     }
@@ -92,7 +107,7 @@ export class OrderController {
 
       const order = await OrderService.updateOrderStatus(orderId, status as OrderStatus, note);
       
-      successResponse(res, order, 'Order status updated successfully');
+      sendSuccess(res, order, 'Order status updated successfully');
     } catch (error) {
       next(error);
     }

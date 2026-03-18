@@ -16,6 +16,9 @@ const DesignViewerPage = lazy(() => import('@/pages/DesignViewerPage'));
 const CartPage = lazy(() => import('@/pages/CartPage'));
 const OrderHistoryPage = lazy(() => import('@/pages/OrderHistoryPage'));
 const WishlistPage = lazy(() => import('@/pages/WishlistPage'));
+const PaymentPage = lazy(() => import('@/pages/PaymentPage'));
+const PaymentSuccessPage = lazy(() => import('@/pages/PaymentSuccessPage'));
+const PaymentFailurePage = lazy(() => import('@/pages/PaymentFailurePage'));
 
 const PageLoader: React.FC = () => (
   <Box
@@ -53,7 +56,13 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requireRole }
 const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
     <Navbar />
-    <Box component="main" sx={{ flex: 1 }}>
+    <Box
+      component="main"
+      sx={{
+        flex: 1,
+        mt: { xs: 9, sm: 10 },
+      }}
+    >
       {children}
     </Box>
     <Footer />
@@ -159,6 +168,37 @@ export const AppRouter: React.FC = () => {
             <ProtectedRoute>
               <MainLayout>
                 <OrderHistoryPage />
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
+        
+        <Route
+          path="/payment"
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+                <PaymentPage />
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/payment/success"
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+                <PaymentSuccessPage />
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/payment/failure"
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+                <PaymentFailurePage />
               </MainLayout>
             </ProtectedRoute>
           }
