@@ -104,11 +104,6 @@ export default function ProductDetailPage() {
     return furniture.name;
   }, [isLoadingState, error, furniture]);
 
-  const headerSubtitle = useMemo(() => {
-    if (!furniture) return 'Home > Furniture';
-    return `Home > Furniture > ${furniture.category} > ${furniture.name}`;
-  }, [furniture]);
-
   const topSection = (
     <Box sx={{ py: { xs: 4, md: 6 } }}>
       {/* Breadcrumb */}
@@ -180,7 +175,7 @@ export default function ProductDetailPage() {
             sx={{ flexWrap: 'wrap', rowGap: 0.5 }}
           >
             <Chip label={furniture.category} size="small" sx={{ textTransform: 'capitalize' }} />
-            {furniture.featured && (
+            {(furniture as { featured?: boolean }).featured && (
               <Chip label="Featured" color="secondary" size="small" sx={{ fontWeight: 600 }} />
             )}
             {furniture.price != null && (
@@ -474,7 +469,7 @@ export default function ProductDetailPage() {
               <Grid container spacing={3}>
                 {relatedFurniture.slice(0, 4).map((item) => (
                   <Grid item xs={12} sm={6} md={3} key={item._id}>
-                    <ProductCard furniture={item} />
+                    <ProductCard furniture={{ ...item, price: item.price ?? 0 }} />
                   </Grid>
                 ))}
               </Grid>

@@ -19,7 +19,7 @@ const FallbackBox: React.FC<{
   furniture: Furniture;
   furnitureItem: FurnitureItem;
   isSelected: boolean;
-  onClick?: () => void;
+  onClick?: (e?: unknown) => void;
 }> = ({ furniture, furnitureItem, isSelected, onClick }) => {
   const groupRef = useRef<THREE.Group>(null);
   const positionY = furniture.dimensions.height / 2;
@@ -30,7 +30,7 @@ const FallbackBox: React.FC<{
       position={[furnitureItem.position.x, positionY, furnitureItem.position.y]}
       rotation={[0, (furnitureItem.rotation * Math.PI) / 180, 0]}
       scale={furnitureItem.scale}
-      onClick={onClick}
+      onClick={onClick ? (e: any) => { e?.stopPropagation?.(); onClick(e); } : undefined}
     >
       <mesh castShadow receiveShadow>
         <boxGeometry
@@ -97,7 +97,7 @@ const Model3D: React.FC<{
   furnitureItem: FurnitureItem;
   furniture: Furniture;
   isSelected: boolean;
-  onClick?: () => void;
+  onClick?: (e?: unknown) => void;
   onLoadComplete?: () => void;
 }> = ({ url, furnitureItem, furniture, isSelected, onClick, onLoadComplete }) => {
   const groupRef = useRef<THREE.Group>(null);
@@ -219,10 +219,11 @@ export const FurnitureModel3D: React.FC<FurnitureModel3DProps> = ({
     }
   };
 
-  const handleError = (error: Error) => {
-    console.warn(`Failed to load 3D model for ${furniture.name}:`, error.message);
+  const handleError = (error: unknown, _info?: React.ErrorInfo) => {
+    const err = error instanceof Error ? error : new Error(String(error));
+    console.warn(`Failed to load 3D model for ${furniture.name}:`, err.message);
     if (onLoadError) {
-      onLoadError(furnitureItem.id, error.message || 'Failed to load model');
+      onLoadError(furnitureItem.id, err.message || 'Failed to load model');
     }
   };
 

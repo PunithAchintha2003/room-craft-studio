@@ -5,7 +5,6 @@ import {
   Container,
   Typography,
   Button,
-  Paper,
   Grid,
   Chip,
   CircularProgress,
@@ -85,7 +84,7 @@ export const DesignViewerPage: React.FC = () => {
     
     try {
       await dispatch(addDesignToCart(currentDesign._id)).unwrap();
-      toast.success(`${currentDesign.furnitureItems?.length || 0} items added to cart! 🛒`);
+      toast.success(`${currentDesign.furniture?.length ?? 0} items added to cart! 🛒`);
       navigate('/cart');
     } catch (error) {
       toast.error('Failed to add items to cart');
