@@ -32,13 +32,13 @@ jobs:
         run: npm i -g vercel@latest
 
       - name: Install and build (client)
+        working-directory: client
         env:
           VITE_API_URL: https://room-craft-studio.onrender.com/api
           VITE_SOCKET_URL: https://room-craft-studio.onrender.com
         run: |
-          cd client
           npm ci
-          npm run build
+          vercel build --prod --token="${{ secrets.VERCEL_TOKEN }}"
 
       - name: Deploy to Vercel
         working-directory: client
