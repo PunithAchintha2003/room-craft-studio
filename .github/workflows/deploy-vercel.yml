@@ -11,6 +11,8 @@ on:
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_USER_ID }}
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+  # Opt into Node.js 24 for actions (checkout, setup-node); avoids deprecation warning
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
 
 jobs:
   deploy-client:
@@ -22,7 +24,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "22"
           cache: "npm"
           cache-dependency-path: client/package-lock.json
 
