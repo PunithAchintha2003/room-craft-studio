@@ -1,4 +1,19 @@
-export type FurnitureCategory = 'chair' | 'table' | 'sofa' | 'bed' | 'storage';
+/**
+ * Furniture categories are stored in the database and referenced by slug.
+ * Examples: "chair", "table", "outdoor", "decor".
+ */
+export type FurnitureCategory = string;
+
+export type WallSide = 'north' | 'south' | 'east' | 'west';
+
+export interface IRoomOpening {
+  type: 'door' | 'window';
+  wall: WallSide;
+  width: number;
+  height: number;
+  bottom: number;
+  offset: number;
+}
 
 export interface IRoomConfig {
   width: number;
@@ -6,6 +21,11 @@ export interface IRoomConfig {
   height: number;
   wallColor: string;
   floorColor: string;
+  wallTexture?: string;
+  floorTexture?: string;
+  wallTextureScale?: number;
+  floorTextureScale?: number;
+  openings?: IRoomOpening[];
 }
 
 export interface IFurnitureItem {

@@ -1,4 +1,8 @@
-export type FurnitureCategory = 'chair' | 'table' | 'sofa' | 'bed' | 'storage';
+/**
+ * Category slug stored in the backend (kebab-case).
+ * Examples: "chair", "table", "outdoor", "kids-room".
+ */
+export type FurnitureCategory = string;
 
 export interface RoomConfig {
   width: number;

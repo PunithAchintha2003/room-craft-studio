@@ -42,10 +42,6 @@ const furnitureSchema = new Schema<IFurniture>(
     category: {
       type: String,
       required: [true, 'Category is required'],
-      enum: {
-        values: ['chair', 'table', 'sofa', 'bed', 'storage'],
-        message: '{VALUE} is not a valid category',
-      },
       index: true,
     },
     dimensions: {

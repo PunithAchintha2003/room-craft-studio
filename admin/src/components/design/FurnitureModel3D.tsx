@@ -121,11 +121,27 @@ const Model3D: React.FC<{
     if (!scene) return null;
     const cloned = scene.clone();
 
-    if (furnitureItem.color) {
+    // Apply optional tint ONLY when the mesh isn't textured.
+    // Textured glTF materials carry their "real" colors in baseColor textures (map),
+    // so overriding .color would wash them out.
+    if (furnitureItem.color && furniture.isColorizable) {
+      const tint = furnitureItem.color;
       cloned.traverse((child: any) => {
-        if (child.isMesh) {
-          child.material = child.material.clone();
-          child.material.color = new THREE.Color(furnitureItem.color);
+        if (!child.isMesh) return;
+
+        const applyTint = (mat: any) => {
+          if (!mat) return mat;
+          if (mat.map) return mat;
+          const clonedMat = mat.clone();
+          if (clonedMat.color) clonedMat.color = new THREE.Color(tint);
+          clonedMat.needsUpdate = true;
+          return clonedMat;
+        };
+
+        if (Array.isArray(child.material)) {
+          child.material = child.material.map(applyTint);
+        } else {
+          child.material = applyTint(child.material);
         }
       });
     }

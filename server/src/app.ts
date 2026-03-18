@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
 import rateLimit from 'express-rate-limit';
+import path from 'path';
 import { env } from './config/env';
 import routes from './routes/index';
 import { errorHandler, notFound } from './middleware/error.middleware';
@@ -51,6 +52,15 @@ app.use(cookieParser());
 if (env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
+
+// Static assets (uploaded thumbnails + 3D models)
+app.use(
+  '/uploads',
+  express.static(path.join(process.cwd(), 'public', 'uploads'), {
+    fallthrough: false,
+    maxAge: env.NODE_ENV === 'production' ? '30d' : 0,
+  })
+);
 
 app.use('/api', routes);
 

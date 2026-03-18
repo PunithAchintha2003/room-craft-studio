@@ -105,7 +105,7 @@ export interface CreateFurnitureInput {
   stock: number;
 }
 
-export interface UpdateFurnitureInput extends Partial<CreateFurnitureInput> {}
+export type UpdateFurnitureInput = Partial<CreateFurnitureInput>;
 
 export const createFurniture = createAsyncThunk(
   'furniture/createFurniture',

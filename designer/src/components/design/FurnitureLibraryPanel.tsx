@@ -14,8 +14,11 @@ import {
   Grid,
   CircularProgress,
   Alert,
+  Tooltip,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
+import ChairIcon from '@mui/icons-material/Chair';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState, AppDispatch } from '@/app/store';
 import { fetchFurniture, setSelectedCategory, setSearchTerm } from '@/features/furniture/furnitureSlice';
@@ -102,25 +105,32 @@ export const FurnitureLibraryPanel: React.FC = () => {
       }}
     >
       <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
-        <Typography variant="h6" gutterBottom>
-          Furniture Library
-        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+          <Typography variant="h6">
+            Furniture Library
+          </Typography>
+          <Tooltip title="Click furniture to add to center of room, or drag to specific position">
+            <InfoOutlinedIcon fontSize="small" color="action" />
+          </Tooltip>
+        </Box>
         
-        <TextField
-          fullWidth
-          size="small"
-          placeholder="Search furniture..."
-          value={localSearchTerm}
-          onChange={(e) => setLocalSearchTerm(e.target.value)}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon />
-              </InputAdornment>
-            ),
-          }}
-          sx={{ mb: 2 }}
-        />
+        <Tooltip title="Search by furniture name or category">
+          <TextField
+            fullWidth
+            size="small"
+            placeholder="Search furniture..."
+            value={localSearchTerm}
+            onChange={(e) => setLocalSearchTerm(e.target.value)}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon />
+                </InputAdornment>
+              ),
+            }}
+            sx={{ mb: 2 }}
+          />
+        </Tooltip>
 
         <Tabs
           value={selectedCategory || 'all'}
@@ -153,82 +163,125 @@ export const FurnitureLibraryPanel: React.FC = () => {
           </Alert>
         )}
 
-        {!isLoading && !error && filteredFurniture.length === 0 && (
-          <Alert severity="info">
-            No furniture items found. Try adjusting your filters.
-          </Alert>
+        {!isLoading && !error && furniture.length === 0 && (
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              py: 6,
+              px: 2,
+              textAlign: 'center',
+            }}
+          >
+            <ChairIcon sx={{ fontSize: 64, color: 'text.disabled', mb: 2 }} />
+            <Typography variant="h6" color="text.secondary" gutterBottom>
+              No Furniture Available
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 300 }}>
+              The furniture catalog is empty. Please contact your administrator to add furniture items.
+            </Typography>
+          </Box>
+        )}
+
+        {!isLoading && !error && furniture.length > 0 && filteredFurniture.length === 0 && (
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              py: 6,
+              px: 2,
+              textAlign: 'center',
+            }}
+          >
+            <SearchIcon sx={{ fontSize: 64, color: 'text.disabled', mb: 2 }} />
+            <Typography variant="h6" color="text.secondary" gutterBottom>
+              No Results Found
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 300 }}>
+              Try adjusting your search or category filter to find furniture.
+            </Typography>
+          </Box>
         )}
 
         {!isLoading && !error && filteredFurniture.length > 0 && (
           <Grid container spacing={2}>
             {filteredFurniture.map((item) => (
               <Grid item xs={12} key={item._id}>
-                <Card
-                  draggable
-                  onDragStart={(e) => handleDragStart(e, item._id)}
-                  onClick={() => handleAddFurniture(item._id)}
-                  sx={{
-                    cursor: 'pointer',
-                    transition: 'all 0.2s',
-                    '&:hover': {
-                      transform: 'translateY(-4px)',
-                      boxShadow: 4,
-                    },
-                    '&:active': {
-                      transform: 'scale(0.98)',
-                    },
-                  }}
-                >
-                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <CardMedia
-                      component="img"
-                      sx={{
-                        width: 80,
-                        height: 80,
-                        objectFit: 'cover',
-                        bgcolor: 'grey.100',
-                      }}
-                      image={item.thumbnail}
-                      alt={item.name}
-                      onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
-                        e.currentTarget.onerror = null;
-                        e.currentTarget.src =
-                          "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Crect width='100%25' height='100%25' fill='%23e0e0e0'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-size='10' fill='%23999'%3ENo Image%3C/text%3E%3C/svg%3E";
-                      }}
-                    />
-                    <CardContent sx={{ flex: 1, py: 1.5 }}>
-                      <Typography variant="subtitle2" gutterBottom>
-                        {item.name}
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary" display="block">
-                        {item.dimensions.width}m × {item.dimensions.length}m × {item.dimensions.height}m
-                      </Typography>
-                      <Box sx={{ display: 'flex', gap: 1, mt: 1, flexWrap: 'wrap' }}>
-                        <Chip
-                          label={item.category}
-                          size="small"
-                          sx={{ textTransform: 'capitalize', height: 20, fontSize: '0.7rem' }}
-                        />
-                        {item.price && (
+                <Tooltip title="Click to add to room center, or drag to position" placement="left">
+                  <Card
+                    draggable
+                    onDragStart={(e) => handleDragStart(e, item._id)}
+                    onClick={() => handleAddFurniture(item._id)}
+                    sx={{
+                      cursor: 'grab',
+                      transition: 'all 0.2s',
+                      '&:hover': {
+                        transform: 'translateY(-4px)',
+                        boxShadow: 4,
+                      },
+                      '&:active': {
+                        transform: 'scale(0.98)',
+                        cursor: 'grabbing',
+                      },
+                    }}
+                  >
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                      <CardMedia
+                        component="img"
+                        sx={{
+                          width: 80,
+                          height: 80,
+                          objectFit: 'cover',
+                          bgcolor: 'grey.100',
+                        }}
+                        image={item.thumbnail}
+                        alt={item.name}
+                        onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
+                          e.currentTarget.onerror = null;
+                          e.currentTarget.src =
+                            "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Crect width='100%25' height='100%25' fill='%23e0e0e0'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-size='10' fill='%23999'%3ENo Image%3C/text%3E%3C/svg%3E";
+                        }}
+                      />
+                      <CardContent sx={{ flex: 1, py: 1.5 }}>
+                        <Typography variant="subtitle2" gutterBottom>
+                          {item.name}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary" display="block">
+                          {item.dimensions.width}m × {item.dimensions.length}m × {item.dimensions.height}m
+                        </Typography>
+                        <Box sx={{ display: 'flex', gap: 1, mt: 1, flexWrap: 'wrap' }}>
                           <Chip
-                            label={`$${item.price.toFixed(2)}`}
+                            label={item.category}
                             size="small"
-                            color="primary"
-                            sx={{ height: 20, fontSize: '0.7rem' }}
+                            sx={{ textTransform: 'capitalize', height: 20, fontSize: '0.7rem' }}
                           />
-                        )}
-                        {item.isColorizable && (
-                          <Chip
-                            label="Colorizable"
-                            size="small"
-                            variant="outlined"
-                            sx={{ height: 20, fontSize: '0.7rem' }}
-                          />
-                        )}
-                      </Box>
-                    </CardContent>
-                  </Box>
-                </Card>
+                          {item.price && (
+                            <Chip
+                              label={`$${item.price.toFixed(2)}`}
+                              size="small"
+                              color="primary"
+                              sx={{ height: 20, fontSize: '0.7rem' }}
+                            />
+                          )}
+                          {item.isColorizable && (
+                            <Tooltip title="Color can be customized">
+                              <Chip
+                                label="Colorizable"
+                                size="small"
+                                variant="outlined"
+                                sx={{ height: 20, fontSize: '0.7rem' }}
+                              />
+                            </Tooltip>
+                          )}
+                        </Box>
+                      </CardContent>
+                    </Box>
+                  </Card>
+                </Tooltip>
               </Grid>
             ))}
           </Grid>

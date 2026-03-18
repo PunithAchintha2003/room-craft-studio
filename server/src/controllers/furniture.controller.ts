@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import * as furnitureService from '../services/furniture.service';
 import { sendSuccess, sendCreated, sendError } from '../utils/response.util';
 import { FurnitureCategory } from '../types/design.types';
-import { uploadImageBuffer } from '../utils/imageUpload';
+import { getPublicBaseUrl, saveUploadToPublicFolder, validateImageUpload, validateModelUpload } from '../utils/localUpload';
 
 export const createFurniture = async (
   req: Request,
@@ -11,6 +11,80 @@ export const createFurniture = async (
 ): Promise<void> => {
   try {
     const furniture = await furnitureService.createFurniture(req.body);
+    sendCreated(res, { furniture }, 'Furniture item created successfully');
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const createFurnitureWithAssets = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const files = req.files as Record<string, Express.Multer.File[]> | undefined;
+    const thumbnailFile = files?.thumbnail?.[0];
+    const modelFile = files?.model?.[0];
+
+    if (!thumbnailFile?.buffer) {
+      sendError(res, 'Thumbnail image is required.', 400);
+      return;
+    }
+    if (!modelFile?.buffer) {
+      sendError(res, '3D model file (.glb/.gltf) is required.', 400);
+      return;
+    }
+
+    try {
+      validateImageUpload(thumbnailFile);
+      validateModelUpload(modelFile);
+    } catch (e) {
+      sendError(res, e instanceof Error ? e.message : 'Invalid upload.', 400);
+      return;
+    }
+
+    const thumbnailSaved = await saveUploadToPublicFolder({
+      kind: 'thumbnails',
+      buffer: thumbnailFile.buffer,
+      originalname: thumbnailFile.originalname,
+    });
+    const modelSaved = await saveUploadToPublicFolder({
+      kind: 'models',
+      buffer: modelFile.buffer,
+      originalname: modelFile.originalname,
+    });
+
+    const baseUrl = getPublicBaseUrl(req);
+    const thumbnailUrl = `${baseUrl}${thumbnailSaved.relativeUrlPath}`;
+    const modelUrl = `${baseUrl}${modelSaved.relativeUrlPath}`;
+    const modelFormat = modelSaved.ext === '.gltf' ? 'gltf' : 'glb';
+
+    // Multer gives strings; coerce fields to expected types.
+    const numWidth = Number(req.body.width);
+    const numLength = Number(req.body.length);
+    const numHeight = Number(req.body.height);
+    const numPrice = Number(req.body.price ?? 0);
+    const numStock = Number(req.body.stock ?? 0);
+
+    const category = req.body.category as FurnitureCategory;
+    const isColorizable = String(req.body.isColorizable ?? 'true') === 'true';
+    const defaultColor = (req.body.defaultColor as string) || '#8B4513';
+    const thumbnailAlt = (req.body.thumbnailAlt as string) || undefined;
+
+    const furniture = await furnitureService.createFurniture({
+      name: String(req.body.name ?? '').trim(),
+      category,
+      dimensions: { width: numWidth, length: numLength, height: numHeight },
+      thumbnail: thumbnailUrl,
+      thumbnailAlt,
+      model3D: { url: modelUrl, format: modelFormat },
+      defaultColor: String(defaultColor).trim(),
+      isColorizable,
+      price: numPrice,
+      stock: numStock,
+    });
+
     sendCreated(res, { furniture }, 'Furniture item created successfully');
   } catch (error) {
     next(error);
@@ -110,13 +184,23 @@ export const updateFurnitureThumbnail = async (
       return;
     }
 
-    const result = await uploadImageBuffer(file.buffer, {
-      mimetype: file.mimetype,
+    try {
+      validateImageUpload(file);
+    } catch (e) {
+      sendError(res, e instanceof Error ? e.message : 'Invalid image upload.', 400);
+      return;
+    }
+
+    const saved = await saveUploadToPublicFolder({
+      kind: 'thumbnails',
+      buffer: file.buffer,
+      originalname: file.originalname,
     });
+    const resultUrl = `${getPublicBaseUrl(req)}${saved.relativeUrlPath}`;
 
     const thumbnailAlt = (req.body?.thumbnailAlt as string) || undefined;
     const furniture = await furnitureService.updateFurnitureThumbnail(id, {
-      url: result.url,
+      url: resultUrl,
       thumbnailAlt,
     });
 
