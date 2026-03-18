@@ -1,0 +1,306 @@
+import React, { useMemo } from 'react';
+import { Layer, Line, Text, Rect } from 'react-konva';
+import { FurnitureItem, Furniture } from '@/types/design.types';
+
+const SNAP_THRESHOLD_PX = 6;
+
+export interface SnapTarget {
+  value: number;
+  type: 'room-edge' | 'room-center' | 'furniture-edge' | 'furniture-center';
+  label?: string;
+}
+
+export interface ActiveSnapGuides {
+  x: number | null;
+  y: number | null;
+  xLabel?: string;
+  yLabel?: string;
+}
+
+interface SnapGuideLayerProps {
+  roomWidth: number;
+  roomLength: number;
+  pixelsPerMeter: number;
+  canvasWidth: number;
+  canvasHeight: number;
+  snapGuides: ActiveSnapGuides;
+}
+
+/**
+ * Renders red/blue snap guide lines and distance labels over the 2D canvas.
+ * The parent is responsible for computing which guides are active and passing them in.
+ */
+export const SnapGuideLayer: React.FC<SnapGuideLayerProps> = ({
+  roomWidth,
+  roomLength,
+  pixelsPerMeter,
+  canvasWidth,
+  canvasHeight,
+  snapGuides,
+}) => {
+  const roomWidthPx = roomWidth * pixelsPerMeter;
+  const roomLengthPx = roomLength * pixelsPerMeter;
+
+  return (
+    <Layer listening={false}>
+      {/* Vertical guide (X-axis snapping) */}
+      {snapGuides.x !== null && (
+        <>
+          <Line
+            points={[snapGuides.x, 0, snapGuides.x, Math.max(roomLengthPx, canvasHeight)]}
+            stroke="#E53935"
+            strokeWidth={1}
+            dash={[6, 3]}
+            opacity={0.85}
+          />
+          {snapGuides.xLabel && (
+            <Rect
+              x={snapGuides.x + 4}
+              y={8}
+              width={snapGuides.xLabel.length * 6.5 + 8}
+              height={18}
+              fill="rgba(229,57,53,0.85)"
+              cornerRadius={3}
+            />
+          )}
+          {snapGuides.xLabel && (
+            <Text
+              x={snapGuides.x + 8}
+              y={11}
+              text={snapGuides.xLabel}
+              fontSize={10}
+              fill="#fff"
+              fontStyle="bold"
+            />
+          )}
+        </>
+      )}
+
+      {/* Horizontal guide (Y-axis snapping) */}
+      {snapGuides.y !== null && (
+        <>
+          <Line
+            points={[0, snapGuides.y, Math.max(roomWidthPx, canvasWidth), snapGuides.y]}
+            stroke="#1565C0"
+            strokeWidth={1}
+            dash={[6, 3]}
+            opacity={0.85}
+          />
+          {snapGuides.yLabel && (
+            <Rect
+              x={8}
+              y={snapGuides.y + 4}
+              width={snapGuides.yLabel.length * 6.5 + 8}
+              height={18}
+              fill="rgba(21,101,192,0.85)"
+              cornerRadius={3}
+            />
+          )}
+          {snapGuides.yLabel && (
+            <Text
+              x={12}
+              y={snapGuides.y + 7}
+              text={snapGuides.yLabel}
+              fontSize={10}
+              fill="#fff"
+              fontStyle="bold"
+            />
+          )}
+        </>
+      )}
+    </Layer>
+  );
+};
+
+// ── Snap computation helpers ──────────────────────────────────────────────────
+
+/**
+ * Computes all snap target X coordinates (in pixels) for a given room + furniture list.
+ */
+export const computeSnapTargetsX = (
+  roomWidth: number,
+  pixelsPerMeter: number,
+  furnitureItems: FurnitureItem[],
+  furnitureCatalog: Furniture[],
+  excludeId?: string
+): SnapTarget[] => {
+  const targets: SnapTarget[] = [
+    { value: 0, type: 'room-edge', label: 'left edge' },
+    { value: roomWidth * pixelsPerMeter, type: 'room-edge', label: 'right edge' },
+    { value: (roomWidth / 2) * pixelsPerMeter, type: 'room-center', label: 'center X' },
+  ];
+
+  furnitureItems
+    .filter(item => item.id !== excludeId)
+    .forEach(item => {
+      const cat = furnitureCatalog.find(f => f._id === item.furnitureId);
+      if (!cat) return;
+      const x = item.position.x * pixelsPerMeter;
+      const w = cat.dimensions.width * pixelsPerMeter * item.scale;
+      targets.push({ value: x, type: 'furniture-edge', label: cat.name });
+      targets.push({ value: x + w, type: 'furniture-edge', label: cat.name });
+      targets.push({ value: x + w / 2, type: 'furniture-center', label: cat.name });
+    });
+
+  return targets;
+};
+
+/**
+ * Computes all snap target Y coordinates (in pixels).
+ */
+export const computeSnapTargetsY = (
+  roomLength: number,
+  pixelsPerMeter: number,
+  furnitureItems: FurnitureItem[],
+  furnitureCatalog: Furniture[],
+  excludeId?: string
+): SnapTarget[] => {
+  const targets: SnapTarget[] = [
+    { value: 0, type: 'room-edge', label: 'top edge' },
+    { value: roomLength * pixelsPerMeter, type: 'room-edge', label: 'bottom edge' },
+    { value: (roomLength / 2) * pixelsPerMeter, type: 'room-center', label: 'center Y' },
+  ];
+
+  furnitureItems
+    .filter(item => item.id !== excludeId)
+    .forEach(item => {
+      const cat = furnitureCatalog.find(f => f._id === item.furnitureId);
+      if (!cat) return;
+      const y = item.position.y * pixelsPerMeter;
+      const h = cat.dimensions.length * pixelsPerMeter * item.scale;
+      targets.push({ value: y, type: 'furniture-edge', label: cat.name });
+      targets.push({ value: y + h, type: 'furniture-edge', label: cat.name });
+      targets.push({ value: y + h / 2, type: 'furniture-center', label: cat.name });
+    });
+
+  return targets;
+};
+
+/**
+ * Finds the nearest snap target within threshold, or returns the original value.
+ */
+export const findSnap = (
+  value: number,
+  targets: SnapTarget[],
+  threshold = SNAP_THRESHOLD_PX
+): { snapped: number; guide: number | null; label?: string } => {
+  let nearest: SnapTarget | null = null;
+  let nearestDist = threshold + 1;
+
+  for (const t of targets) {
+    const dist = Math.abs(value - t.value);
+    if (dist < nearestDist) {
+      nearestDist = dist;
+      nearest = t;
+    }
+  }
+
+  if (nearest) {
+    return { snapped: nearest.value, guide: nearest.value, label: nearest.label };
+  }
+
+  return { snapped: value, guide: null };
+};
+
+/**
+ * Hook to compute active snap guides from a dragging item's pixel position.
+ */
+export const useSnapComputation = (
+  itemId: string,
+  itemPxX: number,
+  itemPxY: number,
+  itemPxW: number,
+  itemPxH: number,
+  roomWidth: number,
+  roomLength: number,
+  pixelsPerMeter: number,
+  furnitureItems: FurnitureItem[],
+  furnitureCatalog: Furniture[],
+  snapToGrid: boolean,
+  gridSizePx: number
+): { snappedX: number; snappedY: number; guides: ActiveSnapGuides } => {
+  return useMemo(() => {
+    const targetsX = computeSnapTargetsX(
+      roomWidth,
+      pixelsPerMeter,
+      furnitureItems,
+      furnitureCatalog,
+      itemId
+    );
+    const targetsY = computeSnapTargetsY(
+      roomLength,
+      pixelsPerMeter,
+      furnitureItems,
+      furnitureCatalog,
+      itemId
+    );
+
+    // Try snapping left edge and center of item
+    const leftSnap = findSnap(itemPxX, targetsX);
+    const centerXSnap = findSnap(itemPxX + itemPxW / 2, targetsX);
+    const rightSnap = findSnap(itemPxX + itemPxW, targetsX);
+
+    let snappedX = itemPxX;
+    let guideX: number | null = null;
+    let labelX: string | undefined;
+
+    if (leftSnap.guide !== null) {
+      snappedX = leftSnap.snapped;
+      guideX = leftSnap.guide;
+      labelX = leftSnap.label;
+    } else if (centerXSnap.guide !== null) {
+      snappedX = centerXSnap.snapped - itemPxW / 2;
+      guideX = centerXSnap.guide;
+      labelX = centerXSnap.label;
+    } else if (rightSnap.guide !== null) {
+      snappedX = rightSnap.snapped - itemPxW;
+      guideX = rightSnap.guide;
+      labelX = rightSnap.label;
+    } else if (snapToGrid) {
+      snappedX = Math.round(itemPxX / gridSizePx) * gridSizePx;
+    }
+
+    const topSnap = findSnap(itemPxY, targetsY);
+    const centerYSnap = findSnap(itemPxY + itemPxH / 2, targetsY);
+    const bottomSnap = findSnap(itemPxY + itemPxH, targetsY);
+
+    let snappedY = itemPxY;
+    let guideY: number | null = null;
+    let labelY: string | undefined;
+
+    if (topSnap.guide !== null) {
+      snappedY = topSnap.snapped;
+      guideY = topSnap.guide;
+      labelY = topSnap.label;
+    } else if (centerYSnap.guide !== null) {
+      snappedY = centerYSnap.snapped - itemPxH / 2;
+      guideY = centerYSnap.guide;
+      labelY = centerYSnap.label;
+    } else if (bottomSnap.guide !== null) {
+      snappedY = bottomSnap.snapped - itemPxH;
+      guideY = bottomSnap.guide;
+      labelY = bottomSnap.label;
+    } else if (snapToGrid) {
+      snappedY = Math.round(itemPxY / gridSizePx) * gridSizePx;
+    }
+
+    return {
+      snappedX,
+      snappedY,
+      guides: { x: guideX, y: guideY, xLabel: labelX, yLabel: labelY },
+    };
+  }, [
+    itemId,
+    itemPxX,
+    itemPxY,
+    itemPxW,
+    itemPxH,
+    roomWidth,
+    roomLength,
+    pixelsPerMeter,
+    furnitureItems,
+    furnitureCatalog,
+    snapToGrid,
+    gridSizePx,
+  ]);
+};

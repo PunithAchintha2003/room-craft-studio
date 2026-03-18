@@ -11,6 +11,7 @@ import { FurnitureModel3D } from './FurnitureModel3D';
 import CameraswitchIcon from '@mui/icons-material/Cameraswitch';
 import GridOnIcon from '@mui/icons-material/GridOn';
 import GridOffIcon from '@mui/icons-material/GridOff';
+import * as THREE from 'three';
 
 interface Canvas3DEditorProps {
   design: Design;
@@ -215,6 +216,11 @@ export const Canvas3DEditor: React.FC<Canvas3DEditorProps> = ({
         gl={{
           antialias: true,
           alpha: true,
+        }}
+        onCreated={({ gl }) => {
+          gl.outputColorSpace = THREE.SRGBColorSpace;
+          gl.shadowMap.enabled = true;
+          gl.shadowMap.type = THREE.PCFSoftShadowMap;
         }}
       >
         <Suspense fallback={null}>

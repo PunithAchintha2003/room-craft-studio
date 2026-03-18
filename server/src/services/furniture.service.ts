@@ -1,9 +1,12 @@
 import { Furniture, IFurniture } from '../models/furniture.model';
+import type { SortOrder } from 'mongoose';
 import { AppError } from '../utils/AppError';
 import { IFurnitureInput, FurnitureCategory } from '../types/design.types';
 import { Design } from '../models/design.model';
+import { ensureCategoryExists } from './furnitureCategory.service';
 
 export const createFurniture = async (input: IFurnitureInput): Promise<IFurniture> => {
+  await ensureCategoryExists(input.category);
   const furniture = await Furniture.create(input);
   return furniture;
 };
@@ -237,7 +240,7 @@ export const advancedSearch = async (
 
   const skip = (options.page - 1) * options.limit;
   const sortOrder = options.sortOrder === 'asc' ? 1 : -1;
-  const sortOptions: Record<string, number> = { [options.sortBy]: sortOrder };
+  const sortOptions: Record<string, SortOrder> = { [options.sortBy]: sortOrder };
 
   const [furniture, total] = await Promise.all([
     Furniture.find(query).sort(sortOptions).skip(skip).limit(options.limit),

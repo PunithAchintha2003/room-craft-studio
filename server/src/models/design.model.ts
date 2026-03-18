@@ -1,5 +1,5 @@
 import mongoose, { Document, Schema } from 'mongoose';
-import { IRoomConfig, IFurnitureItem } from '../types/design.types';
+import { IRoomConfig, IFurnitureItem, IRoomOpening } from '../types/design.types';
 
 export interface IDesign extends Document {
   userId: mongoose.Types.ObjectId;
@@ -51,6 +51,46 @@ const furnitureItemSchema = new Schema<IFurnitureItem>(
   { _id: false }
 );
 
+const roomOpeningSchema = new Schema<IRoomOpening>(
+  {
+    type: {
+      type: String,
+      enum: ['door', 'window'],
+      required: [true, 'Opening type is required'],
+    },
+    wall: {
+      type: String,
+      enum: ['north', 'south', 'east', 'west'],
+      required: [true, 'Opening wall is required'],
+    },
+    width: {
+      type: Number,
+      required: [true, 'Opening width is required'],
+      min: [0.3, 'Opening width must be at least 0.3 meters'],
+      max: [5, 'Opening width cannot exceed 5 meters'],
+    },
+    height: {
+      type: Number,
+      required: [true, 'Opening height is required'],
+      min: [0.3, 'Opening height must be at least 0.3 meters'],
+      max: [5, 'Opening height cannot exceed 5 meters'],
+    },
+    bottom: {
+      type: Number,
+      required: [true, 'Opening bottom offset is required'],
+      min: [0, 'Bottom offset cannot be negative'],
+      max: [5, 'Bottom offset cannot exceed 5 meters'],
+      default: 0,
+    },
+    offset: {
+      type: Number,
+      required: [true, 'Opening offset along wall is required'],
+      min: [0, 'Offset cannot be negative'],
+    },
+  },
+  { _id: false }
+);
+
 const roomConfigSchema = new Schema<IRoomConfig>(
   {
     width: {
@@ -82,6 +122,28 @@ const roomConfigSchema = new Schema<IRoomConfig>(
       required: [true, 'Floor color is required'],
       match: [/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/, 'Invalid hex color format'],
       default: '#D3D3D3',
+    },
+    wallTexture: {
+      type: String,
+    },
+    floorTexture: {
+      type: String,
+    },
+    wallTextureScale: {
+      type: Number,
+      min: [0.1, 'Texture scale must be at least 0.1'],
+      max: [10, 'Texture scale cannot exceed 10'],
+      default: 1,
+    },
+    floorTextureScale: {
+      type: Number,
+      min: [0.1, 'Texture scale must be at least 0.1'],
+      max: [10, 'Texture scale cannot exceed 10'],
+      default: 1,
+    },
+    openings: {
+      type: [roomOpeningSchema],
+      default: [],
     },
   },
   { _id: false }

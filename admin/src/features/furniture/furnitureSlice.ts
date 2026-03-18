@@ -5,20 +5,26 @@ import { Furniture, FurnitureCategory } from '@/types/design.types';
 
 interface FurnitureState {
   furniture: Furniture[];
+  categories: FurnitureCategory[];
   selectedCategory: FurnitureCategory | 'all';
   searchTerm: string;
   isLoading: boolean;
   isSaving: boolean;
+  isLoadingCategories: boolean;
+  isCreatingCategory: boolean;
   deletingId: string | null;
   error: string | null;
 }
 
 const initialState: FurnitureState = {
   furniture: [],
+  categories: [],
   selectedCategory: 'all',
   searchTerm: '',
   isLoading: false,
   isSaving: false,
+  isLoadingCategories: false,
+  isCreatingCategory: false,
   deletingId: null,
   error: null,
 };
@@ -37,6 +43,41 @@ export const fetchFurniture = createAsyncThunk(
       const params = category ? { category } : {};
       const { data } = await api.get<{ data: { furniture: Furniture[] } }>('/furniture', { params });
       return data.data.furniture;
+    } catch (error) {
+      return rejectWithValue(handleError(error));
+    }
+  }
+);
+
+export interface FurnitureCategoryDto {
+  _id: string;
+  slug: string;
+  label: string;
+}
+
+export const fetchFurnitureCategories = createAsyncThunk(
+  'furniture/fetchFurnitureCategories',
+  async (_: void, { rejectWithValue }) => {
+    try {
+      const { data } = await api.get<{ data: { categories: FurnitureCategoryDto[] } }>(
+        '/furniture/categories'
+      );
+      return data.data.categories.map((c) => c.slug);
+    } catch (error) {
+      return rejectWithValue(handleError(error));
+    }
+  }
+);
+
+export const createFurnitureCategory = createAsyncThunk(
+  'furniture/createFurnitureCategory',
+  async ({ label }: { label: string }, { rejectWithValue }) => {
+    try {
+      const { data } = await api.post<{ data: { category: FurnitureCategoryDto } }>(
+        '/furniture/categories',
+        { label }
+      );
+      return data.data.category.slug;
     } catch (error) {
       return rejectWithValue(handleError(error));
     }
@@ -119,6 +160,22 @@ export const createFurniture = createAsyncThunk(
   }
 );
 
+export const createFurnitureWithAssets = createAsyncThunk(
+  'furniture/createFurnitureWithAssets',
+  async (formData: FormData, { rejectWithValue }) => {
+    try {
+      const { data } = await api.post<{ data: { furniture: Furniture } }>(
+        '/furniture/with-assets',
+        formData,
+        { headers: { 'Content-Type': 'multipart/form-data' } }
+      );
+      return data.data.furniture;
+    } catch (error) {
+      return rejectWithValue(handleError(error));
+    }
+  }
+);
+
 export const updateFurniture = createAsyncThunk(
   'furniture/updateFurniture',
   async (
@@ -162,6 +219,32 @@ const furnitureSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+      .addCase(fetchFurnitureCategories.pending, (state) => {
+        state.isLoadingCategories = true;
+      })
+      .addCase(fetchFurnitureCategories.fulfilled, (state, action) => {
+        state.isLoadingCategories = false;
+        state.categories = action.payload;
+      })
+      .addCase(fetchFurnitureCategories.rejected, (state, action) => {
+        state.isLoadingCategories = false;
+        state.error = action.payload as string;
+      })
+      .addCase(createFurnitureCategory.pending, (state) => {
+        state.isCreatingCategory = true;
+        state.error = null;
+      })
+      .addCase(createFurnitureCategory.fulfilled, (state, action) => {
+        state.isCreatingCategory = false;
+        const slug = action.payload;
+        if (!state.categories.includes(slug)) {
+          state.categories = [...state.categories, slug].sort((a, b) => a.localeCompare(b));
+        }
+      })
+      .addCase(createFurnitureCategory.rejected, (state, action) => {
+        state.isCreatingCategory = false;
+        state.error = action.payload as string;
+      })
       .addCase(fetchFurniture.pending, (state) => {
         state.isLoading = true;
         state.error = null;
@@ -201,6 +284,18 @@ const furnitureSlice = createSlice({
         state.furniture.push(action.payload);
       })
       .addCase(createFurniture.rejected, (state, action) => {
+        state.isSaving = false;
+        state.error = action.payload as string;
+      })
+      .addCase(createFurnitureWithAssets.pending, (state) => {
+        state.isSaving = true;
+        state.error = null;
+      })
+      .addCase(createFurnitureWithAssets.fulfilled, (state, action) => {
+        state.isSaving = false;
+        state.furniture.push(action.payload);
+      })
+      .addCase(createFurnitureWithAssets.rejected, (state, action) => {
         state.isSaving = false;
         state.error = action.payload as string;
       })

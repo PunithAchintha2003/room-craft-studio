@@ -238,6 +238,14 @@ From the repo root, you can run each app individually.
   cd designer
   npm run dev
   ```
+  
+  The Designer app is optimized for furniture design professionals conducting in-store consultations. Features include:
+  - 2D room editor with actual furniture dimensions
+  - Interactive 3D editing with TransformControls (G/R/S shortcuts)
+  - Furniture thumbnails in 2D view
+  - Real-time visualization
+  - Keyboard shortcuts (press ? for help)
+  - Professional design workflow
 
 - **Server** (port 5001)
 
@@ -283,7 +291,13 @@ You can extend this with automated tests (unit/integration/end‑to‑end) follo
 
 ---
 
-<h2 id="hci-ux-documentation">🧠 HCI & UX Documentation</h2>
+## Documentation
+
+### User Guides
+- **[Designer Guide](docs/DESIGNER_GUIDE.md)** - Complete manual for furniture design professionals
+- **[3D Workflow](docs/3D_WORKFLOW.md)** - Blender to web pipeline for 3D models
+
+### HCI & UX Documentation
 
 In addition to the production‑ready implementation, RoomCraft Studio includes a full set of HCI artefacts:
 
@@ -296,6 +310,50 @@ In addition to the production‑ready implementation, RoomCraft Studio includes 
 - **Summary** – `HCI_DOCUMENTATION_SUMMARY.md`
 
 These documents explain how UX decisions are grounded in user research, testing, and established HCI principles while still being directly tied to the running product.
+
+---
+
+### Designer App Enhanced Features
+
+**2D Editor:**
+- ✅ Actual furniture dimensions from database (no more hardcoded boxes)
+- ✅ Furniture thumbnail overlays for visual clarity
+- ✅ Improved selection and manipulation
+- ✅ Grid snap and precise placement
+- ✅ **Measurement tool with ruler mode** - Press M key to measure distances between any two points
+
+**3D Editor:**
+- ✅ Interactive TransformControls (move/rotate/scale)
+- ✅ Keyboard shortcuts: G (move), R (rotate), S (scale)
+- ✅ Real-time furniture manipulation in 3D space
+- ✅ Multiple camera presets (corner, top, front)
+- ✅ Enhanced lighting and shadows
+- ✅ **Ground plane raycasting** - Click-to-place furniture support
+- ✅ **Lighting Control Panel** - Time-of-day presets, intensity sliders, shadow toggle
+
+**Material System:**
+- ✅ **Material Picker** - 36 material presets across 6 categories (Wood, Fabric, Metal, Leather, Plastic, Glass)
+- ✅ **PBR Controls** - Roughness and metalness sliders for realistic rendering
+
+**Export Features:**
+- ✅ **Enhanced Screenshot Export** - Multi-resolution (800x600 to 4K), transparent backgrounds, PNG/JPEG/WebP formats
+- ✅ **PDF Report Generator** - Comprehensive reports with screenshots, furniture lists, and cost breakdowns
+- ✅ **3D Scene Export** - GLB/GLTF/OBJ format export with metadata
+
+**UX Improvements:**
+- ✅ Keyboard shortcuts help dialog (press ?)
+- ✅ Comprehensive tooltips throughout
+- ✅ Professional design workflow
+- ✅ Auto-save indicators
+- ✅ Undo/redo with 50-step history
+- ✅ **Interactive Tutorial** - First-time user guided tour with react-joyride
+
+**Code Quality:**
+- ✅ ESLint + Prettier configuration
+- ✅ Pre-commit hooks with Husky + lint-staged
+- ✅ Modular component architecture
+- ✅ TypeScript strict mode
+- ✅ Industry-standard code formatting
 
 ---
 

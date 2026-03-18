@@ -1,15 +1,23 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import * as furnitureController from '../controllers/furniture.controller';
+import * as furnitureCategoryController from '../controllers/furnitureCategory.controller';
 import { protect, restrictTo } from '../middleware/auth.middleware';
-import { uploadThumbnail } from '../middleware/upload.middleware';
+import { uploadFurnitureAssets, uploadThumbnail } from '../middleware/upload.middleware';
 import { validate } from '../middleware/validate.middleware';
 
 const router = Router();
 
+const categorySlugSchema = z
+  .string()
+  .trim()
+  .min(1)
+  .max(64)
+  .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Category must be kebab-case (e.g. "living-room")');
+
 const createFurnitureSchema = z.object({
   name: z.string().min(3).max(100),
-  category: z.enum(['chair', 'table', 'sofa', 'bed', 'storage']),
+  category: categorySlugSchema,
   dimensions: z.object({
     width: z.number().min(0.1).max(5),
     length: z.number().min(0.1).max(5),
@@ -28,6 +36,15 @@ const createFurnitureSchema = z.object({
 });
 
 const updateFurnitureSchema = createFurnitureSchema.partial();
+
+router.get('/categories', furnitureCategoryController.getFurnitureCategories);
+router.post(
+  '/categories',
+  protect,
+  restrictTo('admin'),
+  validate(z.object({ label: z.string().trim().min(2).max(64) })),
+  furnitureCategoryController.createFurnitureCategory
+);
 
 router.get('/', furnitureController.getAllFurniture);
 router.get('/search', furnitureController.searchFurniture);
@@ -48,6 +65,14 @@ router.post(
   restrictTo('designer', 'admin'),
   validate(createFurnitureSchema),
   furnitureController.createFurniture
+);
+
+router.post(
+  '/with-assets',
+  protect,
+  restrictTo('designer', 'admin'),
+  uploadFurnitureAssets,
+  furnitureController.createFurnitureWithAssets
 );
 router.put(
   '/:id',

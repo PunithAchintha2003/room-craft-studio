@@ -37,8 +37,11 @@ import {
   fetchFurniture,
   clearError,
   createFurniture,
+  createFurnitureWithAssets,
   updateFurniture,
   deleteFurniture,
+  fetchFurnitureCategories,
+  createFurnitureCategory,
 } from '@/features/furniture/furnitureSlice';
 import { FurnitureThumbnailUploader } from '@/components/furniture/FurnitureThumbnailUploader';
 import { Furniture, FurnitureCategory } from '@/types/design.types';
@@ -47,7 +50,7 @@ import { FurnitureFormDialog } from '@/components/furniture/FurnitureFormDialog'
 export const FurnitureManagerPage: React.FC = () => {
   const theme = useTheme();
   const dispatch = useDispatch<AppDispatch>();
-  const { furniture, isLoading, isSaving, deletingId, error } = useSelector(
+  const { furniture, categories, isLoading, isSaving, deletingId, error, isCreatingCategory } = useSelector(
     (state: RootState) => state.furniture
   );
   const [uploadTarget, setUploadTarget] = useState<Furniture | null>(null);
@@ -58,9 +61,12 @@ export const FurnitureManagerPage: React.FC = () => {
   const [formMode, setFormMode] = useState<'create' | 'edit'>('create');
   const [editingItem, setEditingItem] = useState<Furniture | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Furniture | null>(null);
+  const [categoryDialogOpen, setCategoryDialogOpen] = useState(false);
+  const [newCategoryLabel, setNewCategoryLabel] = useState('');
 
   useEffect(() => {
     dispatch(fetchFurniture(undefined));
+    dispatch(fetchFurnitureCategories());
   }, [dispatch]);
 
   const filteredFurniture = useMemo(() => {
@@ -97,7 +103,11 @@ export const FurnitureManagerPage: React.FC = () => {
 
   const handleSubmitForm = async (values: any) => {
     if (formMode === 'create') {
-      await dispatch(createFurniture(values as any)).unwrap();
+      if (values instanceof FormData) {
+        await dispatch(createFurnitureWithAssets(values)).unwrap();
+      } else {
+        await dispatch(createFurniture(values as any)).unwrap();
+      }
     } else if (formMode === 'edit' && editingItem) {
       await dispatch(
         updateFurniture({
@@ -114,6 +124,16 @@ export const FurnitureManagerPage: React.FC = () => {
     if (!deleteTarget) return;
     await dispatch(deleteFurniture(deleteTarget._id)).unwrap();
     setDeleteTarget(null);
+  };
+
+  const handleCreateCategory = async () => {
+    const label = newCategoryLabel.trim();
+    if (!label) return;
+    const slug = await dispatch(createFurnitureCategory({ label })).unwrap();
+    setCategoryDialogOpen(false);
+    setNewCategoryLabel('');
+    // Make it immediately usable as a filter if the user wants.
+    setCategoryFilter(slug);
   };
 
   const tableHeaderSx = {
@@ -164,23 +184,28 @@ export const FurnitureManagerPage: React.FC = () => {
             }}
             sx={{ minWidth: 260, flex: 1 }}
           />
-          <TextField
-            select
-            label="Category"
-            size="small"
-            sx={{ minWidth: 160 }}
-            value={categoryFilter}
-            onChange={(e) =>
-              setCategoryFilter(e.target.value as FurnitureCategory | 'all')
-            }
-          >
-            <MenuItem value="all">All</MenuItem>
-            <MenuItem value="chair">Chairs</MenuItem>
-            <MenuItem value="table">Tables</MenuItem>
-            <MenuItem value="sofa">Sofas</MenuItem>
-            <MenuItem value="bed">Beds</MenuItem>
-            <MenuItem value="storage">Storage</MenuItem>
-          </TextField>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            <TextField
+              select
+              label="Category"
+              size="small"
+              sx={{ minWidth: 200 }}
+              value={categoryFilter}
+              onChange={(e) => setCategoryFilter(e.target.value as FurnitureCategory | 'all')}
+            >
+              <MenuItem value="all">All</MenuItem>
+              {categories.map((cat) => (
+                <MenuItem key={cat} value={cat}>
+                  {cat}
+                </MenuItem>
+              ))}
+            </TextField>
+            <Tooltip title="Add category">
+              <IconButton onClick={() => setCategoryDialogOpen(true)} size="small">
+                <AddIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          </Box>
           <TextField
             label="Min stock"
             size="small"
@@ -345,7 +370,42 @@ export const FurnitureManagerPage: React.FC = () => {
         }}
         onSubmit={handleSubmitForm}
         isSubmitting={isSaving}
+        categories={categories}
+        onAddCategory={async (label) => {
+          const slug = await dispatch(createFurnitureCategory({ label })).unwrap();
+          return slug;
+        }}
       />
+
+      <Dialog open={categoryDialogOpen} onClose={() => setCategoryDialogOpen(false)} maxWidth="xs" fullWidth>
+        <DialogTitle>Add category</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Category name"
+            fullWidth
+            value={newCategoryLabel}
+            onChange={(e) => setNewCategoryLabel(e.target.value)}
+            placeholder="E.g. Outdoor"
+          />
+          <Typography variant="caption" color="text.secondary">
+            This will create a kebab-case slug automatically (e.g. “Outdoor” → “outdoor”).
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setCategoryDialogOpen(false)} disabled={isCreatingCategory}>
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            onClick={handleCreateCategory}
+            disabled={isCreatingCategory || !newCategoryLabel.trim()}
+          >
+            Create
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       {deleteTarget && (
         <Dialog open onClose={() => setDeleteTarget(null)}>

@@ -1,6 +1,14 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-type Tool = 'select' | 'pan' | 'delete';
+export type Tool = 'select' | 'pan' | 'delete' | 'measure';
+export type ViewMode = '2d' | '3d';
+
+export interface SnapGuides {
+  x: number | null;
+  y: number | null;
+  xLabel?: string;
+  yLabel?: string;
+}
 
 interface EditorState {
   selectedFurnitureIds: string[];
@@ -10,6 +18,11 @@ interface EditorState {
   gridSize: number;
   snapToGrid: boolean;
   showGrid: boolean;
+  viewMode: ViewMode;
+  snapGuides: SnapGuides;
+  showRuler: boolean;
+  showAlignmentGuides: boolean;
+  showCeiling: boolean;
 }
 
 const initialState: EditorState = {
@@ -20,6 +33,11 @@ const initialState: EditorState = {
   gridSize: 0.5,
   snapToGrid: true,
   showGrid: true,
+  viewMode: '2d',
+  snapGuides: { x: null, y: null },
+  showRuler: true,
+  showAlignmentGuides: true,
+  showCeiling: false,
 };
 
 const editorSlice = createSlice({
@@ -71,6 +89,24 @@ const editorSlice = createSlice({
     toggleShowGrid(state) {
       state.showGrid = !state.showGrid;
     },
+    setViewMode(state, action: PayloadAction<ViewMode>) {
+      state.viewMode = action.payload;
+    },
+    setSnapGuides(state, action: PayloadAction<SnapGuides>) {
+      state.snapGuides = action.payload;
+    },
+    clearSnapGuides(state) {
+      state.snapGuides = { x: null, y: null };
+    },
+    toggleShowRuler(state) {
+      state.showRuler = !state.showRuler;
+    },
+    toggleAlignmentGuides(state) {
+      state.showAlignmentGuides = !state.showAlignmentGuides;
+    },
+    toggleShowCeiling(state) {
+      state.showCeiling = !state.showCeiling;
+    },
     resetEditor() {
       return initialState;
     },
@@ -92,6 +128,12 @@ export const {
   setGridSize,
   toggleSnapToGrid,
   toggleShowGrid,
+  setViewMode,
+  setSnapGuides,
+  clearSnapGuides,
+  toggleShowRuler,
+  toggleAlignmentGuides,
+  toggleShowCeiling,
   resetEditor,
 } = editorSlice.actions;
 

@@ -12,6 +12,8 @@ import {
   FormControlLabel,
   Switch,
   Alert,
+  Chip,
+  DialogContentText,
 } from '@mui/material';
 import type { Furniture, FurnitureCategory } from '@/types/design.types';
 import type { CreateFurnitureInput, UpdateFurnitureInput } from '@/features/furniture/furnitureSlice';
@@ -23,11 +25,11 @@ interface FurnitureFormDialogProps {
   mode: Mode;
   initialValue?: Furniture;
   onClose: () => void;
-  onSubmit: (values: CreateFurnitureInput | UpdateFurnitureInput) => Promise<void> | void;
+  onSubmit: (values: CreateFurnitureInput | UpdateFurnitureInput | FormData) => Promise<void> | void;
   isSubmitting: boolean;
+  categories: FurnitureCategory[];
+  onAddCategory: (label: string) => Promise<FurnitureCategory>;
 }
-
-const CATEGORY_OPTIONS: FurnitureCategory[] = ['chair', 'table', 'sofa', 'bed', 'storage'];
 
 export const FurnitureFormDialog: React.FC<FurnitureFormDialogProps> = ({
   open,
@@ -36,21 +38,25 @@ export const FurnitureFormDialog: React.FC<FurnitureFormDialogProps> = ({
   onClose,
   onSubmit,
   isSubmitting,
+  categories,
+  onAddCategory,
 }) => {
   const [name, setName] = useState('');
   const [category, setCategory] = useState<FurnitureCategory>('chair');
   const [width, setWidth] = useState<string>('1');
   const [length, setLength] = useState<string>('1');
   const [height, setHeight] = useState<string>('1');
-  const [thumbnail, setThumbnail] = useState('');
   const [thumbnailAlt, setThumbnailAlt] = useState('');
-  const [modelUrl, setModelUrl] = useState('');
-  const [modelFormat, setModelFormat] = useState<'gltf' | 'glb'>('glb');
+  const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
+  const [modelFile, setModelFile] = useState<File | null>(null);
   const [defaultColor, setDefaultColor] = useState('#8B4513');
   const [isColorizable, setIsColorizable] = useState(true);
   const [price, setPrice] = useState<string>('0');
   const [stock, setStock] = useState<string>('0');
   const [error, setError] = useState<string | null>(null);
+  const [addCategoryOpen, setAddCategoryOpen] = useState(false);
+  const [newCategoryLabel, setNewCategoryLabel] = useState('');
+  const [addingCategory, setAddingCategory] = useState(false);
 
   useEffect(() => {
     if (!open) return;
@@ -60,31 +66,55 @@ export const FurnitureFormDialog: React.FC<FurnitureFormDialogProps> = ({
       setWidth(String(initialValue.dimensions.width));
       setLength(String(initialValue.dimensions.length));
       setHeight(String(initialValue.dimensions.height));
-      setThumbnail(initialValue.thumbnail);
       setThumbnailAlt(initialValue.thumbnailAlt ?? '');
-      setModelUrl(initialValue.model3D.url);
-      setModelFormat(initialValue.model3D.format);
+      setThumbnailFile(null);
+      setModelFile(null);
       setDefaultColor(initialValue.defaultColor);
       setIsColorizable(initialValue.isColorizable);
       setPrice(String(initialValue.price));
       setStock(String(initialValue.stock));
     } else {
       setName('');
-      setCategory('chair');
+      setCategory(categories[0] ?? 'chair');
       setWidth('1');
       setLength('1');
       setHeight('1');
-      setThumbnail('');
       setThumbnailAlt('');
-      setModelUrl('');
-      setModelFormat('glb');
+      setThumbnailFile(null);
+      setModelFile(null);
       setDefaultColor('#8B4513');
       setIsColorizable(true);
       setPrice('0');
       setStock('0');
     }
     setError(null);
-  }, [open, mode, initialValue]);
+  }, [open, mode, initialValue, categories]);
+
+  useEffect(() => {
+    if (!open) return;
+    // If the currently selected category is not in the list (or list just loaded),
+    // pick a reasonable default.
+    if (categories.length > 0 && !categories.includes(category)) {
+      setCategory(categories[0]);
+    }
+  }, [open, categories, category]);
+
+  const handleAddCategory = async () => {
+    const label = newCategoryLabel.trim();
+    if (!label) return;
+    setAddingCategory(true);
+    setError(null);
+    try {
+      const createdSlug = await onAddCategory(label);
+      setCategory(createdSlug);
+      setAddCategoryOpen(false);
+      setNewCategoryLabel('');
+    } catch (e) {
+      setError(typeof e === 'string' ? e : 'Failed to create category.');
+    } finally {
+      setAddingCategory(false);
+    }
+  };
 
   const handleSubmit = async () => {
     setError(null);
@@ -92,13 +122,15 @@ export const FurnitureFormDialog: React.FC<FurnitureFormDialogProps> = ({
       setError('Name is required.');
       return;
     }
-    if (!thumbnail.trim()) {
-      setError('Thumbnail URL is required.');
-      return;
-    }
-    if (!modelUrl.trim()) {
-      setError('3D model URL is required.');
-      return;
+    if (mode === 'create') {
+      if (!thumbnailFile) {
+        setError('Thumbnail image is required.');
+        return;
+      }
+      if (!modelFile) {
+        setError('3D model file (.glb or .gltf) is required.');
+        return;
+      }
     }
 
     const numWidth = parseFloat(width);
@@ -122,28 +154,37 @@ export const FurnitureFormDialog: React.FC<FurnitureFormDialogProps> = ({
       return;
     }
 
-    const payload: CreateFurnitureInput = {
-      name: name.trim(),
-      category,
-      dimensions: {
-        width: numWidth,
-        length: numLength,
-        height: numHeight,
-      },
-      thumbnail: thumbnail.trim(),
-      thumbnailAlt: thumbnailAlt.trim() || undefined,
-      model3D: {
-        url: modelUrl.trim(),
-        format: modelFormat,
-      },
-      defaultColor: defaultColor.trim(),
-      isColorizable,
-      price: numPrice,
-      stock: numStock,
-    };
+    const thumbnailAltValue = thumbnailAlt.trim() || undefined;
 
     try {
-      await onSubmit(payload);
+      if (mode === 'create') {
+        const formData = new FormData();
+        formData.append('name', name.trim());
+        formData.append('category', category);
+        formData.append('width', String(numWidth));
+        formData.append('length', String(numLength));
+        formData.append('height', String(numHeight));
+        if (thumbnailAltValue) formData.append('thumbnailAlt', thumbnailAltValue);
+        formData.append('defaultColor', defaultColor.trim());
+        formData.append('isColorizable', String(isColorizable));
+        formData.append('price', String(numPrice));
+        formData.append('stock', String(numStock));
+        if (thumbnailFile) formData.append('thumbnail', thumbnailFile);
+        if (modelFile) formData.append('model', modelFile);
+        await onSubmit(formData);
+      } else {
+        const payload: UpdateFurnitureInput = {
+          name: name.trim(),
+          category,
+          dimensions: { width: numWidth, length: numLength, height: numHeight },
+          thumbnailAlt: thumbnailAltValue,
+          defaultColor: defaultColor.trim(),
+          isColorizable,
+          price: numPrice,
+          stock: numStock,
+        };
+        await onSubmit(payload);
+      }
     } catch (err) {
       setError(typeof err === 'string' ? err : 'Failed to save furniture item.');
     }
@@ -175,12 +216,17 @@ export const FurnitureFormDialog: React.FC<FurnitureFormDialogProps> = ({
             value={category}
             onChange={(e) => setCategory(e.target.value as FurnitureCategory)}
           >
-            {CATEGORY_OPTIONS.map((cat) => (
+            {categories.map((cat) => (
               <MenuItem key={cat} value={cat}>
-                {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                {cat}
               </MenuItem>
             ))}
           </TextField>
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <Button size="small" onClick={() => setAddCategoryOpen(true)} disabled={isSubmitting}>
+              Add category
+            </Button>
+          </Box>
 
           <Box sx={{ display: 'flex', gap: 2 }}>
             <TextField
@@ -209,13 +255,27 @@ export const FurnitureFormDialog: React.FC<FurnitureFormDialogProps> = ({
             />
           </Box>
 
-          <TextField
-            label="Thumbnail URL"
-            fullWidth
-            value={thumbnail}
-            onChange={(e) => setThumbnail(e.target.value)}
-            placeholder="https://..."
-          />
+          {mode === 'create' ? (
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              <Typography variant="body2" fontWeight={600}>
+                Thumbnail image
+              </Typography>
+              <Button variant="outlined" component="label" disabled={isSubmitting}>
+                Choose image
+                <input
+                  hidden
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  onChange={(e) => setThumbnailFile(e.target.files?.[0] ?? null)}
+                />
+              </Button>
+              {thumbnailFile && <Chip size="small" label={thumbnailFile.name} />}
+            </Box>
+          ) : (
+            <Alert severity="info">
+              Thumbnail image can be changed from the table using the <b>Image</b> action.
+            </Alert>
+          )}
 
           <TextField
             label="Thumbnail alt text"
@@ -225,24 +285,26 @@ export const FurnitureFormDialog: React.FC<FurnitureFormDialogProps> = ({
             placeholder={name || 'E.g. Modern dining chair'}
           />
 
-          <TextField
-            label="3D model URL"
-            fullWidth
-            value={modelUrl}
-            onChange={(e) => setModelUrl(e.target.value)}
-            placeholder="https://..."
-          />
-
-          <TextField
-            label="3D model format"
-            select
-            fullWidth
-            value={modelFormat}
-            onChange={(e) => setModelFormat(e.target.value as 'gltf' | 'glb')}
-          >
-            <MenuItem value="gltf">gltf</MenuItem>
-            <MenuItem value="glb">glb</MenuItem>
-          </TextField>
+          {mode === 'create' && (
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              <Typography variant="body2" fontWeight={600}>
+                3D model file
+              </Typography>
+              <Button variant="outlined" component="label" disabled={isSubmitting}>
+                Choose .glb / .gltf
+                <input
+                  hidden
+                  type="file"
+                  accept=".glb,.gltf,model/gltf-binary,model/gltf+json"
+                  onChange={(e) => setModelFile(e.target.files?.[0] ?? null)}
+                />
+              </Button>
+              {modelFile && <Chip size="small" label={modelFile.name} />}
+              <Typography variant="caption" color="text.secondary">
+                The format is inferred from the file extension.
+              </Typography>
+            </Box>
+          )}
 
           <Box sx={{ display: 'flex', gap: 2 }}>
             <TextField
@@ -293,6 +355,36 @@ export const FurnitureFormDialog: React.FC<FurnitureFormDialogProps> = ({
           {mode === 'create' ? 'Create' : 'Save changes'}
         </Button>
       </DialogActions>
+
+      <Dialog open={addCategoryOpen} onClose={() => setAddCategoryOpen(false)} maxWidth="xs" fullWidth>
+        <DialogTitle>Add category</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Enter a display name. The backend will generate a kebab-case slug automatically.
+          </DialogContentText>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Category name"
+            fullWidth
+            value={newCategoryLabel}
+            onChange={(e) => setNewCategoryLabel(e.target.value)}
+            placeholder="E.g. Outdoor"
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setAddCategoryOpen(false)} disabled={addingCategory}>
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            onClick={handleAddCategory}
+            disabled={addingCategory || !newCategoryLabel.trim()}
+          >
+            Create
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Dialog>
   );
 };
