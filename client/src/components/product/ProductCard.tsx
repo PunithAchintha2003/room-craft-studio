@@ -21,9 +21,10 @@ interface ProductCardProps {
     tags?: string[];
   };
   onQuickView?: (id: string) => void;
+  compact?: boolean;
 }
 
-export function ProductCard({ furniture, onQuickView }: ProductCardProps) {
+export function ProductCard({ furniture, onQuickView, compact = false }: ProductCardProps) {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const [isHovered, setIsHovered] = useState(false);
@@ -88,11 +89,13 @@ export function ProductCard({ furniture, onQuickView }: ProductCardProps) {
       <Box sx={{ position: 'relative' }}>
         <CardMedia
           component="img"
-          height="240"
+          height={compact ? 160 : 240}
           image={furniture.thumbnail}
           alt={`${furniture.name} - ${furniture.category}`}
           sx={{
+            width: '100%',
             objectFit: 'cover',
+            objectPosition: 'center',
           }}
         />
         
@@ -184,7 +187,14 @@ export function ProductCard({ furniture, onQuickView }: ProductCardProps) {
       </Box>
 
       {/* Content */}
-      <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+      <CardContent
+        sx={{
+          flexGrow: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          py: compact ? 1.5 : undefined,
+        }}
+      >
         <Chip
           label={furniture.category}
           size="small"

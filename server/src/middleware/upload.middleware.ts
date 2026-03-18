@@ -3,6 +3,7 @@ import multer from 'multer';
 const ALLOWED_MIMES = ['image/jpeg', 'image/png', 'image/webp'];
 const MAX_SIZE_BYTES = 5 * 1024 * 1024; // 5MB
 const MAX_MODEL_SIZE_BYTES = 50 * 1024 * 1024; // 50MB
+const MAX_HERO_MODEL_SIZE_BYTES = 20 * 1024 * 1024; // 20MB
 
 const storage = multer.memoryStorage();
 
@@ -45,3 +46,23 @@ export const uploadFurnitureAssets = multer({
   { name: 'thumbnail', maxCount: 1 },
   { name: 'model', maxCount: 1 },
 ]);
+
+const heroModelFileFilter: multer.Options['fileFilter'] = (_req, file, cb) => {
+  const allowedHeroMimes = [
+    'model/gltf-binary',
+    'model/gltf+json',
+    'application/octet-stream',
+  ];
+  if (!allowedHeroMimes.includes(file.mimetype)) {
+    cb(new Error('Invalid model type. Please upload a .glb or .gltf file.'));
+    return;
+  }
+  cb(null, true);
+};
+
+export const uploadHeroModel = multer({
+  storage,
+  fileFilter: heroModelFileFilter,
+  limits: { fileSize: MAX_HERO_MODEL_SIZE_BYTES },
+}).single('file');
+

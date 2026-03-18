@@ -9,6 +9,7 @@ import orderRoutes from './order.routes';
 import wishlistRoutes from './wishlist.routes';
 import paymentRoutes from './payment.routes';
 import notificationRoutes from './notification.routes';
+import adminRoutes from './admin.routes';
 
 const router = Router();
 
@@ -22,6 +23,7 @@ router.use('/orders', orderRoutes);
 router.use('/wishlist', wishlistRoutes);
 router.use('/payment', paymentRoutes);
 router.use('/notifications', notificationRoutes);
+router.use('/admin', adminRoutes);
 
 router.get('/health', (_req, res) => {
   res.json({ success: true, message: 'RoomCraft Studio API is running', timestamp: new Date().toISOString() });
