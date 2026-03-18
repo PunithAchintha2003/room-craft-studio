@@ -49,6 +49,7 @@ const NAV_LINKS = [
   { label: 'Home', href: '/' },
   { label: 'Furniture', href: '/furniture' },
   { label: 'My Designs', href: '/my-designs', protected: true },
+  { label: 'Reviews', href: '/reviews' },
   { label: 'About', href: '/about' },
 ];
 

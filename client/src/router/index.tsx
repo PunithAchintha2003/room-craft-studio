@@ -8,6 +8,7 @@ import Footer from '@/components/layout/Footer';
 const WelcomePage = lazy(() => import('@/pages/WelcomePage'));
 const LoginPage = lazy(() => import('@/pages/LoginPage'));
 const RegisterPage = lazy(() => import('@/pages/RegisterPage'));
+const ReviewsPage = lazy(() => import('@/pages/ReviewsPage'));
 const FurnitureCatalogPage = lazy(() => import('@/pages/FurnitureCatalogPage'));
 const ProductDetailPage = lazy(() => import('@/pages/ProductDetailPage'));
 const MyDesignsPage = lazy(() => import('@/pages/MyDesignsPage'));
@@ -109,6 +110,15 @@ export const AppRouter: React.FC = () => {
           element={
             <MainLayout>
               <ProductDetailPage />
+            </MainLayout>
+          }
+        />
+
+        <Route
+          path="/reviews"
+          element={
+            <MainLayout>
+              <ReviewsPage />
             </MainLayout>
           }
         />
