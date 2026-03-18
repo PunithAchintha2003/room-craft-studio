@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Box,
   Container,
@@ -13,6 +13,7 @@ import {
   Rating,
   useTheme,
   CircularProgress,
+  Skeleton,
 } from '@mui/material';
 import {
   ViewInAr,
@@ -43,6 +44,7 @@ import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { fetchFeaturedFurniture } from '@/features/furniture/furnitureSlice';
 import { ProductCard } from '@/components/product/ProductCard';
 import type { FurnitureCategory } from '@/types/design.types';
+import { fetchPublicReviews, type Review } from '@/services/reviews.api';
 
 const SHOP_CATEGORIES: { value: FurnitureCategory; label: string; icon: React.ReactNode }[] = [
   { value: 'chair', label: 'Chairs', icon: <ChairIcon /> },
@@ -124,30 +126,6 @@ const FEATURES = [
   },
 ];
 
-const TESTIMONIALS = [
-  {
-    name: 'Sarah Mitchell',
-    role: 'Homeowner',
-    avatar: 'SM',
-    rating: 5,
-    text: "I was hesitant about buying a large sofa without seeing it in my room first. RoomCraft Studio let me visualise it perfectly — I ordered with complete confidence and it looks exactly as I imagined.",
-  },
-  {
-    name: 'James Thornton',
-    role: 'Interior Designer',
-    avatar: 'JT',
-    rating: 5,
-    text: "As a professional designer, this tool has transformed my client consultations. I can show clients exactly how their room will look in minutes. It's become indispensable to my workflow.",
-  },
-  {
-    name: 'Emma Clarke',
-    role: 'First-time Buyer',
-    avatar: 'EC',
-    rating: 5,
-    text: "The 3D view is absolutely stunning. I spent hours rearranging furniture and changing colours. When my order arrived, the room looked exactly like my design. Incredible tool!",
-  },
-];
-
 const STATS = [
   { value: '50,000+', label: 'Designs Created' },
   { value: '12,000+', label: 'Happy Customers' },
@@ -187,10 +165,48 @@ export const WelcomePage: React.FC = () => {
   const background = mode === 'dark' ? BACKGROUND.dark : BACKGROUND.light;
   const dispatch = useAppDispatch();
   const { featuredFurniture, loading: featuredLoading } = useAppSelector((state) => state.furniture);
+  const [publicReviews, setPublicReviews] = useState<Review[]>([]);
+  const [reviewsLoading, setReviewsLoading] = useState<boolean>(true);
+  const [reviewsError, setReviewsError] = useState<string | null>(null);
 
   useEffect(() => {
     dispatch(fetchFeaturedFurniture(8));
   }, [dispatch]);
+
+  useEffect(() => {
+    let isMounted = true;
+    const loadReviews = async () => {
+      try {
+        setReviewsLoading(true);
+        setReviewsError(null);
+        const reviews = await fetchPublicReviews();
+        if (!isMounted) return;
+        setPublicReviews(reviews);
+      } catch (error) {
+        if (!isMounted) return;
+        setReviewsError('Failed to load reviews');
+      } finally {
+        if (isMounted) {
+          setReviewsLoading(false);
+        }
+      }
+    };
+
+    loadReviews();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const latestThreeReviews = publicReviews.slice(0, 3);
+
+  const getInitials = (name: string) => {
+    if (!name) return '?';
+    const parts = name.trim().split(' ');
+    if (parts.length === 1) return parts[0]!.charAt(0).toUpperCase();
+    return (parts[0]![0] ?? '').toUpperCase() + (parts[1]![0] ?? '').toUpperCase();
+  };
 
   const heroAndTopContent = (
     <>
@@ -773,65 +789,112 @@ export const WelcomePage: React.FC = () => {
               </Typography>
             </MotionBox>
 
-            <Grid container spacing={3}>
-              {TESTIMONIALS.map((testimonial) => (
-                <Grid item xs={12} md={4} key={testimonial.name}>
-                  <MotionCard
-                    variants={fadeInUp}
-                    whileHover={{ y: -4, transition: { duration: 0.2 } }}
-                    className="glass-surface"
-                    sx={{
-                      height: '100%',
-                      backdropFilter: `blur(${glass.blur}px)`,
-                      WebkitBackdropFilter: `blur(${glass.blur}px)`,
-                      backgroundColor: glass.background,
-                      border: `1px solid ${glass.border}`,
-                    }}
-                  >
-                    <CardContent sx={{ p: 4 }}>
-                      <FormatQuote
-                        sx={{
-                          fontSize: 40,
-                          color: 'secondary.main',
-                          opacity: 0.6,
-                          mb: 1,
-                          transform: 'scaleX(-1)',
-                        }}
-                      />
-                      <Typography
-                        variant="body1"
-                        sx={{ color: 'text.secondary', lineHeight: 1.8, mb: 3, fontStyle: 'italic' }}
-                      >
-                        "{testimonial.text}"
-                      </Typography>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                        <Avatar
-                          sx={{
-                            bgcolor: 'primary.main',
-                            fontWeight: 700,
-                            width: 44,
-                            height: 44,
-                          }}
-                        >
-                          {testimonial.avatar}
-                        </Avatar>
-                        <Box>
-                          <Typography variant="subtitle2" fontWeight={700}>
-                            {testimonial.name}
-                          </Typography>
-                          <Typography variant="caption" color="text.secondary">
-                            {testimonial.role}
-                          </Typography>
-                          <Box>
-                            <Rating value={testimonial.rating} readOnly size="small" />
+            {reviewsLoading ? (
+              <Grid container spacing={3}>
+                {Array.from({ length: 3 }).map((_, idx) => (
+                  <Grid item xs={12} md={4} key={idx}>
+                    <MotionCard
+                      variants={fadeInUp}
+                      className="glass-surface"
+                      sx={{
+                        height: '100%',
+                        backdropFilter: `blur(${glass.blur}px)`,
+                        WebkitBackdropFilter: `blur(${glass.blur}px)`,
+                        backgroundColor: glass.background,
+                        border: `1px solid ${glass.border}`,
+                      }}
+                    >
+                      <CardContent sx={{ p: 4 }}>
+                        <Skeleton variant="text" width="40%" sx={{ mb: 1 }} />
+                        <Skeleton variant="text" width="100%" sx={{ mb: 1 }} />
+                        <Skeleton variant="text" width="90%" sx={{ mb: 3 }} />
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                          <Skeleton variant="circular" width={44} height={44} />
+                          <Box sx={{ flex: 1 }}>
+                            <Skeleton variant="text" width="60%" />
+                            <Skeleton variant="text" width="40%" />
                           </Box>
                         </Box>
-                      </Box>
-                    </CardContent>
-                  </MotionCard>
-                </Grid>
-              ))}
-            </Grid>
+                      </CardContent>
+                    </MotionCard>
+                  </Grid>
+                ))}
+              </Grid>
+            ) : latestThreeReviews.length === 0 ? (
+              <Box sx={{ textAlign: 'center', color: 'text.secondary' }}>
+                <Typography variant="body1" sx={{ mb: 1 }}>
+                  No reviews yet.
+                </Typography>
+                <Typography variant="body2">
+                  Be the first to share your experience after shopping with RoomCraft Studio.
+                </Typography>
+              </Box>
+            ) : (
+              <Grid container spacing={3}>
+                {latestThreeReviews.map((review) => (
+                  <Grid item xs={12} md={4} key={review.id}>
+                    <MotionCard
+                      variants={fadeInUp}
+                      whileHover={{ y: -4, transition: { duration: 0.2 } }}
+                      className="glass-surface"
+                      sx={{
+                        height: '100%',
+                        backdropFilter: `blur(${glass.blur}px)`,
+                        WebkitBackdropFilter: `blur(${glass.blur}px)`,
+                        backgroundColor: glass.background,
+                        border: `1px solid ${glass.border}`,
+                      }}
+                    >
+                      <CardContent sx={{ p: 4 }}>
+                        <FormatQuote
+                          sx={{
+                            fontSize: 40,
+                            color: 'secondary.main',
+                            opacity: 0.6,
+                            mb: 1,
+                            transform: 'scaleX(-1)',
+                          }}
+                        />
+                        <Typography
+                          variant="body1"
+                          sx={{
+                            color: 'text.secondary',
+                            lineHeight: 1.8,
+                            mb: 3,
+                            fontStyle: 'italic',
+                          }}
+                        >
+                          "{review.comment}"
+                        </Typography>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                          <Avatar
+                            sx={{
+                              bgcolor: 'primary.main',
+                              fontWeight: 700,
+                              width: 44,
+                              height: 44,
+                            }}
+                          >
+                            {getInitials(review.user.name)}
+                          </Avatar>
+                          <Box>
+                            <Typography variant="subtitle2" fontWeight={700}>
+                              {review.user.name}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary">
+                              Verified customer
+                            </Typography>
+                            <Box>
+                              <Rating value={review.rating} readOnly size="small" precision={0.5} />
+                            </Box>
+                          </Box>
+                        </Box>
+                      </CardContent>
+                    </MotionCard>
+                  </Grid>
+                ))}
+              </Grid>
+            )}
           </AnimatedSection>
         </Container>
       </Box>

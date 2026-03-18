@@ -30,6 +30,7 @@ import {
   Logout,
   AdminPanelSettings,
   Chair as ChairIcon,
+  RateReview,
 } from '@mui/icons-material';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '@/app/store';
@@ -46,6 +47,7 @@ const NAV_ITEMS = [
   { label: 'Furniture Management', path: '/furniture', icon: <ChairIcon /> },
   { label: 'User Management', path: '/users', icon: <People /> },
   { label: 'Designer Management', path: '/designers', icon: <DesignServices /> },
+  { label: 'Review Management', path: '/reviews', icon: <RateReview /> },
 ];
 
 const PAGE_TITLES: Record<string, string> = {
@@ -55,6 +57,7 @@ const PAGE_TITLES: Record<string, string> = {
   '/furniture': 'Furniture Management',
   '/users': 'User Management',
   '/designers': 'Designer Management',
+  '/reviews': 'Review Management',
 };
 
 export const AdminLayout: React.FC = () => {
