@@ -1,0 +1,20 @@
+# Render Blueprint — RoomCraft Studio API
+# Deploy: Connect this repo in Render Dashboard, then use "New" → "Blueprint" and point to this file.
+# Set all environment variables (secrets) in the Render Dashboard for this service.
+
+services:
+  - type: web
+    name: roomcraft-studio-api
+    runtime: node
+    region: oregon
+
+    # App lives in server/
+    rootDir: server
+
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+
+    # Render sets PORT automatically; no need to add it here.
+    envVars:
+      - key: NODE_ENV
+        value: production

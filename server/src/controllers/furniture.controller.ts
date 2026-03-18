@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import * as furnitureService from '../services/furniture.service';
 import { sendSuccess, sendCreated, sendError } from '../utils/response.util';
 import { FurnitureCategory } from '../types/design.types';
-import { getPublicBaseUrl, saveUploadToPublicFolder, validateImageUpload, validateModelUpload } from '../utils/localUpload';
+import { getUploadBaseUrl, saveUploadToPublicFolder, validateImageUpload, validateModelUpload } from '../utils/localUpload';
 
 export const createFurniture = async (
   req: Request,
@@ -55,7 +55,7 @@ export const createFurnitureWithAssets = async (
       originalname: modelFile.originalname,
     });
 
-    const baseUrl = getPublicBaseUrl(req);
+    const baseUrl = getUploadBaseUrl(req);
     const thumbnailUrl = `${baseUrl}${thumbnailSaved.relativeUrlPath}`;
     const modelUrl = `${baseUrl}${modelSaved.relativeUrlPath}`;
     const modelFormat = modelSaved.ext === '.gltf' ? 'gltf' : 'glb';
@@ -196,7 +196,7 @@ export const updateFurnitureThumbnail = async (
       buffer: file.buffer,
       originalname: file.originalname,
     });
-    const resultUrl = `${getPublicBaseUrl(req)}${saved.relativeUrlPath}`;
+    const resultUrl = `${getUploadBaseUrl(req)}${saved.relativeUrlPath}`;
 
     const thumbnailAlt = (req.body?.thumbnailAlt as string) || undefined;
     const furniture = await furnitureService.updateFurnitureThumbnail(id, {
