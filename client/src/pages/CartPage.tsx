@@ -23,7 +23,7 @@ import { CartSummary } from '@/components/cart/CartSummary';
 import { useAppSelector, useAppDispatch } from '@/app/hooks';
 import { fetchCart, clearCart, addDesignToCart } from '@/features/cart/cartSlice';
 import { useAuth } from '@/hooks/useAuth';
-import type { IDesign } from '@/types/design.types';
+import type { Design } from '@/types/design.types';
 import api from '@/services/api';
 
 export default function CartPage() {
@@ -35,7 +35,7 @@ export default function CartPage() {
   const subtotal = cart?.subtotal ?? 0;
   const tax = cart?.tax ?? 0;
   const total = cart?.total ?? 0;
-  const [designs, setDesigns] = useState<IDesign[]>([]);
+  const [designs, setDesigns] = useState<Design[]>([]);
   const [designModalOpen, setDesignModalOpen] = useState(false);
   const [clearDialogOpen, setClearDialogOpen] = useState(false);
 
@@ -48,9 +48,8 @@ export default function CartPage() {
   useEffect(() => {
     const fetchDesigns = async () => {
       try {
-        const response = await api.get('/designs');
-        // @ts-expect-error API typing is loose here
-        setDesigns(response.data.designs || response.data.data?.designs || []);
+        const response = await api.get<{ designs?: Design[]; data?: { designs?: Design[] } }>('/designs');
+        setDesigns(response.data.designs ?? response.data.data?.designs ?? []);
       } catch (err) {
         console.error('Failed to fetch designs:', err);
       }
@@ -172,7 +171,7 @@ export default function CartPage() {
             <Box>
               <Stack spacing={2}>
                 {items.map((item) => (
-                  <CartItem key={item.furniture._id} item={item} />
+                  <CartItem key={item.furnitureId._id} item={item} />
                 ))}
               </Stack>
 
@@ -245,8 +244,8 @@ export default function CartPage() {
                   <ListItem key={design._id} disablePadding>
                     <ListItemButton onClick={() => handleAddDesign(design._id)}>
                       <ListItemText
-                        primary={design.roomName || `Design ${design._id.slice(-6)}`}
-                        secondary={`${design.roomWidth}m × ${design.roomLength}m • ${design.furnitureItems?.length || 0} items`}
+                        primary={design.name || `Design ${design._id.slice(-6)}`}
+                        secondary={`${design.room.width}m × ${design.room.length}m • ${design.furniture?.length ?? 0} items`}
                       />
                     </ListItemButton>
                   </ListItem>

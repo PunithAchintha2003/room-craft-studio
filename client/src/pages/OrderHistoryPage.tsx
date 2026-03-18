@@ -32,7 +32,7 @@ import { TwoTonePageLayout } from '@/components/layout/TwoTonePageLayout';
 import { GlassCard } from '@/components/common/GlassCard';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { fetchOrders, cancelOrder } from '@/features/order/orderSlice';
-import type { IOrder } from '@/features/order/orderSlice';
+import type { Order, OrderItem } from '@/features/order/orderSlice';
 import { formatCurrencyLKR } from '@/utils/currency';
 
 const getStatusIcon = (status: string) => {
@@ -71,7 +71,7 @@ export default function OrderHistoryPage() {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { orders, loading, error } = useAppSelector((state) => state.orders);
-  const [selectedOrder, setSelectedOrder] = useState<IOrder | null>(null);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [orderToCancel, setOrderToCancel] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -80,7 +80,7 @@ export default function OrderHistoryPage() {
     dispatch(fetchOrders({}));
   }, [dispatch]);
 
-  const handleViewDetails = (order: IOrder) => {
+  const handleViewDetails = (order: Order) => {
     setSelectedOrder(order);
   };
 
@@ -105,9 +105,17 @@ export default function OrderHistoryPage() {
 
   return (
     <TwoTonePageLayout
-      title="Order History"
-      subtitle="Track and manage your orders"
-    >
+      top={
+        <Box sx={{ py: { xs: 3, md: 4 } }}>
+          <Typography variant="h4" fontWeight={700} gutterBottom>
+            Order History
+          </Typography>
+          <Typography variant="body1" color="text.secondary">
+            Track and manage your orders
+          </Typography>
+        </Box>
+      }
+      bottom={
       <Box sx={{ maxWidth: 1200, mx: 'auto', px: 3, py: 4 }}>
         {/* Filter Controls */}
         <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -266,7 +274,7 @@ export default function OrderHistoryPage() {
                       Items
                     </Typography>
                     <Stack spacing={2}>
-                      {selectedOrder.items.map((item, index) => (
+                      {selectedOrder.items.map((item: OrderItem, index: number) => (
                         <Box
                           key={index}
                           sx={{
@@ -279,8 +287,8 @@ export default function OrderHistoryPage() {
                         >
                           <Box
                             component="img"
-                            src={item.furniture.thumbnail}
-                            alt={item.furniture.name}
+                            src={item.thumbnail}
+                            alt={item.name}
                             sx={{
                               width: 80,
                               height: 80,
@@ -290,17 +298,17 @@ export default function OrderHistoryPage() {
                           />
                           <Box sx={{ flex: 1 }}>
                             <Typography variant="subtitle1" fontWeight="medium">
-                              {item.furniture.name}
+                              {item.name}
                             </Typography>
                             <Typography variant="body2" color="text.secondary">
                               Quantity: {item.quantity}
                             </Typography>
                             <Typography variant="body2" color="primary" fontWeight="medium">
-                              {formatCurrencyLKR(item.priceSnapshot)} each
+                              {formatCurrencyLKR(item.price)} each
                             </Typography>
                           </Box>
                           <Typography variant="h6" color="primary">
-                            {formatCurrencyLKR(item.priceSnapshot * item.quantity)}
+                            {formatCurrencyLKR(item.price * item.quantity)}
                           </Typography>
                         </Box>
                       ))}
@@ -423,6 +431,7 @@ export default function OrderHistoryPage() {
           </DialogActions>
         </Dialog>
       </Box>
-    </TwoTonePageLayout>
+      }
+    />
   );
 }

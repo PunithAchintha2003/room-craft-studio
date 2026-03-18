@@ -22,7 +22,6 @@ import {
   InputAdornment,
 } from '@mui/material';
 import { GlassCard } from '@/components/common/GlassCard';
-import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import SearchIcon from '@mui/icons-material/Search';
 import ShareIcon from '@mui/icons-material/Share';

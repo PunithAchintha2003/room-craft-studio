@@ -1,6 +1,6 @@
 import { Drawer, Box, Typography, Stack, Button, Divider, IconButton } from '@mui/material';
 import { Close, ShoppingCart } from '@mui/icons-material';
-import { useAppSelector, useAppDispatch } from '@/app/hooks';
+import { useAppSelector } from '@/app/hooks';
 import { useNavigate } from 'react-router-dom';
 import { CartItem } from './CartItem';
 import { formatCurrencyLKR } from '@/utils/currency';
@@ -12,15 +12,9 @@ interface CartDrawerProps {
 
 export function CartDrawer({ open, onClose }: CartDrawerProps) {
   const navigate = useNavigate();
-  const dispatch = useAppDispatch();
   const { cart, loading } = useAppSelector((state) => state.cart);
   const items = cart?.items ?? [];
   const subtotal = cart?.subtotal ?? 0;
-
-  const handleViewCart = () => {
-    navigate('/cart');
-    onClose();
-  };
 
   const handleCheckout = () => {
     navigate('/payment');

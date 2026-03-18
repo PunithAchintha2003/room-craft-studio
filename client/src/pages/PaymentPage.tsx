@@ -21,7 +21,6 @@ import { createOrder } from '@/features/order/orderSlice';
 import { clearCart } from '@/features/cart/cartSlice';
 import { formatCurrencyLKR } from '@/utils/currency';
 
-const TEST_SUCCESS_CARD = '4242 4242 4242 4242';
 const TEST_DECLINE_CARD = '4000 0000 0000 0002';
 
 function formatCardNumber(value: string): string {
