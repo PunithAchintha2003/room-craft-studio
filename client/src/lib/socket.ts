@@ -7,7 +7,8 @@ import { AppDispatch } from '@/app/store';
 import { addNotification } from '@/features/notifications/notificationSlice';
 import { NotificationItem } from '@/services/notifications.api';
 
-const WS_URL = (import.meta as { env: Record<string, string> }).env['VITE_WS_URL'] ||
+const WS_URL = (import.meta as { env: Record<string, string> }).env['VITE_SOCKET_URL'] ||
+  (import.meta as { env: Record<string, string> }).env['VITE_WS_URL'] ||
   (import.meta as { env: Record<string, string> }).env['VITE_API_URL']?.replace('/api', '') ||
   'http://localhost:5002';
 

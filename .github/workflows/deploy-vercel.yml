@@ -32,7 +32,7 @@ jobs:
       - name: Install and build (client)
         env:
           VITE_API_URL: https://room-craft-studio.onrender.com/api
-          VITE_WS_URL: https://room-craft-studio.onrender.com
+          VITE_SOCKET_URL: https://room-craft-studio.onrender.com
         run: |
           cd client
           npm ci
