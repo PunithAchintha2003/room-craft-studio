@@ -6,6 +6,7 @@ import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { addToCart } from '@/features/cart/cartSlice';
 import { addToWishlist, removeFromWishlist, selectWishlistItems } from '@/features/wishlist/wishlistSlice';
 import { formatCurrencyLKR } from '@/utils/currency';
+import { getAssetUrl } from '@/utils/assetUrl';
 
 interface ProductCardProps {
   furniture: {
@@ -90,7 +91,7 @@ export function ProductCard({ furniture, onQuickView, compact = false }: Product
         <CardMedia
           component="img"
           height={compact ? 160 : 240}
-          image={furniture.thumbnail}
+          image={getAssetUrl(furniture.thumbnail)}
           alt={`${furniture.name} - ${furniture.category}`}
           sx={{
             width: '100%',

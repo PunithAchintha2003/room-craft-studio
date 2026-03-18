@@ -16,6 +16,7 @@ import {
   Alert,
 } from '@mui/material';
 import { GlassCard } from '@/components/common/GlassCard';
+import { getAssetUrl } from '@/utils/assetUrl';
 import SearchIcon from '@mui/icons-material/Search';
 import ChairIcon from '@mui/icons-material/Chair';
 import WeekendIcon from '@mui/icons-material/Weekend';
@@ -193,7 +194,7 @@ const FurnitureCatalogPage: React.FC = () => {
                   <CardActionArea onClick={() => navigate(`/furniture/${item._id}`)}>
                     <CardMedia
                       component="img"
-                      image={item.thumbnail}
+                      image={getAssetUrl(item.thumbnail)}
                       alt={item.thumbnailAlt ?? item.name}
                       loading="lazy"
                       sx={{

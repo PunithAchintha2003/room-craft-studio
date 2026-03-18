@@ -12,6 +12,13 @@ export function getPublicBaseUrl(req: { protocol: string; get: (h: string) => st
   return `${req.protocol}://${host}`;
 }
 
+/** Use PUBLIC_BASE_URL in production so stored URLs are correct for the deployed API (HTTPS). */
+export function getUploadBaseUrl(req: { protocol: string; get: (h: string) => string | undefined }): string {
+  const envBase = process.env.PUBLIC_BASE_URL?.trim();
+  if (envBase) return envBase.replace(/\/$/, '');
+  return getPublicBaseUrl(req);
+}
+
 export function getExtension(originalname: string): string {
   const ext = path.extname(originalname || '').toLowerCase();
   return ext;

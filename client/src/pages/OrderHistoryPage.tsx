@@ -34,6 +34,7 @@ import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { fetchOrders, cancelOrder } from '@/features/order/orderSlice';
 import type { Order, OrderItem } from '@/features/order/orderSlice';
 import { formatCurrencyLKR } from '@/utils/currency';
+import { getAssetUrl } from '@/utils/assetUrl';
 
 const getStatusIcon = (status: string) => {
   switch (status) {
@@ -287,7 +288,7 @@ export default function OrderHistoryPage() {
                         >
                           <Box
                             component="img"
-                            src={item.thumbnail}
+                            src={getAssetUrl(item.thumbnail)}
                             alt={item.name}
                             sx={{
                               width: 80,

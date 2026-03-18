@@ -4,6 +4,7 @@ import { useAppDispatch } from '@/app/hooks';
 import { updateCartItem, removeFromCart } from '@/features/cart/cartSlice';
 import type { ICartItem } from '@/features/cart/cartSlice';
 import { formatCurrencyLKR } from '@/utils/currency';
+import { getAssetUrl } from '@/utils/assetUrl';
 
 interface CartItemProps {
   item: ICartItem;
@@ -73,7 +74,7 @@ export function CartItem({ item, readonly = false }: CartItemProps) {
       {/* Product Image */}
       <Box
         component="img"
-        src={item.furnitureId.thumbnail}
+        src={getAssetUrl(item.furnitureId.thumbnail)}
         alt={`${item.furnitureId.name} - ${item.furnitureId.category}`}
         sx={{
           width: 96,

@@ -32,6 +32,7 @@ import { fetchFurnitureById, fetchRelatedFurniture } from '@/features/furniture/
 import { addToCart } from '@/features/cart/cartSlice';
 import { addToWishlist, removeFromWishlist, selectWishlistItems } from '@/features/wishlist/wishlistSlice';
 import { formatCurrencyLKR } from '@/utils/currency';
+import { getAssetUrl } from '@/utils/assetUrl';
 
 export default function ProductDetailPage() {
   const theme = useTheme();
@@ -225,7 +226,7 @@ export default function ProductDetailPage() {
     );
   }
 
-  const images = [furniture.thumbnail];
+  const images = [getAssetUrl(furniture.thumbnail)];
 
   const isOutOfStock = (furniture.stock || 0) === 0;
   const isLowStock = !isOutOfStock && (furniture.stock || 0) <= 10;
