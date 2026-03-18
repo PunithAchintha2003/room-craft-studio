@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -16,7 +16,7 @@ import {
 } from '@mui/material';
 import { useForm, Controller, useFieldArray } from 'react-hook-form';
 import { HexColorPicker } from 'react-colorful';
-import { RoomConfig, RoomOpening } from '@/types/design.types';
+import { RoomConfig, RoomOpening, RoomLayout, CutoutPosition } from '@/types/design.types';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
@@ -36,9 +36,13 @@ const DEFAULT_OPENING: Omit<RoomOpening, 'id'> = {
 };
 
 export const RoomConfigForm: React.FC<RoomConfigFormProps> = ({ initialConfig, onApply }) => {
-  const { control, handleSubmit, watch, setValue } = useForm<RoomConfig>({
+  const { control, handleSubmit, watch, setValue, getValues } = useForm<RoomConfig>({
     defaultValues: {
       ...initialConfig,
+      layout: initialConfig.layout ?? 'rectangle',
+      cutoutPosition: initialConfig.cutoutPosition ?? 'bottom-right',
+      cutoutWidth: initialConfig.cutoutWidth ?? 2,
+      cutoutLength: initialConfig.cutoutLength ?? 2,
       wallTexture: initialConfig.wallTexture ?? '',
       floorTexture: initialConfig.floorTexture ?? '',
       wallTextureScale: initialConfig.wallTextureScale ?? 1,
@@ -57,6 +61,21 @@ export const RoomConfigForm: React.FC<RoomConfigFormProps> = ({ initialConfig, o
   const floorColor = watch('floorColor');
   const wallTexture = watch('wallTexture');
   const floorTexture = watch('floorTexture');
+  const layout = watch('layout') ?? 'rectangle';
+  const needsCutout = layout !== 'rectangle';
+
+  const cornerPositions: CutoutPosition[] = ['top-left', 'top-right', 'bottom-left', 'bottom-right'];
+  const sidePositions: CutoutPosition[] = ['top', 'bottom', 'left', 'right'];
+
+  useEffect(() => {
+    if (!needsCutout) return;
+    const pos = getValues('cutoutPosition') as CutoutPosition | undefined;
+    if (layout === 't-shape' || layout === 'u-shape') {
+      if (pos && cornerPositions.includes(pos)) setValue('cutoutPosition', 'bottom');
+    } else if (layout === 'l-shape' || layout === 'l-mirror' || layout === 'angled-bay') {
+      if (pos && sidePositions.includes(pos)) setValue('cutoutPosition', 'bottom-right');
+    }
+  }, [layout, needsCutout, setValue, getValues]);
 
   const onSubmit = (data: RoomConfig) => {
     onApply(data);
@@ -146,6 +165,125 @@ export const RoomConfigForm: React.FC<RoomConfigFormProps> = ({ initialConfig, o
               </Grid>
             </Grid>
           </Box>
+
+          <Box>
+            <Typography variant="subtitle2" gutterBottom>
+              Room Layout
+            </Typography>
+            <Controller
+              name="layout"
+              control={control}
+              render={({ field }) => (
+                <FormControl fullWidth size="small">
+                  <Select
+                    {...field}
+                    value={field.value ?? 'rectangle'}
+                    displayEmpty
+                    renderValue={(v) => {
+                      const labels: Record<RoomLayout, string> = {
+                        rectangle: 'Rectangle',
+                        'l-shape': 'L shape',
+                        'l-mirror': 'L mirror',
+                        't-shape': 'T shape',
+                        'u-shape': 'U shape',
+                        'angled-bay': 'Angled Bay',
+                      };
+                      return labels[v as RoomLayout] ?? v;
+                    }}
+                  >
+                    <MenuItem value="rectangle">Rectangle</MenuItem>
+                    <MenuItem value="l-shape">L shape</MenuItem>
+                    <MenuItem value="l-mirror">L mirror</MenuItem>
+                    <MenuItem value="t-shape">T shape</MenuItem>
+                    <MenuItem value="u-shape">U shape</MenuItem>
+                    <MenuItem value="angled-bay">Angled Bay</MenuItem>
+                  </Select>
+                </FormControl>
+              )}
+            />
+          </Box>
+
+          {needsCutout && (
+            <Box>
+              <Typography variant="subtitle2" gutterBottom>
+                Cutout
+              </Typography>
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <Controller
+                    name="cutoutPosition"
+                    control={control}
+                    render={({ field }) => (
+                      <FormControl fullWidth size="small">
+                        <InputLabel id="cutout-position-label">Cutout position</InputLabel>
+                        <Select
+                          {...field}
+                          value={
+                            (layout === 't-shape' || layout === 'u-shape')
+                              ? (cornerPositions.includes((field.value as CutoutPosition) ?? '') ? 'bottom' : (field.value ?? 'bottom'))
+                              : (field.value ?? 'bottom-right')
+                          }
+                          labelId="cutout-position-label"
+                          label="Cutout position"
+                        >
+                          {(layout === 'l-shape' || layout === 'l-mirror' || layout === 'angled-bay') && (
+                            <>
+                              <MenuItem value="top-left">Top left</MenuItem>
+                              <MenuItem value="top-right">Top right</MenuItem>
+                              <MenuItem value="bottom-left">Bottom left</MenuItem>
+                              <MenuItem value="bottom-right">Bottom right</MenuItem>
+                            </>
+                          )}
+                          {(layout === 't-shape' || layout === 'u-shape') && (
+                            <>
+                              <MenuItem value="top">Top</MenuItem>
+                              <MenuItem value="bottom">Bottom</MenuItem>
+                              <MenuItem value="left">Left</MenuItem>
+                              <MenuItem value="right">Right</MenuItem>
+                            </>
+                          )}
+                        </Select>
+                      </FormControl>
+                    )}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <Controller
+                    name="cutoutWidth"
+                    control={control}
+                    rules={{ min: 0.5 }}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        label="Cutout width (m)"
+                        type="number"
+                        fullWidth
+                        size="small"
+                        inputProps={{ min: 0.5, max: 30, step: 0.1 }}
+                      />
+                    )}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <Controller
+                    name="cutoutLength"
+                    control={control}
+                    rules={{ min: 0.5 }}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        label="Cutout length (m)"
+                        type="number"
+                        fullWidth
+                        size="small"
+                        inputProps={{ min: 0.5, max: 30, step: 0.1 }}
+                      />
+                    )}
+                  />
+                </Grid>
+              </Grid>
+            </Box>
+          )}
 
           <Box>
             <Typography variant="subtitle2" gutterBottom>

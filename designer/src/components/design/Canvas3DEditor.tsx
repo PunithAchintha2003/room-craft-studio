@@ -180,7 +180,7 @@ const Scene: React.FC<{
   showGrid,
   onGroundClick,
   lightingConfig,
-  postProcessing,
+  postProcessing: _postProcessing,
 }) => {
   const furnitureMap = new Map(furniture.map(f => [f._id, f]));
   const roomDiag = Math.sqrt(design.room.width ** 2 + design.room.length ** 2);

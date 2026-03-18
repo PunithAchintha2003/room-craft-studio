@@ -13,6 +13,7 @@ import {
 import { Canvas2DFurnitureItem } from './Canvas2DFurnitureItem';
 import { MeasurementLayer } from './MeasurementLayer';
 import { SnapGuideLayer, computeSnapTargetsX, computeSnapTargetsY, findSnap } from './SnapGuideLayer';
+import { getFloorOutlinePoints } from '@/utils/roomShapeUtils';
 import Konva from 'konva';
 
 const PIXELS_PER_METER = 60;
@@ -214,53 +215,71 @@ export const Canvas2DEditor: React.FC<Canvas2DEditorProps> = ({
   // ── Room walls (thick) ────────────────────────────────────────────────────
   const renderRoom = () => {
     const wallColor = currentDesign.room.wallColor;
+    const layout = currentDesign.room.layout ?? 'rectangle';
+
+    if (layout === 'rectangle') {
+      return (
+        <Group>
+          <Rect
+            x={0}
+            y={0}
+            width={roomWidthPx}
+            height={roomLengthPx}
+            fill={currentDesign.room.floorColor || '#F5E6D0'}
+            listening={false}
+          />
+          <Rect x={0} y={0} width={roomWidthPx} height={WALL_THICKNESS_PX} fill={wallColor} listening={false} />
+          <Rect x={0} y={roomLengthPx - WALL_THICKNESS_PX} width={roomWidthPx} height={WALL_THICKNESS_PX} fill={wallColor} listening={false} />
+          <Rect x={0} y={0} width={WALL_THICKNESS_PX} height={roomLengthPx} fill={wallColor} listening={false} />
+          <Rect x={roomWidthPx - WALL_THICKNESS_PX} y={0} width={WALL_THICKNESS_PX} height={roomLengthPx} fill={wallColor} listening={false} />
+          <Rect
+            x={0}
+            y={0}
+            width={roomWidthPx}
+            height={roomLengthPx}
+            stroke="#424242"
+            strokeWidth={1.5}
+            fill="transparent"
+            listening={false}
+          />
+          <Text x={roomWidthPx / 2 - 20} y={roomLengthPx + 8} text={`${currentDesign.room.width}m`} fontSize={11} fill="#616161" listening={false} />
+          <Text x={roomWidthPx + 8} y={roomLengthPx / 2 - 8} text={`${currentDesign.room.length}m`} fontSize={11} fill="#616161" listening={false} />
+        </Group>
+      );
+    }
+
+    const points = getFloorOutlinePoints(currentDesign.room, PIXELS_PER_METER);
     return (
       <Group>
         {/* Floor fill */}
-        <Rect
-          x={0}
-          y={0}
-          width={roomWidthPx}
-          height={roomLengthPx}
+        <Line
+          points={points}
+          closed
           fill={currentDesign.room.floorColor || '#F5E6D0'}
           listening={false}
         />
-        {/* North wall */}
-        <Rect x={0} y={0} width={roomWidthPx} height={WALL_THICKNESS_PX} fill={wallColor} listening={false} />
-        {/* South wall */}
-        <Rect x={0} y={roomLengthPx - WALL_THICKNESS_PX} width={roomWidthPx} height={WALL_THICKNESS_PX} fill={wallColor} listening={false} />
-        {/* West wall */}
-        <Rect x={0} y={0} width={WALL_THICKNESS_PX} height={roomLengthPx} fill={wallColor} listening={false} />
-        {/* East wall */}
-        <Rect x={roomWidthPx - WALL_THICKNESS_PX} y={0} width={WALL_THICKNESS_PX} height={roomLengthPx} fill={wallColor} listening={false} />
+        {/* Walls (thick stroke along outline) */}
+        <Line
+          points={points}
+          closed
+          stroke={wallColor}
+          strokeWidth={WALL_THICKNESS_PX}
+          fill="transparent"
+          lineJoin="miter"
+          listening={false}
+        />
         {/* Outer border */}
-        <Rect
-          x={0}
-          y={0}
-          width={roomWidthPx}
-          height={roomLengthPx}
+        <Line
+          points={points}
+          closed
           stroke="#424242"
           strokeWidth={1.5}
           fill="transparent"
           listening={false}
         />
-        {/* Room dimensions labels */}
-        <Text
-          x={roomWidthPx / 2 - 20}
-          y={roomLengthPx + 8}
-          text={`${currentDesign.room.width}m`}
-          fontSize={11}
-          fill="#616161"
-          listening={false}
-        />
-        <Text
-          x={roomWidthPx + 8}
-          y={roomLengthPx / 2 - 8}
-          text={`${currentDesign.room.length}m`}
-          fontSize={11}
-          fill="#616161"
-          listening={false}
-        />
+        {/* Dimensions labels */}
+        <Text x={roomWidthPx / 2 - 20} y={roomLengthPx + 8} text={`${currentDesign.room.width}m`} fontSize={11} fill="#616161" listening={false} />
+        <Text x={roomWidthPx + 8} y={roomLengthPx / 2 - 8} text={`${currentDesign.room.length}m`} fontSize={11} fill="#616161" listening={false} />
       </Group>
     );
   };

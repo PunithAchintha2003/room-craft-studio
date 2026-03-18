@@ -201,7 +201,7 @@ export const DesignEditorPage: React.FC = () => {
         userId: user?._id || '',
         name: 'New Design',
         description: '',
-        room: { width: 5, length: 5, height: 3, wallColor: '#F5F5F5', floorColor: '#D2B48C' },
+        room: { width: 5, length: 5, height: 3, wallColor: '#F5F5F5', floorColor: '#D2B48C', layout: 'rectangle' },
         furniture: [],
         isPublic: false,
         createdAt: new Date().toISOString(),
