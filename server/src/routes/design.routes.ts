@@ -17,12 +17,22 @@ const furnitureItemSchema = z.object({
   color: z.string().regex(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/).optional(),
 });
 
+const roomLayoutEnum = z.enum(['rectangle', 'l-shape', 'l-mirror', 't-shape', 'u-shape', 'angled-bay']);
+const cutoutPositionEnum = z.enum([
+  'top-left', 'top-right', 'bottom-left', 'bottom-right',
+  'top', 'bottom', 'left', 'right',
+]);
+
 const roomConfigSchema = z.object({
   width: z.number().min(1).max(20),
   length: z.number().min(1).max(20),
   height: z.number().min(2).max(5),
   wallColor: z.string().regex(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/).default('#FFFFFF'),
   floorColor: z.string().regex(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/).default('#D3D3D3'),
+  layout: roomLayoutEnum.optional().default('rectangle'),
+  cutoutPosition: cutoutPositionEnum.optional(),
+  cutoutWidth: z.number().min(0).optional(),
+  cutoutLength: z.number().min(0).optional(),
 });
 
 const createDesignSchema = z.object({

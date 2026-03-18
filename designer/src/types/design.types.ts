@@ -6,6 +6,33 @@ export type FurnitureCategory = string;
 
 export type WallSide = 'north' | 'south' | 'east' | 'west';
 
+/**
+ * Room floor plan layout.
+ * - rectangle: simple rectangle
+ * - l-shape / l-mirror: L-shaped with one corner cut out (cutout position + width/length)
+ * - t-shape: T-shaped with stem on one side (cutout position = side of stem, width/length = stem)
+ * - u-shape: U-shaped with opening on one side (cutout position = open side, width/length = opening)
+ * - angled-bay: one corner cut at an angle (cutout position = corner, width/length = bay dimensions)
+ */
+export type RoomLayout =
+  | 'rectangle'
+  | 'l-shape'
+  | 'l-mirror'
+  | 't-shape'
+  | 'u-shape'
+  | 'angled-bay';
+
+/** For L/L-mirror/Angled bay: which corner. For T/U: which side (stem or opening). */
+export type CutoutPosition =
+  | 'top-left'
+  | 'top-right'
+  | 'bottom-left'
+  | 'bottom-right'
+  | 'top'
+  | 'bottom'
+  | 'left'
+  | 'right';
+
 export interface RoomOpening {
   id: string;
   type: 'door' | 'window';
@@ -37,6 +64,25 @@ export interface RoomConfig {
   height: number;
   wallColor: string;
   floorColor: string;
+  /**
+   * Room floor plan layout (default: rectangle)
+   */
+  layout?: RoomLayout;
+  /**
+   * Cutout position for L/T/U/Angled Bay layouts.
+   * L/L-mirror/Angled bay: corner (top-left, top-right, bottom-left, bottom-right).
+   * T-shape: side where stem is (top, bottom, left, right).
+   * U-shape: side that is open (top, bottom, left, right).
+   */
+  cutoutPosition?: CutoutPosition;
+  /**
+   * Cutout width in meters (for L/T/U/Angled bay).
+   */
+  cutoutWidth?: number;
+  /**
+   * Cutout length in meters (for L/T/U/Angled bay).
+   */
+  cutoutLength?: number;
   /**
    * Optional wall texture URL or identifier
    */

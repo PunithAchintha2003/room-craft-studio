@@ -123,6 +123,17 @@ const roomConfigSchema = new Schema<IRoomConfig>(
       match: [/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/, 'Invalid hex color format'],
       default: '#D3D3D3',
     },
+    layout: {
+      type: String,
+      enum: ['rectangle', 'l-shape', 'l-mirror', 't-shape', 'u-shape', 'angled-bay'],
+      default: 'rectangle',
+    },
+    cutoutPosition: {
+      type: String,
+      enum: ['top-left', 'top-right', 'bottom-left', 'bottom-right', 'top', 'bottom', 'left', 'right'],
+    },
+    cutoutWidth: { type: Number, min: 0 },
+    cutoutLength: { type: Number, min: 0 },
     wallTexture: {
       type: String,
     },

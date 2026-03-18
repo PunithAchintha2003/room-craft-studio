@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/app/store';
 import { RoomConfig, RoomOpening } from '../../types/design.types';
+import { getFloorOutlinePoints3D } from '../../utils/roomShapeUtils';
 
 interface Room3DProps {
   room: RoomConfig;
@@ -92,6 +93,7 @@ export const Room3D: React.FC<Room3DProps> = ({ room }) => {
     height,
     wallColor,
     floorColor,
+    layout = 'rectangle',
     wallTexture: wallTextureUrl,
     floorTexture: floorTextureUrl,
     wallTextureScale = 1,
@@ -161,154 +163,182 @@ export const Room3D: React.FC<Room3DProps> = ({ room }) => {
   const eastWallOpenings = openings.filter(o => o.wall === 'east');
   const eastSegments = buildWallSegments(length, eastWallOpenings);
 
-  // Center the room at origin
+  // Center the room at origin (group position so that room center is at world origin)
   const cx = width / 2;
   const cz = length / 2;
+
+  const isRect = layout === 'rectangle';
+  const outlinePoints3D = useMemo(() => getFloorOutlinePoints3D(room), [room.layout, room.width, room.length, room.cutoutPosition, room.cutoutWidth, room.cutoutLength]);
+
+  const floorGeometry = useMemo(() => {
+    if (isRect) return null;
+    const shape = new THREE.Shape();
+    const pts = outlinePoints3D;
+    if (pts.length > 0) {
+      shape.moveTo(pts[0][0], -pts[0][1]);
+      for (let i = 1; i < pts.length; i++) shape.lineTo(pts[i][0], -pts[i][1]);
+      shape.lineTo(pts[0][0], -pts[0][1]);
+    }
+    return new THREE.ShapeGeometry(shape);
+  }, [isRect, outlinePoints3D]);
 
   return (
     <group position={[-cx, 0, -cz]}>
       {/* ── Floor ── */}
-      <mesh
-        position={[cx, 0, cz]}
-        rotation={[-Math.PI / 2, 0, 0]}
-        receiveShadow
-      >
-        <planeGeometry args={[width, length]} />
-        <primitive object={floorMaterial} attach="material" />
-      </mesh>
+      {isRect ? (
+        <mesh position={[cx, 0, cz]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
+          <planeGeometry args={[width, length]} />
+          <primitive object={floorMaterial} attach="material" />
+        </mesh>
+      ) : (
+        floorGeometry && (
+          <mesh
+            position={[cx, 0, cz]}
+            rotation={[-Math.PI / 2, 0, 0]}
+            receiveShadow
+          >
+            <primitive object={floorGeometry} attach="geometry" />
+            <primitive object={floorMaterial} attach="material" />
+          </mesh>
+        )
+      )}
 
       {/* ── Ceiling (toggled) ── */}
       {showCeiling && (
-        <mesh
-          position={[cx, height, cz]}
-          rotation={[Math.PI / 2, 0, 0]}
-          receiveShadow
-        >
-          <planeGeometry args={[width, length]} />
-          <meshStandardMaterial color="#FAFAFA" roughness={0.95} metalness={0} />
-        </mesh>
+        isRect ? (
+          <mesh position={[cx, height, cz]} rotation={[Math.PI / 2, 0, 0]} receiveShadow>
+            <planeGeometry args={[width, length]} />
+            <meshStandardMaterial color="#FAFAFA" roughness={0.95} metalness={0} />
+          </mesh>
+        ) : (
+          floorGeometry && (
+            <mesh position={[cx, height, cz]} rotation={[Math.PI / 2, 0, 0]} receiveShadow>
+              <primitive object={floorGeometry.clone()} attach="geometry" />
+              <meshStandardMaterial color="#FAFAFA" roughness={0.95} metalness={0} />
+            </mesh>
+          )
+        )
       )}
 
-      {/* ── North wall segments ── */}
-      {northSegments.map((seg, i) => {
-        const segW = seg.end - seg.start;
-        return (
-          <WallSegment
-            key={`north-${i}`}
-            position={[seg.start + segW / 2, height / 2, 0]}
-            width={segW}
-            height={height}
-            wallColor={wallColor}
-            wallTexture={wallTexture ?? undefined}
-            wallTextureScale={wallTextureScale}
-          />
-        );
-      })}
-      {/* Opening frames - north */}
-      {northWallOpenings.map((o, i) => (
-        <mesh key={`north-frame-${i}`} position={[o.offset, o.bottom + o.height / 2, 0]}>
-          <boxGeometry args={[o.width, o.height, WALL_THICKNESS * 1.2]} />
-          <meshStandardMaterial color={o.type === 'door' ? '#6D4C41' : '#B3E5FC'} roughness={0.7} metalness={0.1} />
-        </mesh>
-      ))}
-
-      {/* ── South wall segments ── */}
-      {southSegments.map((seg, i) => {
-        const segW = seg.end - seg.start;
-        return (
-          <WallSegment
-            key={`south-${i}`}
-            position={[seg.start + segW / 2, height / 2, length]}
-            rotation={[0, Math.PI, 0]}
-            width={segW}
-            height={height}
-            wallColor={wallColor}
-            wallTexture={wallTexture ?? undefined}
-            wallTextureScale={wallTextureScale}
-          />
-        );
-      })}
-      {southWallOpenings.map((o, i) => (
-        <mesh key={`south-frame-${i}`} position={[o.offset, o.bottom + o.height / 2, length]}>
-          <boxGeometry args={[o.width, o.height, WALL_THICKNESS * 1.2]} />
-          <meshStandardMaterial color={o.type === 'door' ? '#6D4C41' : '#B3E5FC'} roughness={0.7} metalness={0.1} />
-        </mesh>
-      ))}
-
-      {/* ── West wall segments ── */}
-      {westSegments.map((seg, i) => {
-        const segL = seg.end - seg.start;
-        return (
-          <WallSegment
-            key={`west-${i}`}
-            position={[0, height / 2, seg.start + segL / 2]}
-            rotation={[0, Math.PI / 2, 0]}
-            width={segL}
-            height={height}
-            wallColor={wallColor}
-            wallTexture={wallTexture ?? undefined}
-            wallTextureScale={wallTextureScale}
-          />
-        );
-      })}
-      {westWallOpenings.map((o, i) => (
-        <mesh key={`west-frame-${i}`} position={[0, o.bottom + o.height / 2, o.offset]} rotation={[0, Math.PI / 2, 0]}>
-          <boxGeometry args={[o.width, o.height, WALL_THICKNESS * 1.2]} />
-          <meshStandardMaterial color={o.type === 'door' ? '#6D4C41' : '#B3E5FC'} roughness={0.7} metalness={0.1} />
-        </mesh>
-      ))}
-
-      {/* ── East wall segments ── */}
-      {eastSegments.map((seg, i) => {
-        const segL = seg.end - seg.start;
-        return (
-          <WallSegment
-            key={`east-${i}`}
-            position={[width, height / 2, seg.start + segL / 2]}
-            rotation={[0, -Math.PI / 2, 0]}
-            width={segL}
-            height={height}
-            wallColor={wallColor}
-            wallTexture={wallTexture ?? undefined}
-            wallTextureScale={wallTextureScale}
-          />
-        );
-      })}
-      {eastWallOpenings.map((o, i) => (
-        <mesh key={`east-frame-${i}`} position={[width, o.bottom + o.height / 2, o.offset]} rotation={[0, -Math.PI / 2, 0]}>
-          <boxGeometry args={[o.width, o.height, WALL_THICKNESS * 1.2]} />
-          <meshStandardMaterial color={o.type === 'door' ? '#6D4C41' : '#B3E5FC'} roughness={0.7} metalness={0.1} />
-        </mesh>
-      ))}
-
-      {/* ── Baseboards ── */}
-      {/* North */}
-      <Baseboard
-        position={[cx, BASEBOARD_HEIGHT / 2, BASEBOARD_DEPTH / 2]}
-        length={width}
-        wallColor={wallColor}
-      />
-      {/* South */}
-      <Baseboard
-        position={[cx, BASEBOARD_HEIGHT / 2, length - BASEBOARD_DEPTH / 2]}
-        rotation={[0, Math.PI, 0]}
-        length={width}
-        wallColor={wallColor}
-      />
-      {/* West */}
-      <Baseboard
-        position={[BASEBOARD_DEPTH / 2, BASEBOARD_HEIGHT / 2, cz]}
-        rotation={[0, Math.PI / 2, 0]}
-        length={length}
-        wallColor={wallColor}
-      />
-      {/* East */}
-      <Baseboard
-        position={[width - BASEBOARD_DEPTH / 2, BASEBOARD_HEIGHT / 2, cz]}
-        rotation={[0, -Math.PI / 2, 0]}
-        length={length}
-        wallColor={wallColor}
-      />
+      {/* ── Walls: either outline segments (non-rect) or four sides with openings ── */}
+      {isRect ? (
+        <>
+          {northSegments.map((seg, i) => {
+            const segW = seg.end - seg.start;
+            return (
+              <WallSegment
+                key={`north-${i}`}
+                position={[seg.start + segW / 2, height / 2, 0]}
+                width={segW}
+                height={height}
+                wallColor={wallColor}
+                wallTexture={wallTexture ?? undefined}
+                wallTextureScale={wallTextureScale}
+              />
+            );
+          })}
+          {northWallOpenings.map((o, i) => (
+            <mesh key={`north-frame-${i}`} position={[o.offset, o.bottom + o.height / 2, 0]}>
+              <boxGeometry args={[o.width, o.height, WALL_THICKNESS * 1.2]} />
+              <meshStandardMaterial color={o.type === 'door' ? '#6D4C41' : '#B3E5FC'} roughness={0.7} metalness={0.1} />
+            </mesh>
+          ))}
+          {southSegments.map((seg, i) => {
+            const segW = seg.end - seg.start;
+            return (
+              <WallSegment
+                key={`south-${i}`}
+                position={[seg.start + segW / 2, height / 2, length]}
+                rotation={[0, Math.PI, 0]}
+                width={segW}
+                height={height}
+                wallColor={wallColor}
+                wallTexture={wallTexture ?? undefined}
+                wallTextureScale={wallTextureScale}
+              />
+            );
+          })}
+          {southWallOpenings.map((o, i) => (
+            <mesh key={`south-frame-${i}`} position={[o.offset, o.bottom + o.height / 2, length]}>
+              <boxGeometry args={[o.width, o.height, WALL_THICKNESS * 1.2]} />
+              <meshStandardMaterial color={o.type === 'door' ? '#6D4C41' : '#B3E5FC'} roughness={0.7} metalness={0.1} />
+            </mesh>
+          ))}
+          {westSegments.map((seg, i) => {
+            const segL = seg.end - seg.start;
+            return (
+              <WallSegment
+                key={`west-${i}`}
+                position={[0, height / 2, seg.start + segL / 2]}
+                rotation={[0, Math.PI / 2, 0]}
+                width={segL}
+                height={height}
+                wallColor={wallColor}
+                wallTexture={wallTexture ?? undefined}
+                wallTextureScale={wallTextureScale}
+              />
+            );
+          })}
+          {westWallOpenings.map((o, i) => (
+            <mesh key={`west-frame-${i}`} position={[0, o.bottom + o.height / 2, o.offset]} rotation={[0, Math.PI / 2, 0]}>
+              <boxGeometry args={[o.width, o.height, WALL_THICKNESS * 1.2]} />
+              <meshStandardMaterial color={o.type === 'door' ? '#6D4C41' : '#B3E5FC'} roughness={0.7} metalness={0.1} />
+            </mesh>
+          ))}
+          {eastSegments.map((seg, i) => {
+            const segL = seg.end - seg.start;
+            return (
+              <WallSegment
+                key={`east-${i}`}
+                position={[width, height / 2, seg.start + segL / 2]}
+                rotation={[0, -Math.PI / 2, 0]}
+                width={segL}
+                height={height}
+                wallColor={wallColor}
+                wallTexture={wallTexture ?? undefined}
+                wallTextureScale={wallTextureScale}
+              />
+            );
+          })}
+          {eastWallOpenings.map((o, i) => (
+            <mesh key={`east-frame-${i}`} position={[width, o.bottom + o.height / 2, o.offset]} rotation={[0, -Math.PI / 2, 0]}>
+              <boxGeometry args={[o.width, o.height, WALL_THICKNESS * 1.2]} />
+              <meshStandardMaterial color={o.type === 'door' ? '#6D4C41' : '#B3E5FC'} roughness={0.7} metalness={0.1} />
+            </mesh>
+          ))}
+          <Baseboard position={[cx, BASEBOARD_HEIGHT / 2, BASEBOARD_DEPTH / 2]} length={width} wallColor={wallColor} />
+          <Baseboard position={[cx, BASEBOARD_HEIGHT / 2, length - BASEBOARD_DEPTH / 2]} rotation={[0, Math.PI, 0]} length={width} wallColor={wallColor} />
+          <Baseboard position={[BASEBOARD_DEPTH / 2, BASEBOARD_HEIGHT / 2, cz]} rotation={[0, Math.PI / 2, 0]} length={length} wallColor={wallColor} />
+          <Baseboard position={[width - BASEBOARD_DEPTH / 2, BASEBOARD_HEIGHT / 2, cz]} rotation={[0, -Math.PI / 2, 0]} length={length} wallColor={wallColor} />
+        </>
+      ) : (
+        outlinePoints3D.map((pt, i) => {
+          const next = outlinePoints3D[(i + 1) % outlinePoints3D.length];
+          const x0 = pt[0];
+          const z0 = pt[1];
+          const x1 = next[0];
+          const z1 = next[1];
+          const dx = x1 - x0;
+          const dz = z1 - z0;
+          const len = Math.sqrt(dx * dx + dz * dz);
+          if (len < 0.01) return null;
+          const midX = (x0 + x1) / 2 + cx;
+          const midZ = (z0 + z1) / 2 + cz;
+          const angle = Math.atan2(dz, dx);
+          return (
+            <WallSegment
+              key={`outline-${i}`}
+              position={[midX, height / 2, midZ]}
+              rotation={[0, -angle, 0]}
+              width={len}
+              height={height}
+              wallColor={wallColor}
+              wallTexture={wallTexture ?? undefined}
+              wallTextureScale={wallTextureScale}
+            />
+          );
+        })
+      )}
     </group>
   );
 };
