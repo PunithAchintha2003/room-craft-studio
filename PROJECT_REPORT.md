@@ -1,140 +1,192 @@
- # RoomCraft Studio – Final Consolidated Report
+# RoomCraft Studio - Project Report
 
- ## 1. Project Overview
+## Document Control
 
- RoomCraft Studio is a room-design and furniture visualisation platform with three web frontends (client, admin, designer) and a shared TypeScript/Node.js REST API backend. Users can browse a furniture catalogue, create and save room designs in a 2D editor, and visualise them in 3D across all portals. The system follows a layered backend architecture (routes → controllers → services → models) and feature-sliced React frontends with Redux Toolkit and a shared design system based on a two‑tone layout and glassmorphism.
+- **Project**: RoomCraft Studio
+- **Version**: 1.0
+- **Date**: March 2026
+- **Prepared by**: Group 96
+- **Purpose**: Consolidated technical and product delivery report
 
- This report consolidates the content and findings from all previous markdown documents in the repository (architecture, HCI documentation, ecommerce status, and phase summaries) into a single high‑level summary suitable for submission.
+---
 
- ---
+## 1. Executive Summary
 
- ## 2. System Architecture Summary
+RoomCraft Studio is a multi-portal platform for furniture discovery, room design, and ecommerce execution. The solution includes three React frontends (`client`, `admin`, `designer`) and a shared Node.js/TypeScript REST API (`server`) backed by MongoDB.
 
- The architecture is documented in detail in the former `ARCHITECTURE.md` and related files. At a high level:
+The platform delivers end-to-end user value across:
 
- - **Containers**
-   - `client/`: Customer SPA for catalogue, room designer, saved designs, and ecommerce flows.
-   - `admin/`: Management SPA for dashboard KPIs, furniture CRUD, and design/user oversight.
-   - `designer/`: Designer SPA that shares the same design language as `admin/` with specialist workflows.
-   - `server/`: Express + TypeScript API with JWT auth and MongoDB via Mongoose.
- - **Backend layers**
-   - Routes (`server/src/routes/*.ts`) map REST endpoints to controllers.
-   - Controllers (`server/src/controllers/*.ts`) validate input, call services, and shape HTTP responses.
-   - Services (`server/src/services/*.ts`) contain business logic for designs, furniture, cart, orders, wishlist, and payments.
-   - Models (`server/src/models/*.ts`) define MongoDB schemas for furniture, designs, cart, orders, wishlist, and users.
- - **Cross‑cutting concerns**
-   - Auth middleware, input validation, upload handling, error middleware, security headers, and logging.
- - **Frontend structure**
-   - React 18 + Vite + TypeScript.
-   - Redux Toolkit feature slices (`designSlice`, `furnitureSlice`, `cartSlice`, `orderSlice`, `wishlistSlice`, `checkoutSlice`, etc.).
-   - MUI‑based theming with shared tokens for colour, typography, shape, shadows, and glassmorphism.
+- 2D room planning and 3D visualization
+- Furniture catalog and product discovery
+- Cart, wishlist, checkout, order lifecycle, and payment processing
+- Administrative and designer workflows
 
- This architecture enables clear separation of concerns, maintainability, and reuse of shared components and patterns across all three frontends.
+From an engineering perspective, the system uses a layered backend architecture and feature-based frontend state management to keep implementation modular, testable, and maintainable.
 
- ---
+---
 
- ## 3. 3D Visualisation (Phase 3) Summary
+## 2. Product Scope and Objectives
 
- Phase 3 introduced complete 3D visualisation capabilities across the client, admin, and designer portals. The implementation used React Three Fiber and `@react-three/drei` to provide a declarative Three.js integration.
+### Primary Objectives
 
- **Key components**
+- Enable users to design realistic room layouts in 2D and 3D.
+- Support a full ecommerce flow from product browsing to payment.
+- Provide role-specific portals for customers, administrators, and designers.
+- Maintain a consistent design language and reusable component system.
 
- - `Room3D`: Renders the room shell (floor and four walls) using configurable colours derived from room configuration.
- - `FurnitureModel3D`: Loads GLB/GLTF furniture models via `useGLTF`, with robust error boundaries, loading states, and a geometric fallback when models fail.
- - `Canvas3DViewer` (client): Main 3D scene with orbit controls, lighting, shadows, and screenshot capture.
- - `Canvas3DEditor` (admin/designer): Modal 3D editor supporting furniture selection in 3D, camera presets (corner/top/front), and a grid toggle.
+### In Scope
 
- **Features by portal**
+- Customer SPA (`client/`) for catalog, design workflows, and ecommerce journeys.
+- Admin SPA (`admin/`) for operational management and oversight.
+- Designer SPA (`designer/`) for specialist design tasks.
+- REST API (`server/`) for authentication, business logic, and data persistence.
 
- - **Client**:
-   - 2D/3D toggle on the Design Viewer page.
-   - OrbitControls for rotate/zoom/pan.
-   - Screenshot export using a custom `useScreenshot` hook.
-   - Loading indicators and graceful error handling for model failures.
- - **Admin & Designer**:
-   - 3D Preview modal from the design editor toolbar.
-   - Furniture selection directly in 3D.
-   - Camera presets and grid overlay for alignment.
-   - Shared 3D components and synced state with the 2D editor.
+---
 
- Performance testing indicates stable 60 FPS under typical furniture counts, fast model loading, and responsive interaction across desktop and mobile devices.
+## 3. Solution Architecture
 
- ---
+### 3.1 System Composition
 
- ## 4. Ecommerce Implementation Summary
+- `client/`: Customer-facing SPA (catalog, 2D/3D design, wishlist, cart, checkout, order history)
+- `admin/`: Management portal (dashboard KPIs, furniture CRUD, user/design oversight)
+- `designer/`: Designer portal with shared design system and specialized tools
+- `server/`: Express + TypeScript API with JWT-based authentication and MongoDB/Mongoose
 
- The ecommerce work adds a production‑ready cart, orders, wishlist, and payments layer on top of the existing catalogue and design features.
+### 3.2 Backend Design
 
- **Backend**
+The backend follows a clear layered pattern:
 
- - **Models**
-   - `cart.model.ts`: Per‑user cart with TTL, price snapshots, tax/shipping fields, and design‑to‑cart support.
-   - `order.model.ts`: Full order lifecycle including status history and order numbers.
-   - `wishlist.model.ts`: Per‑user wishlist with de‑duplicated furniture entries.
-   - Enhanced `furniture.model.ts`: Additional ecommerce fields such as multiple images, descriptions, specifications, tags, featured flags, ratings, and stock.
- - **Services**
-   - `cart.service.ts`: Add/update/remove items, clear cart, validate against stock, add design layouts to cart.
-   - `order.service.ts`: Create orders, update statuses, adjust stock levels, and fetch order history.
-   - `wishlist.service.ts`: Wishlist CRUD and checks.
-   - `payment.service.ts`: Stripe payment intents, webhook validation, and refunds.
-   - `furniture.service.ts`: Featured/related products and advanced search.
- - **Controllers & Routes**
-   - REST endpoints for cart, orders, wishlist, and payment flows, all wired into the main router and protected by auth middleware.
-   - Stripe webhook route uses raw body parsing for signature verification.
+- **Routes** map HTTP endpoints to controllers.
+- **Controllers** validate requests and orchestrate service execution.
+- **Services** implement domain logic (design, furniture, cart, order, wishlist, payment).
+- **Models** define persistence schemas and relationships.
 
- **Frontend state**
+### 3.3 Cross-Cutting Concerns
 
- - `cartSlice`: Cart items, totals, tax/shipping estimates, and optimistic updates.
- - `orderSlice`: Order history with filters and pagination.
- - `wishlistSlice`: Wishlist management and quick actions.
- - `checkoutSlice`: Multi‑step checkout, including address/shipping and payment.
- - Enhanced `furnitureSlice`: Selected product, featured lists, related items, and ecommerce filters.
- - Stripe integration via `client/src/lib/stripe.ts` with `@stripe/stripe-js` and `@stripe/react-stripe-js`.
+- Authentication and authorization middleware
+- Input validation and error handling middleware
+- Logging, security headers, and upload handling
+- Stripe webhook handling with raw body validation
 
- **Key UI pieces**
+### 3.4 Frontend Architecture
 
- - Cart drawer and full cart page with rich empty states, quantity controls, tax/shipping breakdown, clear‑cart confirmation, and “Add design to cart”.
- - Updated navbar with cart icon and badge, loading the cart state on app start.
- - Product card component with price, stock state, add‑to‑cart, and wishlist toggles.
+- React 18 + Vite + TypeScript
+- Redux Toolkit slices for domain state (`design`, `furniture`, `cart`, `order`, `wishlist`, `checkout`)
+- Shared MUI-based theming, tokens, and reusable UI patterns
 
- Overall, the ecommerce backend and state management are complete and production‑ready, while some secondary UI pages (e.g., full checkout page and detailed product view) can be expanded further if additional marks or polish are desired.
+---
 
- ---
+## 4. Key Delivery Areas
 
- ## 5. HCI & UX Documentation Summary
+### 4.1 3D Visualization Capability
 
- The project includes extensive HCI documentation originally spread across multiple markdown files. The key outcomes are:
+The platform includes integrated 3D room visualization across portals using React Three Fiber and `@react-three/drei`.
 
- - **Personas (7 total)**: Covering core design users and ecommerce‑specific roles (budget shopper, gift buyer, repeat customer), each with detailed goals, frustrations, accessibility needs, and end‑to‑end journeys.
- - **Storyboards (6 total)**: Long, step‑by‑step narratives (15–22 steps each) for design and ecommerce journeys, including a fully annotated accessible checkout flow for a screen‑reader user.
- - **Testing plan**: 16 tasks grouped into discovery, cart, checkout, and design‑integration sets, with defined effectiveness, efficiency, and satisfaction metrics, plus SUS methodology and accessibility testing procedures.
- - **Iterations**: Four major evidence‑based iterations focusing on checkout form clarity, tax transparency, mobile optimisation, and stock visibility, each with before/after metrics, user quotes, and explicit links to Nielsen and Norman principles.
- - **Accessibility**: A WCAG 2.1 AA audit with 97% compliance (35/36 criteria passed), no critical or major issues, and detailed notes on keyboard navigation, focus states, and contrast ratios.
+Delivered capabilities include:
 
- Quantitatively, the iterations raise SUS scores from 68 to 84, eliminate cart abandonment due to surprise costs, bring mobile checkout completion to 100%, and remove stock‑related friction. These documents collectively demonstrate a user‑centred, data‑driven design process aligned with the coursework brief.
+- Room shell rendering (floor/walls) from room configuration
+- GLB/GLTF furniture model loading with loading/error fallback behavior
+- Camera controls, lighting, shadows, and grid/camera presets (where applicable)
+- 2D/3D workflow continuity between editors and viewers
+- Screenshot capture support on the client viewer
 
- ---
+Reported outcome: stable interaction quality and responsive rendering for typical furniture counts.
 
- ## 6. Phase Milestones
+### 4.2 Ecommerce Capability
 
- Across the earlier phase reports (Phase 2 and Phase 3 summaries and completion documents), the project tracks progress in terms of:
+Ecommerce implementation extends the platform with:
 
- - **Phase 2**: Completion of the 2D editor and underlying design/furniture slices, delivering a robust canvas‑based editing experience.
- - **Phase 3**: Addition of 3D visualisation and preview features for all portals, including testing and performance optimisation.
- - **Ecommerce phase**: Introduction of carts, orders, wishlist, and payment flows, plus the supporting HCI work and documentation.
+- Per-user cart management and quantity updates
+- Wishlist management with duplicate prevention
+- Order creation, status tracking, and order history
+- Stock-aware operations and inventory adjustments
+- Stripe payment intent lifecycle and webhook verification
 
- Each phase closes with explicit success criteria, implementation statistics (components created, files modified, dependencies added), performance metrics, and recommended next steps.
+Frontend experience includes:
 
- ---
+- Cart drawer and full cart page
+- Product cards with price/stock/add-to-cart/wishlist actions
+- Checkout state management and payment integration support
 
- ## 7. Overall Status and Recommendation
+---
 
- As of March 2026, the project delivers:
+## 5. UX, HCI, and Accessibility Outcomes
 
- - A production‑ready backend with a clean, layered architecture.
- - Three frontends sharing a consistent design system and supporting both 2D and 3D design workflows.
- - A near‑complete ecommerce experience with robust state management and Stripe integration.
- - Publication‑quality HCI documentation with personas, storyboards, testing, iterations, and accessibility analysis.
+The project includes structured UX artifacts and evidence-driven iteration:
 
- The consolidated report in this file can be submitted alongside the codebase and `README.md` as a concise summary of the technical and HCI work, with the underlying implementation and UX details preserved in the code and git history.
+- 7 personas across design and ecommerce user segments
+- 6 storyboards covering major user journeys
+- 16-task usability test plan with effectiveness/efficiency/satisfaction metrics
+- 4 documented design iterations targeting checkout clarity, transparency, mobile flow, and stock communication
+- WCAG 2.1 AA audit results at 97% compliance (35/36 criteria passed)
+
+Measured UX impact reported in the documentation includes SUS improvement from 68 to 84 and reduced checkout friction across mobile and desktop workflows.
+
+---
+
+## 6. Delivery Timeline and Milestones
+
+### Phase 2
+
+- Delivered 2D editor foundations and supporting furniture/design state architecture.
+
+### Phase 3
+
+- Delivered full 3D visualization and portal-level preview capabilities.
+
+### Ecommerce Expansion
+
+- Delivered cart, wishlist, order, and payment modules with supporting UX documentation.
+
+Each phase includes completion criteria, implementation metrics, and follow-up recommendations in the underlying phase documents.
+
+---
+
+## 7. Current Status Assessment
+
+### Engineering Status
+
+- Backend architecture is production-structured and modular.
+- Multi-portal frontend implementation is functionally complete.
+- Core ecommerce domain and payment integration are implemented.
+
+### Product Status
+
+- Core customer journey (discover -> design -> purchase) is implemented.
+- Admin and designer operations are supported through dedicated interfaces.
+- UX documentation and accessibility evidence are mature for reporting/submission.
+
+### Known Extension Opportunities
+
+- Expand advanced product-detail and checkout presentation pages.
+- Add deeper analytics/observability for operational reporting.
+- Increase automated regression coverage for critical purchase and design workflows.
+
+---
+
+## 8. Risks and Mitigations
+
+- **Risk**: 3D performance variance on low-end devices.  
+  **Mitigation**: Model fallback handling, controlled scene complexity, and staged optimization.
+
+- **Risk**: Payment flow reliability and webhook integrity.  
+  **Mitigation**: Stripe signature verification and explicit backend payment services.
+
+- **Risk**: UX complexity across multi-step journeys.  
+  **Mitigation**: Iterative usability testing, accessibility audits, and documented UX refinements.
+
+---
+
+## 9. Recommendations and Next Steps
+
+- Finalize secondary ecommerce pages and polish edge-case states.
+- Add additional automated tests for checkout/payment and 3D design synchronization.
+- Introduce performance dashboards and error monitoring for production operations.
+- Continue accessibility verification as UI surfaces evolve.
+
+---
+
+## 10. Conclusion
+
+RoomCraft Studio is delivered as a technically solid, user-centered platform with aligned architecture, multi-portal execution, and measurable UX improvements. The system is suitable for academic submission and can be advanced toward broader production readiness through focused hardening, observability, and test expansion.
 
