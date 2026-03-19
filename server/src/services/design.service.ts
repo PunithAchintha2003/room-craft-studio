@@ -16,7 +16,8 @@ export const createDesign = async (
 };
 
 export const getUserDesigns = async (userId: string): Promise<IDesign[]> => {
-  const designs = await Design.find({ userId }).sort({ updatedAt: -1 });
+  const objectId = new mongoose.Types.ObjectId(userId);
+  const designs = await Design.find({ userId: objectId }).sort({ updatedAt: -1 });
   return designs;
 };
 

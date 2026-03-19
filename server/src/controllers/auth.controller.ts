@@ -106,3 +106,38 @@ export const getMe = async (
     next(error);
   }
 };
+
+export const updateProfile = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const body = req.body as { name?: string; email?: string };
+    const user = await authService.updateProfile(req.user!.id, {
+      name: body.name,
+      email: body.email,
+    });
+    sendSuccess(res, { user }, 'Profile updated successfully');
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const changePassword = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const body = req.body as { currentPassword: string; newPassword: string };
+    await authService.changePassword(
+      req.user!.id,
+      body.currentPassword,
+      body.newPassword
+    );
+    sendSuccess(res, null, 'Password changed successfully');
+  } catch (error) {
+    next(error);
+  }
+};

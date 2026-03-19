@@ -151,3 +151,51 @@ export const getCurrentUser = async (userId: string): Promise<IUser> => {
   }
   return user;
 };
+
+export interface UpdateProfileInput {
+  name?: string;
+  email?: string;
+}
+
+export const updateProfile = async (
+  userId: string,
+  input: UpdateProfileInput
+): Promise<IUser> => {
+  const user = await User.findById(userId);
+  if (!user) {
+    throw new AppError('User not found', 404);
+  }
+  if (input.name !== undefined) {
+    user.name = input.name.trim();
+    if (user.name.length < 2) {
+      throw new AppError('Name must be at least 2 characters', 400);
+    }
+  }
+  if (input.email !== undefined) {
+    const email = input.email.toLowerCase().trim();
+    const existing = await User.findOne({ email, _id: { $ne: userId } });
+    if (existing) {
+      throw new AppError('An account with this email already exists', 409);
+    }
+    user.email = email;
+  }
+  await user.save({ validateBeforeSave: true });
+  return user;
+};
+
+export const changePassword = async (
+  userId: string,
+  currentPassword: string,
+  newPassword: string
+): Promise<void> => {
+  const user = await User.findById(userId).select('+password');
+  if (!user) {
+    throw new AppError('User not found', 404);
+  }
+  const isMatch = await user.comparePassword(currentPassword);
+  if (!isMatch) {
+    throw new AppError('Current password is incorrect', 401);
+  }
+  user.password = newPassword;
+  await user.save({ validateBeforeSave: true });
+};

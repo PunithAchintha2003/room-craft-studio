@@ -70,6 +70,42 @@ export const fetchCurrentUser = createAsyncThunk(
   }
 );
 
+export interface UpdateProfileInput {
+  name: string;
+  email: string;
+}
+
+export const updateProfile = createAsyncThunk(
+  'auth/updateProfile',
+  async (input: UpdateProfileInput, { rejectWithValue }) => {
+    try {
+      const { data } = await api.patch<{ data: { user: User } }>('/auth/profile', input);
+      return data.data.user;
+    } catch (error) {
+      return rejectWithValue(handleAuthError(error));
+    }
+  }
+);
+
+export interface ChangePasswordInput {
+  currentPassword: string;
+  newPassword: string;
+}
+
+export const changePassword = createAsyncThunk(
+  'auth/changePassword',
+  async (input: ChangePasswordInput, { rejectWithValue }) => {
+    try {
+      await api.post('/auth/change-password', {
+        currentPassword: input.currentPassword,
+        newPassword: input.newPassword,
+      });
+    } catch (error) {
+      return rejectWithValue(handleAuthError(error));
+    }
+  }
+);
+
 const authSlice = createSlice({
   name: 'auth',
   initialState,
@@ -141,6 +177,16 @@ const authSlice = createSlice({
         state.user = null;
         state.accessToken = null;
         state.isAuthenticated = false;
+      })
+      .addCase(updateProfile.fulfilled, (state, action) => {
+        state.user = action.payload;
+        state.error = null;
+      })
+      .addCase(updateProfile.rejected, (state, action) => {
+        state.error = action.payload as string;
+      })
+      .addCase(changePassword.rejected, (state, action) => {
+        state.error = action.payload as string;
       });
   },
 });

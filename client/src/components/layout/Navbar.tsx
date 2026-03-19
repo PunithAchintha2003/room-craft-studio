@@ -25,7 +25,6 @@ import {
   Close as CloseIcon,
   Person as PersonIcon,
   Logout as LogoutIcon,
-  Dashboard as DashboardIcon,
   DarkMode as DarkModeIcon,
   LightMode as LightModeIcon,
   ShoppingCart as ShoppingCartIcon,
@@ -301,12 +300,6 @@ export const Navbar: React.FC = () => {
                         <FavoriteBorderIcon fontSize="small" sx={{ mr: 1.5 }} />
                         <Typography variant="body2">Wishlist</Typography>
                       </MenuItem>
-                      {user.role === 'admin' && (
-                        <MenuItem onClick={() => { handleUserMenuClose(); navigate('/dashboard'); }} sx={{ py: 1.25 }}>
-                          <DashboardIcon fontSize="small" sx={{ mr: 1.5 }} />
-                          <Typography variant="body2">Dashboard</Typography>
-                        </MenuItem>
-                      )}
                       <Divider />
                       <MenuItem onClick={handleLogout} sx={{ color: 'error.main', py: 1.25 }}>
                         <LogoutIcon fontSize="small" sx={{ mr: 1.5 }} />
