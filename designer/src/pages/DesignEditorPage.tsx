@@ -168,8 +168,12 @@ export const DesignEditorPage: React.FC = () => {
       })).unwrap();
       toast.success('Design saved');
       setHasUnsavedChanges(false);
-    } catch {
-      toast.error('Failed to save design');
+    } catch (err) {
+      const message = typeof err === 'string' ? err : 'Failed to save design';
+      toast.error(message);
+      if (message.toLowerCase().includes('log in')) {
+        navigate('/login');
+      }
     }
   }, [currentDesign, dispatch]);
 
@@ -236,8 +240,12 @@ export const DesignEditorPage: React.FC = () => {
       setSaveDialogOpen(false);
       setHasUnsavedChanges(false);
       navigate(`/editor/${result._id}`);
-    } catch {
-      toast.error('Failed to create design');
+    } catch (err) {
+      const message = typeof err === 'string' ? err : 'Failed to create design';
+      toast.error(message);
+      if (message.toLowerCase().includes('log in')) {
+        navigate('/login');
+      }
     }
   };
 

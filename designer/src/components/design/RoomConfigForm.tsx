@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import {
   Box,
   Typography,
@@ -42,6 +42,22 @@ export const RoomConfigForm: React.FC<RoomConfigFormProps> = ({ initialConfig, o
   const isDark = theme.palette.mode === 'dark';
   const glass = isDark ? GLASS.dark : GLASS.light;
 
+  const sanitizeOpenings = (config: RoomConfig): RoomConfig => {
+    // Keep values within backend validation limits (server zod + mongoose schema).
+    const width = Math.max(1, Math.min(20, Number(config.width) || 0));
+    const length = Math.max(1, Math.min(20, Number(config.length) || 0));
+    const height = Math.max(2, Math.min(5, Number(config.height) || 0));
+    const openings = (config.openings ?? []).map((o) => {
+      const wallLen = o.wall === 'north' || o.wall === 'south' ? width : length;
+      const safeWidth = Math.max(0.1, Math.min(Number(o.width) || 0, wallLen));
+      const safeHeight = Math.max(0.1, Math.min(Number(o.height) || 0, height));
+      const safeBottom = Math.max(0, Math.min(Number(o.bottom) || 0, Math.max(0, height - safeHeight)));
+      const safeOffset = Math.max(0, Math.min(Number(o.offset) || 0, Math.max(0, wallLen - safeWidth)));
+      return { ...o, width: safeWidth, height: safeHeight, bottom: safeBottom, offset: safeOffset };
+    });
+    return { ...config, width, length, height, openings };
+  };
+
   const { control, watch, setValue, getValues, subscribe } = useForm<RoomConfig>({
     defaultValues: {
       ...initialConfig,
@@ -79,14 +95,20 @@ export const RoomConfigForm: React.FC<RoomConfigFormProps> = ({ initialConfig, o
           isFirst = false;
           return;
         }
-        if (values) onApply(values as RoomConfig);
+        if (values) onApply(sanitizeOpenings(values as RoomConfig));
       },
     });
     return unsubscribe;
   }, [subscribe, onApply]);
 
-  const cornerPositions: CutoutPosition[] = ['top-left', 'top-right', 'bottom-left', 'bottom-right'];
-  const sidePositions: CutoutPosition[] = ['top', 'bottom', 'left', 'right'];
+  const cornerPositions = useMemo<CutoutPosition[]>(
+    () => ['top-left', 'top-right', 'bottom-left', 'bottom-right'],
+    []
+  );
+  const sidePositions = useMemo<CutoutPosition[]>(
+    () => ['top', 'bottom', 'left', 'right'],
+    []
+  );
 
   useEffect(() => {
     if (!needsCutout) return;
@@ -96,7 +118,7 @@ export const RoomConfigForm: React.FC<RoomConfigFormProps> = ({ initialConfig, o
     } else if (layout === 'l-shape' || layout === 'angled-bay') {
       if (pos && sidePositions.includes(pos)) setValue('cutoutPosition', 'bottom-right');
     }
-  }, [layout, needsCutout, setValue, getValues]);
+  }, [layout, needsCutout, setValue, getValues, cornerPositions, sidePositions]);
 
   return (
     <Paper
@@ -125,13 +147,13 @@ export const RoomConfigForm: React.FC<RoomConfigFormProps> = ({ initialConfig, o
                 title={
                   <Box sx={{ py: 0.5 }}>
                     <Typography variant="body2">
-                      Width: Min 2m, Max 30m
+                      Width: Min 1m, Max 20m
                     </Typography>
                     <Typography variant="body2">
-                      Length: Min 2m, Max 30m
+                      Length: Min 1m, Max 20m
                     </Typography>
                     <Typography variant="body2">
-                      Height: Min 1m, Max 5m
+                      Height: Min 2m, Max 5m
                     </Typography>
                   </Box>
                 }
@@ -172,7 +194,7 @@ export const RoomConfigForm: React.FC<RoomConfigFormProps> = ({ initialConfig, o
                 <Controller
                   name="width"
                   control={control}
-                  rules={{ min: 2, max: 30 }}
+                  rules={{ min: 1, max: 20 }}
                   render={({ field }) => (
                     <TextField
                       {...field}
@@ -180,7 +202,7 @@ export const RoomConfigForm: React.FC<RoomConfigFormProps> = ({ initialConfig, o
                       type="number"
                       fullWidth
                       size="small"
-                      inputProps={{ min: 2, max: 30, step: 0.1 }}
+                      inputProps={{ min: 1, max: 20, step: 0.1 }}
                     />
                   )}
                 />
@@ -189,7 +211,7 @@ export const RoomConfigForm: React.FC<RoomConfigFormProps> = ({ initialConfig, o
                 <Controller
                   name="length"
                   control={control}
-                  rules={{ min: 2, max: 30 }}
+                  rules={{ min: 1, max: 20 }}
                   render={({ field }) => (
                     <TextField
                       {...field}
@@ -197,7 +219,7 @@ export const RoomConfigForm: React.FC<RoomConfigFormProps> = ({ initialConfig, o
                       type="number"
                       fullWidth
                       size="small"
-                      inputProps={{ min: 2, max: 30, step: 0.1 }}
+                      inputProps={{ min: 1, max: 20, step: 0.1 }}
                     />
                   )}
                 />
@@ -206,7 +228,7 @@ export const RoomConfigForm: React.FC<RoomConfigFormProps> = ({ initialConfig, o
                 <Controller
                   name="height"
                   control={control}
-                  rules={{ min: 1, max: 5 }}
+                  rules={{ min: 2, max: 5 }}
                   render={({ field }) => (
                     <TextField
                       {...field}
@@ -214,7 +236,7 @@ export const RoomConfigForm: React.FC<RoomConfigFormProps> = ({ initialConfig, o
                       type="number"
                       fullWidth
                       size="small"
-                      inputProps={{ min: 1, max: 5, step: 0.1 }}
+                      inputProps={{ min: 2, max: 5, step: 0.1 }}
                     />
                   )}
                 />

@@ -123,9 +123,8 @@ const Model3D: React.FC<{
     const scaleX = size.x > 0 ? width / size.x : 1;
     const scaleY = size.y > 0 ? height / size.y : 1;
     const scaleZ = size.z > 0 ? length / size.z : 1;
-    const uniformScale = Math.min(scaleX, scaleY, scaleZ);
-
-    cloned.scale.setScalar(uniformScale);
+    // Use non-uniform scale so 2D footprint (width × length) and height match exactly
+    cloned.scale.set(scaleX, scaleY, scaleZ);
 
     // Re-center after scaling
     const bbox2 = new THREE.Box3().setFromObject(cloned);

@@ -4,12 +4,29 @@
  */
 export type FurnitureCategory = string;
 
+export type WallSide = 'north' | 'south' | 'east' | 'west';
+
+export interface RoomOpening {
+  id: string;
+  type: 'door' | 'window';
+  wall: WallSide;
+  /** Width of the opening in meters (span along the wall) */
+  width: number;
+  /** Height of the opening in meters */
+  height: number;
+  /** Distance from floor to bottom of opening in meters */
+  bottom: number;
+  /** Offset from the left corner to the START of the opening (meters) */
+  offset: number;
+}
+
 export interface RoomConfig {
   width: number;
   length: number;
   height: number;
   wallColor: string;
   floorColor: string;
+  openings?: RoomOpening[];
 }
 
 export interface FurnitureItem {
