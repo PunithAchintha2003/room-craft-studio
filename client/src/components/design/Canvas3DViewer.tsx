@@ -13,6 +13,7 @@ interface Canvas3DViewerProps {
   height?: number | string;
   enableControls?: boolean;
   showStats?: boolean;
+  showRoom?: boolean;
   onFurnitureClick?: (id: string) => void;
   selectedFurnitureIds?: string[];
 }
@@ -47,9 +48,10 @@ const LoadingFallback: React.FC = () => (
 const Scene: React.FC<{
   design: Design;
   furniture: Furniture[];
+  showRoom: boolean;
   onFurnitureClick?: (id: string) => void;
   selectedFurnitureIds?: string[];
-}> = ({ design, furniture, onFurnitureClick, selectedFurnitureIds }) => {
+}> = ({ design, furniture, showRoom, onFurnitureClick, selectedFurnitureIds }) => {
   // Create a map of furniture items for quick lookup
   const furnitureMap = new Map(furniture.map((f) => [f._id, f]));
 
@@ -72,9 +74,11 @@ const Scene: React.FC<{
       <hemisphereLight intensity={0.3} groundColor="#444444" />
 
       {/* Room: same world space as designer (0..width, 0..length) */}
-      <group position={[design.room.width / 2, 0, design.room.length / 2]}>
-        <Room3D room={design.room} />
-      </group>
+      {showRoom && (
+        <group position={[design.room.width / 2, 0, design.room.length / 2]}>
+          <Room3D room={design.room} />
+        </group>
+      )}
 
       {/* Furniture */}
       {design.furniture.map((item) => {
@@ -114,6 +118,7 @@ export const Canvas3DViewer = forwardRef<Canvas3DViewerHandle, Canvas3DViewerPro
       height = '100%',
       enableControls = true,
       showStats = false,
+      showRoom = true,
       onFurnitureClick,
       selectedFurnitureIds = [],
     },
@@ -209,6 +214,7 @@ export const Canvas3DViewer = forwardRef<Canvas3DViewerHandle, Canvas3DViewerPro
             <Scene
               design={design}
               furniture={furniture}
+              showRoom={showRoom}
               onFurnitureClick={onFurnitureClick}
               selectedFurnitureIds={selectedFurnitureIds}
             />

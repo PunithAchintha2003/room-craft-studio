@@ -14,6 +14,10 @@
 
 [Features](#features) · [Quick Start](#quick-start) · [Architecture](#architecture-overview) · [Docs](#documentation) · [Testing](#testing)
 
+🌐 Live Client: [room-craft-studio.vercel.app](https://room-craft-studio.vercel.app)  
+🛠 Live Admin Portal: [room-craft-studio-admin-portal.vercel.app](https://room-craft-studio-admin-portal.vercel.app)  
+📺 YouTube: [PUSL 3122 HCI Group 96 Presentation](https://youtu.be/zHbJxvBknQM)
+
 </div>
 
 ---
@@ -22,7 +26,6 @@
 
 - [🎯 Overview](#overview)
 - [✨ Features](#features)
-- [🖼 Screenshots](#screenshots)
 - [🏗 Architecture Overview](#architecture-overview)
 - [🛠 Tech Stack](#tech-stack)
 - [📦 Prerequisites](#prerequisites)
@@ -32,6 +35,7 @@
 - [⚙️ Configuration](#configuration)
 - [✅ Testing](#testing)
 - [📚 Documentation](#documentation)
+- [👥 Team Contributions](#team-contributions)
 - [🗺 Roadmap](#roadmap)
 - [📄 License](#license)
 
@@ -94,21 +98,6 @@ It is built to feel like a real product **and** to showcase a full HCI workflow:
 - Shared two-tone background and glassmorphism across all apps  
 - Theme tokens for colours, typography, shape, and elevation  
 - Dark/light mode with system preference support  
-
----
-
-<a id="screenshots"></a>
-## 🖼 Screenshots
-
-> Replace paths below with your own captures under `docs/screenshots/`.
-
-| Welcome & catalog | 2D room editor |
-|------------------|----------------|
-| ![Landing and catalog](docs/screenshots/landing-catalog.png) | ![2D room editor](docs/screenshots/room-editor-2d.png) |
-
-| 3D viewer | Cart & order summary |
-|-----------|----------------------|
-| ![3D design viewer](docs/screenshots/room-viewer-3d.png) | ![Cart and order summary](docs/screenshots/cart-summary.png) |
 
 ---
 
@@ -313,6 +302,19 @@ You can add automated tests (unit/integration/e2e) following the existing archit
 - ✅ Keyboard shortcuts help (`?`), tooltips, auto-save, undo/redo (50 steps)  
 - ✅ **Interactive tutorial** — react-joyride guided tour  
 - ✅ ESLint + Prettier, Husky + lint-staged, TypeScript strict mode  
+
+---
+
+<a id="team-contributions"></a>
+## 👥 Team Contributions
+
+| Student ID | Name | Role | Contribution |
+|-----------|------|------|--------------|
+| 10952357 | Matara Hirimbura | Project Lead & Visualization Developer | Introduced the system, built 2D/3D visualization, and developed the design portal. |
+| 10952604 | Rathnayaka Tharushika | Backend & Authentication Developer | Implemented login/signup, user role management, and user and designer management. |
+| 10953498 | Manikkuge Navodya | Furniture Module Developer | Developed furniture browsing and admin furniture management. |
+| 10952542 | Mohottalage Perera | Order & Wishlist Developer | Implemented wishlist and order management features. |
+| 10952732 | Ekanayake Ekanayake | Review System Developer | Developed review and feedback management. |
 
 ---
 
