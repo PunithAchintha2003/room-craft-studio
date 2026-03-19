@@ -17,7 +17,7 @@ const furnitureItemSchema = z.object({
   color: z.string().regex(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/).optional(),
 });
 
-const roomLayoutEnum = z.enum(['rectangle', 'l-shape', 'l-mirror', 't-shape', 'u-shape', 'angled-bay']);
+const roomLayoutEnum = z.enum(['rectangle', 'l-shape', 't-shape', 'u-shape', 'angled-bay']);
 const cutoutPositionEnum = z.enum([
   'top-left', 'top-right', 'bottom-left', 'bottom-right',
   'top', 'bottom', 'left', 'right',

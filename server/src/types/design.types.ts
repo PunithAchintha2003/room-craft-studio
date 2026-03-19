@@ -9,7 +9,6 @@ export type WallSide = 'north' | 'south' | 'east' | 'west';
 export type RoomLayout =
   | 'rectangle'
   | 'l-shape'
-  | 'l-mirror'
   | 't-shape'
   | 'u-shape'
   | 'angled-bay';
