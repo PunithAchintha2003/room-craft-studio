@@ -23,7 +23,6 @@ import {
   alpha,
   useTheme,
   Stack,
-  Button,
 } from '@mui/material';
 import {
   Search,

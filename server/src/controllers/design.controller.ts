@@ -22,9 +22,10 @@ export const getUserDesigns = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const designs = req.user!.role === 'designer'
-      ? await designService.getAllDesignsForDesigner()
-      : await designService.getUserDesigns(req.user!.id);
+    const designs =
+      req.user!.role === 'admin'
+        ? await designService.getAllDesignsForAdmin()
+        : await designService.getUserDesigns(req.user!.id);
     sendSuccess(res, { designs }, 'Designs retrieved successfully');
   } catch (error) {
     next(error);

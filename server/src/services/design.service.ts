@@ -20,8 +20,8 @@ export const getUserDesigns = async (userId: string): Promise<IDesign[]> => {
   return designs;
 };
 
-export const getAllDesignsForDesigner = async (): Promise<IDesign[]> => {
-  const designs = await Design.find().sort({ updatedAt: -1 }).populate('userId', 'name email');
+export const getAllDesignsForAdmin = async (): Promise<IDesign[]> => {
+  const designs = await Design.find().sort({ updatedAt: -1 });
   return designs;
 };
 

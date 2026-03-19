@@ -1,4 +1,4 @@
-import { createTheme, alpha, Theme } from '@mui/material/styles';
+import { createTheme, Theme } from '@mui/material/styles';
 import { BACKGROUND, BRAND, GLASS, SEMANTIC, TYPOGRAPHY } from './tokens';
 
 export type AdminThemeMode = 'dark' | 'light';

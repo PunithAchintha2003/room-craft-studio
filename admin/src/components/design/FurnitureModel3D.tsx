@@ -221,8 +221,10 @@ export const FurnitureModel3D: React.FC<FurnitureModel3DProps> = ({
     }
   }, [furnitureItem.id, onLoadStart]);
 
-  const handleClick = (e: any) => {
-    e.stopPropagation();
+  const handleClick = (e?: unknown) => {
+    // react-three-fiber passes an event; we also call this from UI fallbacks.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (e as any)?.stopPropagation?.();
     if (onClick) {
       onClick(furnitureItem.id);
     }
@@ -234,10 +236,14 @@ export const FurnitureModel3D: React.FC<FurnitureModel3DProps> = ({
     }
   };
 
-  const handleError = (error: Error) => {
-    console.warn(`Failed to load 3D model for ${furniture.name}:`, error.message);
+  // react-error-boundary passes (error, info) where error can be unknown.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleError = (error: unknown) => {
+    const message =
+      error instanceof Error ? error.message : typeof error === 'string' ? error : 'Failed to load model';
+    console.warn(`Failed to load 3D model for ${furniture.name}:`, message);
     if (onLoadError) {
-      onLoadError(furnitureItem.id, error.message || 'Failed to load model');
+      onLoadError(furnitureItem.id, message);
     }
   };
 
@@ -248,10 +254,10 @@ export const FurnitureModel3D: React.FC<FurnitureModel3DProps> = ({
           furniture={furniture}
           furnitureItem={furnitureItem}
           isSelected={isSelected}
-          onClick={handleClick}
+          onClick={() => handleClick()}
         />
       }
-      onError={handleError}
+      onError={(err) => handleError(err)}
       resetKeys={[furniture.model3D.url]}
     >
       <Suspense fallback={<LoadingFallback furnitureItem={furnitureItem} furniture={furniture} />}>
@@ -260,7 +266,7 @@ export const FurnitureModel3D: React.FC<FurnitureModel3DProps> = ({
           furnitureItem={furnitureItem}
           furniture={furniture}
           isSelected={isSelected}
-          onClick={handleClick}
+          onClick={() => handleClick()}
           onLoadComplete={handleLoadComplete}
         />
       </Suspense>
