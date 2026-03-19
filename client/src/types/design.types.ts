@@ -6,6 +6,23 @@ export type FurnitureCategory = string;
 
 export type WallSide = 'north' | 'south' | 'east' | 'west';
 
+export type RoomLayout =
+  | 'rectangle'
+  | 'l-shape'
+  | 't-shape'
+  | 'u-shape'
+  | 'angled-bay';
+
+export type CutoutPosition =
+  | 'top-left'
+  | 'top-right'
+  | 'bottom-left'
+  | 'bottom-right'
+  | 'top'
+  | 'bottom'
+  | 'left'
+  | 'right';
+
 export interface RoomOpening {
   id: string;
   type: 'door' | 'window';
@@ -26,6 +43,14 @@ export interface RoomConfig {
   height: number;
   wallColor: string;
   floorColor: string;
+  layout?: RoomLayout;
+  cutoutPosition?: CutoutPosition;
+  cutoutWidth?: number;
+  cutoutLength?: number;
+  wallTexture?: string;
+  floorTexture?: string;
+  wallTextureScale?: number;
+  floorTextureScale?: number;
   openings?: RoomOpening[];
 }
 

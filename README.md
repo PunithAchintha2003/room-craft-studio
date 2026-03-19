@@ -1,376 +1,334 @@
-## RoomCraft Studio
-
 <div align="center">
 
-![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue?logo=typescript&logoColor=white)
-![React](https://img.shields.io/badge/React-18.x-61dafb?logo=react&logoColor=white)
-![Vite](https://img.shields.io/badge/Vite-5.x-8a2be2?logo=vite&logoColor=white)
-![Node.js](https://img.shields.io/badge/Node.js-18+-339933?logo=node.js&logoColor=white)
-![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-47A248?logo=mongodb&logoColor=white)
-![Status](https://img.shields.io/badge/Status-Production--ready-green)
-![License](https://img.shields.io/badge/License-Course%20Project-lightgrey)
+# 🏠 RoomCraft Studio
 
-**Design, visualise, and shop for furniture in realistic 2D and 3D room layouts – with a full HCI process behind it.**
+**Design, visualise, and shop for furniture in realistic 2D and 3D room layouts**  
+*Built with a complete HCI process — from personas to accessibility.*
 
-[Features](#features) • [Quick Start](#quick-start) • [Architecture](#architecture-overview) • [HCI & UX](#hci-ux-documentation) • [Testing](#testing)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![React](https://img.shields.io/badge/React-18.x-61DAFB?logo=react&logoColor=black)](https://reactjs.org/)
+[![Vite](https://img.shields.io/badge/Vite-5.x-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
+[![Node.js](https://img.shields.io/badge/Node.js-18+-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-47A248?logo=mongodb&logoColor=white)](https://www.mongodb.com/)
+[![License](https://img.shields.io/badge/License-Course%20Project-lightgrey)](./LICENSE)
+
+[Features](#features) · [Quick Start](#quick-start) · [Architecture](#architecture-overview) · [Docs](#documentation) · [Testing](#testing)
 
 </div>
 
 ---
 
-<h2 id="table-of-contents">📋 Table of Contents</h2>
+## 📋 Table of Contents
 
-- [Overview](#overview)
-- [Features](#features)
-- [Screenshots](#screenshots)
-- [Architecture Overview](#architecture-overview)
-- [Tech Stack](#tech-stack)
-- [Prerequisites](#prerequisites)
-- [Quick Start](#quick-start)
-- [Project Structure](#project-structure)
-- [Scripts & Development Workflow](#scripts-development-workflow)
-- [Configuration](#configuration)
-- [Testing](#testing)
-- [HCI & UX Documentation](#hci-ux-documentation)
-- [Roadmap](#roadmap)
-- [License](#license)
+- [🎯 Overview](#overview)
+- [✨ Features](#features)
+- [🖼 Screenshots](#screenshots)
+- [🏗 Architecture Overview](#architecture-overview)
+- [🛠 Tech Stack](#tech-stack)
+- [📦 Prerequisites](#prerequisites)
+- [⚡ Quick Start](#quick-start)
+- [📁 Project Structure](#project-structure)
+- [🧩 Scripts & Development](#scripts-development-workflow)
+- [⚙️ Configuration](#configuration)
+- [✅ Testing](#testing)
+- [📚 Documentation](#documentation)
+- [🗺 Roadmap](#roadmap)
+- [📄 License](#license)
 
 ---
 
-<h2 id="overview">🎯 Overview</h2>
+<a id="overview"></a>
+## 🎯 Overview
 
-RoomCraft Studio is a production‑ready **room‑design and furniture visualisation platform** with three React frontends and a shared Node.js/Express API. It combines a 2D room editor, 3D visualisation, and ecommerce features (cart, orders, wishlist, Stripe) on top of a clean, layered architecture.
+**RoomCraft Studio** is a production-ready **room-design and furniture visualisation platform** with three React frontends and a shared Node.js/Express API. It combines a 2D room editor, 3D visualisation, and ecommerce (cart, orders, wishlist, Stripe) on a clean, layered architecture.
 
-It is built to look and feel like a real product **and** to showcase a complete HCI workflow: personas, storyboards, wireframes, usability testing, iterative redesign, accessibility auditing, and clean architecture.
+It is built to feel like a real product **and** to showcase a full HCI workflow: personas, storyboards, wireframes, usability testing, iterative redesign, accessibility auditing, and clean architecture.
+
+<table>
+<tr>
+<td width="50%">
 
 ### At a glance
 
-- 👥 **Three apps** – Client, Admin, Designer.
-- 🧩 **2D + 3D** – Canvas‑based editor plus full 3D viewer.
-- 🛒 **Ecommerce‑ready** – Cart, orders, wishlist, Stripe integration.
-- 🧠 **HCI‑driven** – Personas, storyboards, wireframes, testing, iterations, accessibility.
-- 🧱 **Clean architecture** – Layered backend, feature‑sliced frontends, shared design system.
+- 👥 **Three apps** — Client, Admin, Designer  
+- 🧩 **2D + 3D** — Canvas editor + full 3D viewer  
+- 🛒 **Ecommerce-ready** — Cart, orders, wishlist, Stripe  
+- 🧠 **HCI-driven** — Personas → testing → iterations → accessibility  
+- 🧱 **Clean architecture** — Layered backend, feature-sliced frontends, shared design system  
+
+</td>
+</tr>
+</table>
 
 ---
 
-<h2 id="features">✨ Features</h2>
+<a id="features"></a>
+## ✨ Features
 
-- **2D room designer**
-  - Grid‑based editor with furniture placement, snapping, and design management.
-  - Saved designs per user and design history.
-  - Two‑tone layout that separates controls from canvas to reduce visual noise.
+### 🖌 2D Room Designer
 
-- **3D visualisation**
-  - Interactive 3D viewer with orbit, zoom, and pan.
-  - Realistic lighting, shadows, and contact shadows for depth perception.
-  - Seamless 2D/3D toggle on the design viewer page.
-  - Screenshot capture/export for presentations.
-  - Admin 3D preview for validating designs before approval.
-  - Full implementation details in `PHASE3_COMPLETE.md`.
+- Grid-based editor with furniture placement, snapping, and design management  
+- Saved designs per user with design history  
+- Two-tone layout separating controls from canvas to reduce visual noise  
 
-- **Ecommerce**
-  - Carts with TTL, price snapshots, and tax calculation.
-  - Orders with full lifecycle status tracking.
-  - Wishlists per user.
-  - Stripe integration for payment intents, webhooks, and refunds.
-  - Product cards with stock, ratings, tags, and “add to cart / wishlist” actions.
-  - Implementation status and coverage in `ECOMMERCE_IMPLEMENTATION_STATUS.md`.
+### 🌐 3D Visualisation
 
-- **Design system**
-  - Shared two‑tone background and glassmorphism components across all apps.
-  - Theme tokens for colours, typography, shape, and elevation.
-  - Dark/light mode with system preference support.
+- Interactive 3D viewer with orbit, zoom, and pan  
+- Realistic lighting, shadows, and contact shadows  
+- Seamless 2D/3D toggle on the design viewer page  
+- Screenshot capture/export for presentations  
+- Admin 3D preview for validating designs before approval  
+- Full details in `PHASE3_COMPLETE.md`  
 
----
+### 🛒 Ecommerce
 
-<h2 id="screenshots">🖼 Screenshots</h2>
+- Carts with TTL, price snapshots, and tax calculation  
+- Orders with full lifecycle status tracking  
+- Wishlists per user  
+- Stripe integration (payment intents, webhooks, refunds)  
+- Product cards with stock, ratings, tags, add to cart/wishlist  
+- Status and coverage in `ECOMMERCE_IMPLEMENTATION_STATUS.md`  
 
-> Screens below are examples; replace paths with your own captures under `docs/screenshots/`.
+### 🎨 Design System
 
-- **Welcome & catalog**
-
-  `![Landing and catalog](docs/screenshots/landing-catalog.png)`
-
-- **2D room editor**
-
-  `![2D room editor](docs/screenshots/room-editor-2d.png)`
-
-- **3D viewer**
-
-  `![3D design viewer](docs/screenshots/room-viewer-3d.png)`
-
-- **Cart & order summary**
-
-  `![Cart and order summary](docs/screenshots/cart-summary.png)`
+- Shared two-tone background and glassmorphism across all apps  
+- Theme tokens for colours, typography, shape, and elevation  
+- Dark/light mode with system preference support  
 
 ---
 
-<h2 id="architecture-overview">🏗 Architecture overview</h2>
+<a id="screenshots"></a>
+## 🖼 Screenshots
 
-RoomCraft Studio is designed with a **clean, layered architecture** and clear separation of concerns. For full details and diagrams, see `ARCHITECTURE.md`.
+> Replace paths below with your own captures under `docs/screenshots/`.
 
-- **Backend (`server/`)**
-  - **Layers**: routes → controllers → services → models.
-  - **Patterns**:
-    - Controllers handle validation and HTTP response shaping.
-    - Services encapsulate business logic (designs, furniture, cart, orders, wishlist, payments).
-    - Models define persistence via Mongoose (MongoDB).
-  - **Cross‑cutting concerns**:
-    - Authentication and authorisation middleware.
-    - Request validation.
-    - Centralised error handling and logging.
-    - Security middleware (Helmet, CORS, rate limiting as configured).
-    - Stripe webhooks with raw body parsing.
+| Welcome & catalog | 2D room editor |
+|------------------|----------------|
+| ![Landing and catalog](docs/screenshots/landing-catalog.png) | ![2D room editor](docs/screenshots/room-editor-2d.png) |
 
-- **Frontends (`client/`, `admin/`, `designer/`)**
-  - React 18 + TypeScript single‑page applications.
-  - Redux Toolkit feature slices for designs, furniture, cart, orders, wishlist, checkout, and 3D viewer.
-  - Shared design tokens and theming to ensure consistent UX across all apps.
-
-- **3D architecture**
-  - React Three Fiber + Drei for 3D scenes.
-  - Reusable primitives:
-    - `Canvas3DViewer` – scene container.
-    - `Room3D` – floor and wall geometry.
-    - `FurnitureModel3D` – GLB/GLTF loader with loading states and fallbacks.
-  - 3D viewer state (mode, camera, loading, errors) managed in a dedicated Redux slice.
+| 3D viewer | Cart & order summary |
+|-----------|----------------------|
+| ![3D design viewer](docs/screenshots/room-viewer-3d.png) | ![Cart and order summary](docs/screenshots/cart-summary.png) |
 
 ---
 
-<h2 id="tech-stack">🛠 Tech stack</h2>
+<a id="architecture-overview"></a>
+## 🏗 Architecture Overview
 
-- **Frontend**
-  - React 18, TypeScript, Vite.
-  - Redux Toolkit for state management.
-  - MUI (Material UI) with custom themes and tokens.
-  - React‑Konva for 2D canvas.
-  - React Three Fiber + Drei + Three.js for 3D.
+RoomCraft Studio uses a **clean, layered architecture** with clear separation of concerns. See `ARCHITECTURE.md` for full details and diagrams.
 
-- **Backend**
-  - Node.js, Express, TypeScript.
-  - MongoDB with Mongoose.
-  - Stripe for payments.
+### Backend (`server/`)
 
-- **Tooling**
-  - npm/Yarn (npm used in scripts).
-  - ESLint + TypeScript configuration.
+| Layer | Responsibility |
+|-------|----------------|
+| **Routes** | HTTP endpoints and routing |
+| **Controllers** | Validation and response shaping |
+| **Services** | Business logic (designs, furniture, cart, orders, wishlist, payments) |
+| **Models** | Persistence via Mongoose (MongoDB) |
 
-See `ARCHITECTURE.md` for a more detailed technology overview.
+**Cross-cutting:** Auth middleware, request validation, centralised error handling and logging, security (Helmet, CORS, rate limiting), Stripe webhooks with raw body parsing.
 
----
+### Frontends (`client/`, `admin/`, `designer/`)
 
-<h2 id="project-structure">📁 Project structure</h2>
+- React 18 + TypeScript SPAs  
+- Redux Toolkit feature slices (designs, furniture, cart, orders, wishlist, checkout, 3D viewer)  
+- Shared design tokens and theming for consistent UX  
 
-- `client/` – customer‑facing SPA (2D/3D designer, ecommerce flows, HCI docs).
-- `admin/` – admin dashboard and design editor with 3D preview.
-- `designer/` – designer‑focused tooling, sharing the same design system.
-- `server/` – REST API, authentication, ecommerce logic, and persistence.
-- `ARCHITECTURE.md` – high‑level architecture, diagrams, and design decisions.
-- `PHASE2_COMPLETE.md` / `PHASE3_COMPLETE.md` – phase‑specific implementation details.
-- `ECOMMERCE_IMPLEMENTATION_STATUS.md` – ecommerce backend/state coverage and progress.
-- `client/HCI_*.md` – HCI artefacts (personas, storyboards, wireframes, testing, iterations, accessibility).
+### 3D Stack
+
+- **React Three Fiber** + **Drei** for 3D scenes  
+- **Primitives:** `Canvas3DViewer`, `Room3D`, `FurnitureModel3D` (GLB/GLTF with loading states)  
+- 3D viewer state (mode, camera, loading, errors) in a dedicated Redux slice  
 
 ---
 
-<h2 id="prerequisites">📦 Prerequisites</h2>
+<a id="tech-stack"></a>
+## 🛠 Tech Stack
 
-- Node.js 18+ and npm.
-- Running MongoDB instance.
-- Stripe account (for end‑to‑end payment testing).
+| Category | Technologies |
+|----------|---------------|
+| **Frontend** | React 18, TypeScript, Vite, Redux Toolkit, MUI (custom themes), React-Konva (2D), React Three Fiber + Drei + Three.js (3D) |
+| **Backend** | Node.js, Express, TypeScript, MongoDB (Mongoose), Stripe |
+| **Tooling** | npm, ESLint, TypeScript strict mode |
+
+See `ARCHITECTURE.md` for a detailed technology overview.
 
 ---
 
-<h2 id="quick-start">⚡ Quick Start</h2>
+<a id="prerequisites"></a>
+## 📦 Prerequisites
 
-Clone and install:
+- **Node.js** 18+ and **npm**  
+- **MongoDB** (local or Atlas)  
+- **Stripe** account (for end-to-end payment testing)  
+
+---
+
+<a id="quick-start"></a>
+## ⚡ Quick Start
+
+**1. Clone and enter the repo**
 
 ```bash
 git clone <repo-url>
 cd room-craft-studio
 ```
 
-Install dependencies per app:
+**2. Install dependencies** (run in each app directory)
 
 ```bash
-cd client && npm install
+cd client   && npm install
 cd ../admin && npm install
 cd ../designer && npm install
 cd ../server && npm install
 ```
 
-Run server + client (two terminals):
+**3. Run the API and client** (two terminals)
 
 ```bash
-# Terminal 1 – API
-cd server
-npm run dev
+# Terminal 1 — API
+cd server && npm run dev
 
-# Terminal 2 – Client
-cd client
-npm run dev
+# Terminal 2 — Client
+cd client && npm run dev
 ```
 
-The client will be available on port 3000 and the API on port 5001 (by default).
+- **Client:** http://localhost:3000  
+- **API:** http://localhost:5001  
 
 ---
 
-<h2 id="scripts-development-workflow">🧩 Scripts & Development Workflow</h2>
+<a id="project-structure"></a>
+## 📁 Project Structure
 
-From the repo root, you can run each app individually.
-
-- **Client** (port 3000)
-
-  ```bash
-  cd client
-  npm run dev
-  ```
-
-- **Admin** (port 5173)
-
-  ```bash
-  cd admin
-  npm run dev
-  ```
-
-- **Designer** (port 3002)
-
-  ```bash
-  cd designer
-  npm run dev
-  ```
-  
-  The Designer app is optimized for furniture design professionals conducting in-store consultations. Features include:
-  - 2D room editor with actual furniture dimensions
-  - Interactive 3D editing with TransformControls (G/R/S shortcuts)
-  - Furniture thumbnails in 2D view
-  - Real-time visualization
-  - Keyboard shortcuts (press ? for help)
-  - Professional design workflow
-
-- **Server** (port 5001)
-
-  ```bash
-  cd server
-  npm run dev
-  ```
-
-You can run multiple apps in parallel during development (for example, the client and server).
+| Path | Description |
+|------|-------------|
+| `client/` | Customer-facing SPA (2D/3D designer, ecommerce, HCI docs) |
+| `admin/` | Admin dashboard and design editor with 3D preview |
+| `designer/` | Designer-focused tooling, shared design system |
+| `server/` | REST API, auth, ecommerce, persistence |
+| `ARCHITECTURE.md` | Architecture, diagrams, design decisions |
+| `PHASE2_COMPLETE.md` / `PHASE3_COMPLETE.md` | Phase implementation details |
+| `ECOMMERCE_IMPLEMENTATION_STATUS.md` | Ecommerce coverage and progress |
+| `client/HCI_*.md` | HCI artefacts (personas, storyboards, wireframes, testing, accessibility) |
 
 ---
 
-<h2 id="configuration">⚙️ Configuration</h2>
+<a id="scripts-development-workflow"></a>
+## 🧩 Scripts & Development Workflow
 
-Environment variables for the backend are documented in `server/.env.example`. At minimum you will need:
+Run each app from its directory. You can run multiple apps in parallel (e.g. client + server).
 
-- MongoDB connection string.
-- JWT/auth configuration.
-- Stripe API keys (if you want to run payment flows).
+| App | Port | Command |
+|-----|------|--------|
+| **Client** | 3000 | `cd client && npm run dev` |
+| **Admin** | 5173 | `cd admin && npm run dev` |
+| **Designer** | 3002 | `cd designer && npm run dev` |
+| **Server** | 5001 | `cd server && npm run dev` |
 
-Create a `.env` file in `server/` based on `.env.example` and fill in the required values.
+**Designer app** is built for furniture design professionals and in-store consultations:
 
-Frontends can optionally use a `.env` file for API base URLs if the defaults are not suitable; see `client/.env` and `admin/.env` if present.
-
----
-
-<h2 id="testing">✅ Testing</h2>
-
-The project includes both implementation‑level and UX‑level testing.
-
-- **Backend / implementation testing**
-  - Manual regression checklists for 2D/3D flows (documented in `PHASE3_COMPLETE.md`).
-  - API endpoint verification for cart, orders, wishlist, and payment routes.
-  - Error and edge cases covered: missing 3D models, failed payments, invalid input payloads.
-
-- **Frontend / UX testing**
-  - Usability testing plan with defined tasks, metrics, and success criteria (`client/HCI_TESTING_PLAN.md`).
-  - Testing notes and observed issues (`client/HCI_TESTING_NOTES.md`).
-  - Iterative redesigns driven by test results, with before/after metrics (`client/HCI_ITERATIONS_ECOMMERCE.md`).
-  - Accessibility audit against WCAG 2.1 AA (`client/HCI_ACCESSIBILITY_REPORT.md`).
-
-You can extend this with automated tests (unit/integration/end‑to‑end) following the existing architecture and state management patterns.
+- 2D room editor with real furniture dimensions  
+- Interactive 3D editing with TransformControls (G/R/S shortcuts)  
+- Furniture thumbnails in 2D, real-time visualisation  
+- Keyboard shortcuts (press `?` for help)  
 
 ---
 
-## Documentation
+<a id="configuration"></a>
+## ⚙️ Configuration
 
-### User Guides
-- **[Designer Guide](docs/DESIGNER_GUIDE.md)** - Complete manual for furniture design professionals
-- **[3D Workflow](docs/3D_WORKFLOW.md)** - Blender to web pipeline for 3D models
+Backend env vars are documented in `server/.env.example`. Minimum required:
 
-### HCI & UX Documentation
+- MongoDB connection string  
+- JWT/auth configuration  
+- Stripe API keys (for payment flows)  
 
-In addition to the production‑ready implementation, RoomCraft Studio includes a full set of HCI artefacts:
+Create `server/.env` from `server/.env.example` and fill in values.
 
-- **Personas** – `client/HCI_PERSONAS.md`
-- **Storyboards** – `client/HCI_STORYBOARDS.md`, `client/HCI_STORYBOARDS_ECOMMERCE.md`
-- **Wireframes & IA** – `client/HCI_WIREFRAMES.md`
-- **Usability testing** – `client/HCI_TESTING_PLAN.md`, `client/HCI_TESTING_NOTES.md`
-- **Iterative redesign** – `client/HCI_ITERATIONS.md`, `client/HCI_ITERATIONS_ECOMMERCE.md`
-- **Accessibility report** – `client/HCI_ACCESSIBILITY_REPORT.md`
-- **Summary** – `HCI_DOCUMENTATION_SUMMARY.md`
-
-These documents explain how UX decisions are grounded in user research, testing, and established HCI principles while still being directly tied to the running product.
+Frontends can use `.env` for API base URLs if needed; see `client/.env` and `admin/.env` when present.
 
 ---
 
-### Designer App Enhanced Features
+## ✅ Testing
 
-**2D Editor:**
-- ✅ Actual furniture dimensions from database (no more hardcoded boxes)
-- ✅ Furniture thumbnail overlays for visual clarity
-- ✅ Improved selection and manipulation
-- ✅ Grid snap and precise placement
-- ✅ **Measurement tool with ruler mode** - Press M key to measure distances between any two points
+- **Backend / implementation**  
+  Manual regression checklists for 2D/3D flows (`PHASE3_COMPLETE.md`), API verification for cart, orders, wishlist, payments, and edge cases (missing 3D models, failed payments, invalid payloads).
 
-**3D Editor:**
-- ✅ Interactive TransformControls (move/rotate/scale)
-- ✅ Keyboard shortcuts: G (move), R (rotate), S (scale)
-- ✅ Real-time furniture manipulation in 3D space
-- ✅ Multiple camera presets (corner, top, front)
-- ✅ Enhanced lighting and shadows
-- ✅ **Ground plane raycasting** - Click-to-place furniture support
-- ✅ **Lighting Control Panel** - Time-of-day presets, intensity sliders, shadow toggle
+- **Frontend / UX**  
+  Usability testing plan, tasks, metrics (`client/HCI_TESTING_PLAN.md`), notes and issues (`client/HCI_TESTING_NOTES.md`), iterative redesigns (`client/HCI_ITERATIONS_ECOMMERCE.md`), WCAG 2.1 AA accessibility audit (`client/HCI_ACCESSIBILITY_REPORT.md`).
 
-**Material System:**
-- ✅ **Material Picker** - 36 material presets across 6 categories (Wood, Fabric, Metal, Leather, Plastic, Glass)
-- ✅ **PBR Controls** - Roughness and metalness sliders for realistic rendering
-
-**Export Features:**
-- ✅ **Enhanced Screenshot Export** - Multi-resolution (800x600 to 4K), transparent backgrounds, PNG/JPEG/WebP formats
-- ✅ **PDF Report Generator** - Comprehensive reports with screenshots, furniture lists, and cost breakdowns
-- ✅ **3D Scene Export** - GLB/GLTF/OBJ format export with metadata
-
-**UX Improvements:**
-- ✅ Keyboard shortcuts help dialog (press ?)
-- ✅ Comprehensive tooltips throughout
-- ✅ Professional design workflow
-- ✅ Auto-save indicators
-- ✅ Undo/redo with 50-step history
-- ✅ **Interactive Tutorial** - First-time user guided tour with react-joyride
-
-**Code Quality:**
-- ✅ ESLint + Prettier configuration
-- ✅ Pre-commit hooks with Husky + lint-staged
-- ✅ Modular component architecture
-- ✅ TypeScript strict mode
-- ✅ Industry-standard code formatting
+You can add automated tests (unit/integration/e2e) following the existing architecture and state patterns.
 
 ---
 
-<h2 id="roadmap">🗺 Roadmap</h2>
+<a id="documentation"></a>
+## 📚 Documentation
 
-Potential next steps:
+### User guides
 
-- Extend ecommerce UIs (product detail, full checkout flow, order history pages).
-- Further performance optimisation for 3D on low‑end/mobile devices.
-- High‑resolution screenshot export and design thumbnails.
-- Additional automated test coverage across backend and frontends.
+- **[Designer Guide](docs/DESIGNER_GUIDE.md)** — Manual for furniture design professionals  
+- **[3D Workflow](docs/3D_WORKFLOW.md)** — Blender → web pipeline for 3D models  
 
-See `ECOMMERCE_IMPLEMENTATION_STATUS.md` and `PHASE3_COMPLETE.md` for more detail on current coverage and planned work.
+### HCI & UX
+
+- **Personas** — `client/HCI_PERSONAS.md`  
+- **Storyboards** — `client/HCI_STORYBOARDS.md`, `client/HCI_STORYBOARDS_ECOMMERCE.md`  
+- **Wireframes & IA** — `client/HCI_WIREFRAMES.md`  
+- **Usability testing** — `client/HCI_TESTING_PLAN.md`, `client/HCI_TESTING_NOTES.md`  
+- **Iterative redesign** — `client/HCI_ITERATIONS.md`, `client/HCI_ITERATIONS_ECOMMERCE.md`  
+- **Accessibility** — `client/HCI_ACCESSIBILITY_REPORT.md`  
+- **Summary** — `HCI_DOCUMENTATION_SUMMARY.md`  
+
+### Designer app — enhanced features
+
+**🖌 2D Editor**
+
+- ✅ Real furniture dimensions from DB (no hardcoded boxes)  
+- ✅ Furniture thumbnail overlays  
+- ✅ Improved selection, grid snap, precise placement  
+- ✅ **Measurement tool** — Press `M` to measure between two points  
+
+**🌐 3D Editor**
+
+- ✅ TransformControls (move/rotate/scale) — G / R / S  
+- ✅ Real-time 3D manipulation, multiple camera presets  
+- ✅ Enhanced lighting and shadows  
+- ✅ **Ground plane raycasting** — click-to-place furniture  
+- ✅ **Lighting Control Panel** — time-of-day presets, intensity, shadow toggle  
+
+**🎨 Material system**
+
+- ✅ **Material Picker** — 36 presets (Wood, Fabric, Metal, Leather, Plastic, Glass)  
+- ✅ **PBR controls** — Roughness and metalness sliders  
+
+**📤 Export**
+
+- ✅ **Screenshot export** — Multi-resolution (800×600 to 4K), PNG/JPEG/WebP, transparent background  
+- ✅ **PDF reports** — Screenshots, furniture list, cost breakdown  
+- ✅ **3D export** — GLB/GLTF/OBJ with metadata  
+
+**✨ UX & quality**
+
+- ✅ Keyboard shortcuts help (`?`), tooltips, auto-save, undo/redo (50 steps)  
+- ✅ **Interactive tutorial** — react-joyride guided tour  
+- ✅ ESLint + Prettier, Husky + lint-staged, TypeScript strict mode  
 
 ---
 
-<h2 id="license">📄 License</h2>
+<a id="roadmap"></a>
+## 🗺 Roadmap
 
-This project is provided for educational and demonstration purposes.  
-If you plan to use it in production or as a base for a commercial project, review and adapt the license and security configuration to your requirements.
+- Extend ecommerce UIs (product detail, full checkout, order history)  
+- 3D performance tuning for low-end/mobile  
+- High-res screenshot export and design thumbnails  
+- Broader automated test coverage (backend + frontends)  
+
+See `ECOMMERCE_IMPLEMENTATION_STATUS.md` and `PHASE3_COMPLETE.md` for current coverage and plans.
+
+---
+
+<a id="license"></a>
+## 📄 License
+
+This project is for **educational and demonstration** use. For production or commercial use, review and adapt the license and security configuration to your needs.
