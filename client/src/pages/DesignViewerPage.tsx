@@ -43,16 +43,18 @@ export const DesignViewerPage: React.FC = () => {
   const { user } = useSelector((state: RootState) => state.auth);
 
   const [isOwner, setIsOwner] = useState(false);
-  const [viewMode, setViewMode] = useState<'2d' | '3d'>('2d');
+  const [viewMode, setViewMode] = useState<'2d' | '3d'>(id === 'preview' ? '3d' : '2d');
   const canvas3DRef = useRef<Canvas3DViewerHandle>(null);
 
   useEffect(() => {
     if (id === 'preview') {
+      setViewMode('3d');
       const furnitureId = searchParams.get('furniture');
       if (furnitureId) {
         dispatch(fetchPreviewDesign(furnitureId));
       }
     } else if (id) {
+      setViewMode('2d');
       if (user) {
         dispatch(fetchDesignById(id));
       } else {
@@ -276,6 +278,7 @@ export const DesignViewerPage: React.FC = () => {
                     furniture={furniture}
                     width={900}
                     height={700}
+                    showRoom={id !== 'preview'}
                     enableControls
                     showStats={false}
                   />
