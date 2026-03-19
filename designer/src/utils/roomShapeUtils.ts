@@ -25,7 +25,7 @@ export function getFloorOutlinePoints(
   const cl = Math.min(room.cutoutLength ?? 2, L - 1);
   const pos = room.cutoutPosition ?? 'bottom-right';
 
-  if (layout === 'l-shape' || layout === 'l-mirror') {
+  if (layout === 'l-shape') {
     // L shape: one corner rectangle cut out
     const points: [number, number][] = [];
     switch (pos) {
@@ -128,9 +128,9 @@ export function getFloorOutlinePoints(
     return points.flatMap(([x, y]) => scale(x, y));
   }
 
+  // U shape: three sides in a horseshoe; cutoutPosition = which side is open
   if (layout === 'u-shape') {
-    // U: opening on one side. Opening width cw, depth cl. Opening centered.
-    const openW = Math.min(cw, W - 1);
+    const openW = Math.min(cw, W - 0.5);
     const openL = Math.min(cl, L - 0.5);
     const start = (W - openW) / 2;
     const end = start + openW;
@@ -138,26 +138,26 @@ export function getFloorOutlinePoints(
     switch (pos) {
       case 'top':
         points = [
-          [0, openL],
-          [start, openL],
-          [start, 0],
-          [end, 0],
-          [end, openL],
-          [W, openL],
-          [W, L],
           [0, L],
+          [0, 0],
+          [start, 0],
+          [start, L - openL],
+          [end, L - openL],
+          [end, 0],
+          [W, 0],
+          [W, L],
         ];
         break;
       case 'bottom':
         points = [
           [0, 0],
-          [W, 0],
-          [W, L - openL],
-          [end, L - openL],
-          [end, L],
+          [0, L],
           [start, L],
-          [start, L - openL],
-          [0, L - openL],
+          [start, openL],
+          [end, openL],
+          [end, L],
+          [W, L],
+          [W, 0],
         ];
         break;
       case 'left':
@@ -176,13 +176,13 @@ export function getFloorOutlinePoints(
       default:
         points = [
           [0, 0],
-          [W - openL, 0],
-          [W - openL, (L - openW) / 2],
-          [W, (L - openW) / 2],
-          [W, (L + openW) / 2],
-          [W - openL, (L + openW) / 2],
-          [W - openL, L],
           [0, L],
+          [W - openL, L],
+          [W - openL, (L + openW) / 2],
+          [W, (L + openW) / 2],
+          [W, (L - openW) / 2],
+          [W - openL, (L - openW) / 2],
+          [W - openL, 0],
         ];
         break;
     }
@@ -227,7 +227,7 @@ export function getFloorOutlinePoints3D(room: RoomConfig): [number, number][] {
   const cl = Math.min(room.cutoutLength ?? 2, L - 1);
   const pos = room.cutoutPosition ?? 'bottom-right';
 
-  if (layout === 'l-shape' || layout === 'l-mirror') {
+  if (layout === 'l-shape') {
     const points: [number, number][] = [];
     switch (pos) {
       case 'top-left':
@@ -291,23 +291,24 @@ export function getFloorOutlinePoints3D(room: RoomConfig): [number, number][] {
   }
 
   if (layout === 'u-shape') {
-    const openW = Math.min(cw, W - 1);
+    const openW = Math.min(cw, W - 0.5);
     const openL = Math.min(cl, L - 0.5);
     const start = (W - openW) / 2;
     const end = start + openW;
     let points: [number, number][];
     switch (pos) {
       case 'top':
-        points = [[0, openL], [start, openL], [start, 0], [end, 0], [end, openL], [W, openL], [W, L], [0, L]];
+        points = [[0, L], [0, 0], [start, 0], [start, L - openL], [end, L - openL], [end, 0], [W, 0], [W, L]];
         break;
       case 'bottom':
-        points = [[0, 0], [W, 0], [W, L - openL], [end, L - openL], [end, L], [start, L], [start, L - openL], [0, L - openL]];
+        points = [[0, 0], [0, L], [start, L], [start, openL], [end, openL], [end, L], [W, L], [W, 0]];
         break;
       case 'left':
         points = [[openL, 0], [W, 0], [W, L], [openL, L], [openL, (L + openW) / 2], [0, (L + openW) / 2], [0, (L - openW) / 2], [openL, (L - openW) / 2]];
         break;
+      case 'right':
       default:
-        points = [[0, 0], [W - openL, 0], [W - openL, (L - openW) / 2], [W, (L - openW) / 2], [W, (L + openW) / 2], [W - openL, (L + openW) / 2], [W - openL, L], [0, L]];
+        points = [[0, 0], [0, L], [W - openL, L], [W - openL, (L + openW) / 2], [W, (L + openW) / 2], [W, (L - openW) / 2], [W - openL, (L - openW) / 2], [W - openL, 0]];
         break;
     }
     return points.map(([x, y]) => toCentered(x, y));

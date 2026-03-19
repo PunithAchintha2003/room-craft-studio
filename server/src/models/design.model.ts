@@ -125,7 +125,7 @@ const roomConfigSchema = new Schema<IRoomConfig>(
     },
     layout: {
       type: String,
-      enum: ['rectangle', 'l-shape', 'l-mirror', 't-shape', 'u-shape', 'angled-bay'],
+      enum: ['rectangle', 'l-shape', 't-shape', 'u-shape', 'angled-bay'],
       default: 'rectangle',
     },
     cutoutPosition: {

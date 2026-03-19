@@ -9,6 +9,7 @@ import {
   clearSelection,
   setSnapGuides,
   clearSnapGuides,
+  setCanvasOffset,
 } from '@/features/editor/editorSlice';
 import { Canvas2DFurnitureItem } from './Canvas2DFurnitureItem';
 import { MeasurementLayer } from './MeasurementLayer';
@@ -49,6 +50,16 @@ export const Canvas2DEditor: React.FC<Canvas2DEditorProps> = ({
   } = useSelector((state: RootState) => state.editor);
 
   const gridSizePx = gridSize * PIXELS_PER_METER;
+
+  // Keep top-down room centered when canvas or room size changes (zoom/pan preserved otherwise)
+  useEffect(() => {
+    if (!currentDesign) return;
+    const roomW = currentDesign.room.width * PIXELS_PER_METER;
+    const roomL = currentDesign.room.length * PIXELS_PER_METER;
+    const cx = (width - roomW * zoom) / 2;
+    const cy = (height - roomL * zoom) / 2;
+    dispatch(setCanvasOffset({ x: cx, y: cy }));
+  }, [currentDesign?.room?.width, currentDesign?.room?.length, width, height, zoom, dispatch]);
 
   // Sync transformer nodes when selection changes
   useEffect(() => {

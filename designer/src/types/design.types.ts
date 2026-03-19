@@ -9,15 +9,14 @@ export type WallSide = 'north' | 'south' | 'east' | 'west';
 /**
  * Room floor plan layout.
  * - rectangle: simple rectangle
- * - l-shape / l-mirror: L-shaped with one corner cut out (cutout position + width/length)
+ * - l-shape: L-shaped with one corner cut out (cutout position + width/length)
  * - t-shape: T-shaped with stem on one side (cutout position = side of stem, width/length = stem)
- * - u-shape: U-shaped with opening on one side (cutout position = open side, width/length = opening)
+ * - u-shape: three sides in a horseshoe/U (cutout position = open side, width/length = opening)
  * - angled-bay: one corner cut at an angle (cutout position = corner, width/length = bay dimensions)
  */
 export type RoomLayout =
   | 'rectangle'
   | 'l-shape'
-  | 'l-mirror'
   | 't-shape'
   | 'u-shape'
   | 'angled-bay';
@@ -70,7 +69,7 @@ export interface RoomConfig {
   layout?: RoomLayout;
   /**
    * Cutout position for L/T/U/Angled Bay layouts.
-   * L/L-mirror/Angled bay: corner (top-left, top-right, bottom-left, bottom-right).
+   * L/Angled bay: corner (top-left, top-right, bottom-left, bottom-right).
    * T-shape: side where stem is (top, bottom, left, right).
    * U-shape: side that is open (top, bottom, left, right).
    */

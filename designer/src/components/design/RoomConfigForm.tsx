@@ -72,7 +72,7 @@ export const RoomConfigForm: React.FC<RoomConfigFormProps> = ({ initialConfig, o
     const pos = getValues('cutoutPosition') as CutoutPosition | undefined;
     if (layout === 't-shape' || layout === 'u-shape') {
       if (pos && cornerPositions.includes(pos)) setValue('cutoutPosition', 'bottom');
-    } else if (layout === 'l-shape' || layout === 'l-mirror' || layout === 'angled-bay') {
+    } else if (layout === 'l-shape' || layout === 'angled-bay') {
       if (pos && sidePositions.includes(pos)) setValue('cutoutPosition', 'bottom-right');
     }
   }, [layout, needsCutout, setValue, getValues]);
@@ -183,7 +183,6 @@ export const RoomConfigForm: React.FC<RoomConfigFormProps> = ({ initialConfig, o
                       const labels: Record<RoomLayout, string> = {
                         rectangle: 'Rectangle',
                         'l-shape': 'L shape',
-                        'l-mirror': 'L mirror',
                         't-shape': 'T shape',
                         'u-shape': 'U shape',
                         'angled-bay': 'Angled Bay',
@@ -193,7 +192,6 @@ export const RoomConfigForm: React.FC<RoomConfigFormProps> = ({ initialConfig, o
                   >
                     <MenuItem value="rectangle">Rectangle</MenuItem>
                     <MenuItem value="l-shape">L shape</MenuItem>
-                    <MenuItem value="l-mirror">L mirror</MenuItem>
                     <MenuItem value="t-shape">T shape</MenuItem>
                     <MenuItem value="u-shape">U shape</MenuItem>
                     <MenuItem value="angled-bay">Angled Bay</MenuItem>
@@ -219,29 +217,26 @@ export const RoomConfigForm: React.FC<RoomConfigFormProps> = ({ initialConfig, o
                         <Select
                           {...field}
                           value={
-                            (layout === 't-shape' || layout === 'u-shape')
+                            layout === 't-shape' || layout === 'u-shape'
                               ? (cornerPositions.includes((field.value as CutoutPosition) ?? '') ? 'bottom' : (field.value ?? 'bottom'))
-                              : (field.value ?? 'bottom-right')
+                              : (sidePositions.includes((field.value as CutoutPosition) ?? '') ? 'bottom-right' : (field.value ?? 'bottom-right'))
                           }
                           labelId="cutout-position-label"
                           label="Cutout position"
+                          onChange={(e) => field.onChange(e.target.value)}
                         >
-                          {(layout === 'l-shape' || layout === 'l-mirror' || layout === 'angled-bay') && (
-                            <>
-                              <MenuItem value="top-left">Top left</MenuItem>
-                              <MenuItem value="top-right">Top right</MenuItem>
-                              <MenuItem value="bottom-left">Bottom left</MenuItem>
-                              <MenuItem value="bottom-right">Bottom right</MenuItem>
-                            </>
-                          )}
-                          {(layout === 't-shape' || layout === 'u-shape') && (
-                            <>
-                              <MenuItem value="top">Top</MenuItem>
-                              <MenuItem value="bottom">Bottom</MenuItem>
-                              <MenuItem value="left">Left</MenuItem>
-                              <MenuItem value="right">Right</MenuItem>
-                            </>
-                          )}
+                          {(layout === 'l-shape' || layout === 'angled-bay') && [
+                            <MenuItem key="top-left" value="top-left">Top left</MenuItem>,
+                            <MenuItem key="top-right" value="top-right">Top right</MenuItem>,
+                            <MenuItem key="bottom-left" value="bottom-left">Bottom left</MenuItem>,
+                            <MenuItem key="bottom-right" value="bottom-right">Bottom right</MenuItem>,
+                          ]}
+                          {(layout === 't-shape' || layout === 'u-shape') && [
+                            <MenuItem key="top" value="top">Top</MenuItem>,
+                            <MenuItem key="bottom" value="bottom">Bottom</MenuItem>,
+                            <MenuItem key="left" value="left">Left</MenuItem>,
+                            <MenuItem key="right" value="right">Right</MenuItem>,
+                          ]}
                         </Select>
                       </FormControl>
                     )}
