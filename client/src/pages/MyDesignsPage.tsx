@@ -22,13 +22,14 @@ import {
   InputAdornment,
 } from '@mui/material';
 import { GlassCard } from '@/components/common/GlassCard';
+import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import SearchIcon from '@mui/icons-material/Search';
 import ShareIcon from '@mui/icons-material/Share';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState, AppDispatch } from '@/app/store';
-import { fetchDesigns, deleteDesign } from '@/features/design/designSlice';
+import { fetchDesigns, deleteDesign, setCurrentDesign } from '@/features/design/designSlice';
 import { addDesignToCart } from '@/features/cart/cartSlice';
 import toast from 'react-hot-toast';
 
@@ -44,6 +45,11 @@ export const MyDesignsPage: React.FC = () => {
   useEffect(() => {
     dispatch(fetchDesigns());
   }, [dispatch]);
+
+  const handleNewDesign = () => {
+    dispatch(setCurrentDesign(null));
+    navigate('/designer');
+  };
 
   const handleViewDesign = (id: string) => {
     navigate(`/design-viewer/${id}`);
@@ -104,7 +110,7 @@ export const MyDesignsPage: React.FC = () => {
     <Box sx={{ bgcolor: 'background.default', minHeight: '100vh', py: 4 }}>
       <Container maxWidth="xl">
         <Box sx={{ mb: 4 }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, flexWrap: 'wrap', gap: 2 }}>
             <Box>
               <Typography variant="h3" gutterBottom>
                 My Designs
@@ -113,6 +119,9 @@ export const MyDesignsPage: React.FC = () => {
                 View and manage your saved room designs
               </Typography>
             </Box>
+            <Button variant="contained" startIcon={<AddIcon />} onClick={handleNewDesign}>
+              New Design
+            </Button>
           </Box>
 
           <TextField

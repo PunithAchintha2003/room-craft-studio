@@ -19,6 +19,8 @@ const WishlistPage = lazy(() => import('@/pages/WishlistPage'));
 const PaymentPage = lazy(() => import('@/pages/PaymentPage'));
 const PaymentSuccessPage = lazy(() => import('@/pages/PaymentSuccessPage'));
 const PaymentFailurePage = lazy(() => import('@/pages/PaymentFailurePage'));
+const AboutPage = lazy(() => import('@/pages/AboutPage'));
+const ProfilePage = lazy(() => import('@/pages/ProfilePage'));
 
 const PageLoader: React.FC = () => (
   <Box
@@ -133,6 +135,15 @@ export const AppRouter: React.FC = () => {
         />
 
         <Route
+          path="/about"
+          element={
+            <MainLayout>
+              <AboutPage />
+            </MainLayout>
+          }
+        />
+
+        <Route
           path="/cart"
           element={
             <MainLayout>
@@ -231,7 +242,7 @@ export const AppRouter: React.FC = () => {
           element={
             <ProtectedRoute>
               <MainLayout>
-                <Box sx={{ p: { xs: 2, sm: 4 }, textAlign: 'center' }}>Profile — Coming soon</Box>
+                <ProfilePage />
               </MainLayout>
             </ProtectedRoute>
           }

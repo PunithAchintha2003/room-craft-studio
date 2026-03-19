@@ -21,6 +21,7 @@ import {
   LockOutlined,
   CheckCircle,
   Cancel,
+  ArrowBack,
   DarkMode as DarkModeIcon,
   LightMode as LightModeIcon,
 } from '@mui/icons-material';
@@ -258,6 +259,25 @@ export const RegisterPage: React.FC = () => {
           }}
         >
           <Box sx={{ mb: 4 }}>
+            <Button
+              variant="text"
+              startIcon={<ArrowBack />}
+              onClick={() => navigate('/')}
+              sx={{
+                mb: 1,
+                px: 0.5,
+                alignSelf: 'flex-start',
+                color: alpha(theme.palette.text.primary, 0.8),
+                fontWeight: 700,
+                '&:hover': {
+                  backgroundColor: alpha(theme.palette.primary.main, isDark ? 0.18 : 0.06),
+                  color: theme.palette.text.primary,
+                },
+              }}
+              aria-label="Back to home"
+            >
+              Back to home
+            </Button>
             <Typography variant="h4" fontWeight={800} gutterBottom>
               Create your account
             </Typography>

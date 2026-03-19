@@ -1,11 +1,14 @@
-import React, { Suspense, useMemo } from 'react';
-import { Box, CircularProgress, useTheme } from '@mui/material';
+import React, { Suspense, useCallback, useMemo, useRef } from 'react';
+import { Box, CircularProgress, IconButton, Stack, Tooltip, useTheme } from '@mui/material';
 import { Canvas } from '@react-three/fiber';
 import { Html, OrbitControls, useGLTF, PerspectiveCamera } from '@react-three/drei';
 import * as THREE from 'three';
+import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
+import { ZoomIn, ZoomOut } from '@mui/icons-material';
 
 interface RoomPreviewProps {
   minimal?: boolean;
+  showZoomControls?: boolean;
 }
 
 const getHeroModelUrl = () => {
@@ -42,8 +45,19 @@ const FOCUS_TARGET: [number, number, number] = [0, 0, 0];
 const CAMERA_DISTANCE = 7;
 const CAMERA_HEIGHT = 1.5;
 
-export const HeroRoomPreview: React.FC<RoomPreviewProps> = () => {
+export const HeroRoomPreview: React.FC<RoomPreviewProps> = ({ showZoomControls = false }) => {
   const theme = useTheme();
+  const controlsRef = useRef<OrbitControlsImpl | null>(null);
+
+  const handleZoomIn = useCallback(() => {
+    controlsRef.current?.dollyOut(1.2);
+    controlsRef.current?.update();
+  }, []);
+
+  const handleZoomOut = useCallback(() => {
+    controlsRef.current?.dollyIn(1.2);
+    controlsRef.current?.update();
+  }, []);
 
   return (
     <Box
@@ -102,6 +116,7 @@ export const HeroRoomPreview: React.FC<RoomPreviewProps> = () => {
         </Suspense>
 
         <OrbitControls
+          ref={controlsRef}
           target={FOCUS_TARGET}
           enablePan={false}
           enableDamping
@@ -113,6 +128,50 @@ export const HeroRoomPreview: React.FC<RoomPreviewProps> = () => {
         />
         </Canvas>
       </Box>
+
+      {showZoomControls && (
+        <Stack
+          direction="column"
+          spacing={1}
+          sx={{
+            position: 'absolute',
+            top: 12,
+            right: 12,
+            pointerEvents: 'auto',
+          }}
+        >
+          <Tooltip title="Zoom in">
+            <IconButton
+              size="small"
+              onClick={handleZoomIn}
+              sx={{
+                bgcolor: 'rgba(0,0,0,0.35)',
+                color: theme.palette.common.white,
+                backdropFilter: 'blur(6px)',
+                '&:hover': { bgcolor: 'rgba(0,0,0,0.5)' },
+              }}
+              aria-label="Zoom in"
+            >
+              <ZoomIn fontSize="small" />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Zoom out">
+            <IconButton
+              size="small"
+              onClick={handleZoomOut}
+              sx={{
+                bgcolor: 'rgba(0,0,0,0.35)',
+                color: theme.palette.common.white,
+                backdropFilter: 'blur(6px)',
+                '&:hover': { bgcolor: 'rgba(0,0,0,0.5)' },
+              }}
+              aria-label="Zoom out"
+            >
+              <ZoomOut fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        </Stack>
+      )}
 
       <Box
         sx={{

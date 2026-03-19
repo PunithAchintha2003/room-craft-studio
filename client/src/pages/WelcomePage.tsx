@@ -365,36 +365,25 @@ export const WelcomePage: React.FC = () => {
                         : alpha(theme.palette.background.paper, 0.98),
                   }}
                 >
-                  <HeroRoomPreview />
+                  <HeroRoomPreview showZoomControls />
                   <Box
                     sx={{
                       position: 'absolute',
                       bottom: 16,
                       left: 16,
-                      right: 16,
                       display: 'flex',
-                      gap: 1,
                     }}
                   >
-                    {['2D Layout', '3D View', 'Colours'].map((tab, i) => (
-                      <Chip
-                        key={tab}
-                        label={tab}
-                        size="small"
-                        sx={{
-                              backgroundColor:
-                                i === 1
-                                  ? 'secondary.main'
-                                  : alpha(theme.palette.text.primary, 0.08),
-                          color:
-                            i === 1
-                              ? 'primary.main'
-                              : alpha(theme.palette.text.primary, 0.8),
-                          fontWeight: 600,
-                          fontSize: '0.75rem',
-                        }}
-                      />
-                    ))}
+                    <Chip
+                      label="3D View"
+                      size="small"
+                      sx={{
+                        backgroundColor: 'secondary.main',
+                        color: 'primary.main',
+                        fontWeight: 700,
+                        fontSize: '0.75rem',
+                      }}
+                    />
                   </Box>
                 </Box>
               </MotionBox>

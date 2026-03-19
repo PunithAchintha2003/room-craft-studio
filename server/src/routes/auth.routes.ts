@@ -21,6 +21,20 @@ const loginSchema = z.object({
   password: z.string().min(1, 'Password is required'),
 });
 
+const updateProfileSchema = z.object({
+  name: z.string().min(2, 'Name must be at least 2 characters').max(50).optional(),
+  email: z.string().email('Invalid email address').optional(),
+});
+
+const changePasswordSchema = z.object({
+  currentPassword: z.string().min(1, 'Current password is required'),
+  newPassword: z
+    .string()
+    .min(8, 'Password must be at least 8 characters')
+    .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
+    .regex(/[0-9]/, 'Password must contain at least one number'),
+});
+
 router.post('/register', validate(registerSchema), authController.register);
 router.post('/login', validate(loginSchema), authController.login);
 router.post('/admin/login', validate(loginSchema), authController.adminLogin);
@@ -28,5 +42,7 @@ router.post('/designer/login', validate(loginSchema), authController.designerLog
 router.post('/refresh', authController.refreshToken);
 router.post('/logout', protect, authController.logout);
 router.get('/me', protect, authController.getMe);
+router.patch('/profile', protect, validate(updateProfileSchema), authController.updateProfile);
+router.post('/change-password', protect, validate(changePasswordSchema), authController.changePassword);
 
 export default router;
