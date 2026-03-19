@@ -21,7 +21,7 @@ interface KeyboardShortcutsDialogProps {
 const ShortcutItem: React.FC<{
   keys: string[];
   description: string;
-  glass: typeof GLASS.dark;
+  glass: (typeof GLASS)[keyof typeof GLASS];
   isDark: boolean;
 }> = ({ keys, description, glass, isDark }) => (
   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: 1 }}>
