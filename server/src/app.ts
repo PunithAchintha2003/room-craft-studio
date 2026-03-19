@@ -11,6 +11,17 @@ import { errorHandler, notFound } from './middleware/error.middleware';
 
 const app = express();
 
+const configuredOrigins = [
+  env.CLIENT_ORIGIN,
+  env.ADMIN_ORIGIN,
+  env.DESIGNER_ORIGIN,
+  ...(env.ALLOWED_ORIGINS
+    ? env.ALLOWED_ORIGINS.split(',').map((origin) => origin.trim()).filter(Boolean)
+    : []),
+];
+
+const allowedOrigins = [...new Set(configuredOrigins)];
+
 app.use(
   helmet({
     crossOriginResourcePolicy: { policy: 'cross-origin' },
@@ -19,7 +30,12 @@ app.use(
 
 app.use(
   cors({
-    origin: [env.CLIENT_ORIGIN, env.ADMIN_ORIGIN, env.DESIGNER_ORIGIN],
+    origin: (origin, callback) => {
+      // Allow server-to-server calls and same-origin requests with no Origin header.
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+      return callback(new Error(`CORS blocked for origin: ${origin}`));
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
