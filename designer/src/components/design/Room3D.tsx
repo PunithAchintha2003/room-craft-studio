@@ -1,9 +1,10 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import * as THREE from 'three';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/app/store';
 import { RoomConfig, RoomOpening } from '../../types/design.types';
 import { getFloorOutlinePoints3D } from '../../utils/roomShapeUtils';
+import { getRoomTextureUrl } from '../../utils/roomTexturePresets';
 
 interface Room3DProps {
   room: RoomConfig;
@@ -13,16 +14,28 @@ const WALL_THICKNESS = 0.15;
 const BASEBOARD_HEIGHT = 0.1;
 const BASEBOARD_DEPTH = 0.05;
 
-// ── Texture loader (cached by URL) ────────────────────────────────────────────
+// ── Texture loader (cached by URL, async with error handling) ────────────────
 const textureCache = new Map<string, THREE.Texture>();
-const loadTexture = (url: string): THREE.Texture => {
-  if (textureCache.has(url)) return textureCache.get(url)!;
-  const tex = new THREE.TextureLoader().load(url);
-  // These are color (albedo) textures, so they should be interpreted as sRGB.
-  tex.colorSpace = THREE.SRGBColorSpace;
-  textureCache.set(url, tex);
-  return tex;
-};
+const loader = new THREE.TextureLoader();
+
+function loadTextureAsync(
+  url: string
+): Promise<THREE.Texture> {
+  const cached = textureCache.get(url);
+  if (cached) return Promise.resolve(cached.clone());
+  return new Promise((resolve, reject) => {
+    loader.load(
+      url,
+      (tex) => {
+        tex.colorSpace = THREE.SRGBColorSpace;
+        textureCache.set(url, tex);
+        resolve(tex);
+      },
+      undefined,
+      reject
+    );
+  });
+}
 
 // ── Wall segment helper ───────────────────────────────────────────────────────
 interface WallSegmentProps {
@@ -94,21 +107,54 @@ export const Room3D: React.FC<Room3DProps> = ({ room }) => {
     wallColor,
     floorColor,
     layout = 'rectangle',
-    wallTexture: wallTextureUrl,
-    floorTexture: floorTextureUrl,
+    wallTexture: wallTextureValue,
+    floorTexture: floorTextureValue,
     wallTextureScale = 1,
     floorTextureScale = 1,
     openings = [],
   } = room;
 
-  const floorTexture = useMemo(
-    () => (floorTextureUrl ? loadTexture(floorTextureUrl) : null),
-    [floorTextureUrl]
-  );
-  const wallTexture = useMemo(
-    () => (wallTextureUrl ? loadTexture(wallTextureUrl) : null),
-    [wallTextureUrl]
-  );
+  const resolvedWallUrl = getRoomTextureUrl(wallTextureValue, 'wall');
+  const resolvedFloorUrl = getRoomTextureUrl(floorTextureValue, 'floor');
+
+  const [wallTexture, setWallTexture] = useState<THREE.Texture | null>(null);
+  const [floorTexture, setFloorTexture] = useState<THREE.Texture | null>(null);
+
+  useEffect(() => {
+    if (!resolvedWallUrl) {
+      setWallTexture(null);
+      return;
+    }
+    let cancelled = false;
+    loadTextureAsync(resolvedWallUrl)
+      .then((tex) => {
+        if (!cancelled) setWallTexture(tex);
+      })
+      .catch(() => {
+        if (!cancelled) setWallTexture(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [resolvedWallUrl]);
+
+  useEffect(() => {
+    if (!resolvedFloorUrl) {
+      setFloorTexture(null);
+      return;
+    }
+    let cancelled = false;
+    loadTextureAsync(resolvedFloorUrl)
+      .then((tex) => {
+        if (!cancelled) setFloorTexture(tex);
+      })
+      .catch(() => {
+        if (!cancelled) setFloorTexture(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [resolvedFloorUrl]);
 
   const floorMaterial = useMemo(() => {
     const mat = new THREE.MeshStandardMaterial({

@@ -1,6 +1,5 @@
 import React from 'react';
-import { Group, Rect, Image as KonvaImage, Text } from 'react-konva';
-import useImage from 'use-image';
+import { Group, Rect, Text } from 'react-konva';
 import Konva from 'konva';
 import { Furniture, FurnitureItem } from '@/types/design.types';
 
@@ -25,8 +24,6 @@ export const Canvas2DFurnitureItem: React.FC<Canvas2DFurnitureItemProps> = ({
   onDragEnd,
   onTransformEnd,
 }) => {
-  const [image] = useImage(furniture.thumbnail, 'anonymous');
-
   const rectWidth = furniture.dimensions.width * pixelsPerMeter;
   const rectHeight = furniture.dimensions.length * pixelsPerMeter;
 
@@ -44,7 +41,7 @@ export const Canvas2DFurnitureItem: React.FC<Canvas2DFurnitureItemProps> = ({
       onDragEnd={(e) => onDragEnd(item.id, e)}
       onTransformEnd={(e) => onTransformEnd(item.id, e)}
     >
-      {/* Base rectangle with color */}
+      {/* Shape: rectangle with fill color */}
       <Rect
         width={rectWidth}
         height={rectHeight}
@@ -57,17 +54,6 @@ export const Canvas2DFurnitureItem: React.FC<Canvas2DFurnitureItemProps> = ({
         shadowOpacity={1}
         shadowOffsetY={isSelected ? 3 : 1}
       />
-
-      {/* Thumbnail overlay */}
-      {image && (
-        <KonvaImage
-          image={image}
-          width={rectWidth}
-          height={rectHeight}
-          opacity={0.65}
-          cornerRadius={4}
-        />
-      )}
 
       {/* Selection highlight overlay */}
       {isSelected && (
@@ -82,26 +68,17 @@ export const Canvas2DFurnitureItem: React.FC<Canvas2DFurnitureItemProps> = ({
         />
       )}
 
-      {/* Furniture name label */}
+      {/* Name only — centered in shape */}
       <Text
         text={furniture.name}
-        fontSize={Math.max(8, Math.min(11, rectWidth / 8))}
+        fontSize={Math.max(9, Math.min(12, Math.min(rectWidth, rectHeight) / 6))}
         fill={isSelected ? '#0D47A1' : '#37474F'}
         fontStyle="bold"
         width={rectWidth}
         align="center"
-        y={rectHeight / 2 - 6}
-        listening={false}
-      />
-
-      {/* Dimensions label */}
-      <Text
-        text={`${furniture.dimensions.width}×${furniture.dimensions.length}m`}
-        fontSize={Math.max(7, Math.min(9, rectWidth / 10))}
-        fill={isSelected ? '#1565C0' : '#607D8B'}
-        width={rectWidth}
-        align="center"
-        y={rectHeight / 2 + 6}
+        verticalAlign="middle"
+        height={rectHeight}
+        y={0}
         listening={false}
       />
     </Group>

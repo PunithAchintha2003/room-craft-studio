@@ -83,7 +83,7 @@ export const Canvas2DEditor: React.FC<Canvas2DEditorProps> = ({
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          bgcolor: 'grey.50',
+          bgcolor: 'transparent',
         }}
       >
         <Box sx={{ textAlign: 'center', color: 'text.secondary' }}>No design loaded</Box>
@@ -135,7 +135,7 @@ export const Canvas2DEditor: React.FC<Canvas2DEditorProps> = ({
     if (!showRuler) return null;
     const elements: React.ReactNode[] = [];
 
-    // Top ruler background
+    // Top ruler background (no stroke to avoid visible lines at canvas edge)
     elements.push(
       <Rect
         key="ruler-top-bg"
@@ -144,13 +144,11 @@ export const Canvas2DEditor: React.FC<Canvas2DEditorProps> = ({
         width={width / zoom}
         height={RULER_SIZE / zoom}
         fill="#F5F5F5"
-        stroke="#E0E0E0"
-        strokeWidth={0.5}
         listening={false}
       />
     );
 
-    // Left ruler background
+    // Left ruler background (no stroke to avoid visible lines at canvas edge)
     elements.push(
       <Rect
         key="ruler-left-bg"
@@ -159,8 +157,6 @@ export const Canvas2DEditor: React.FC<Canvas2DEditorProps> = ({
         width={RULER_SIZE / zoom}
         height={height / zoom}
         fill="#F5F5F5"
-        stroke="#E0E0E0"
-        strokeWidth={0.5}
         listening={false}
       />
     );
@@ -457,14 +453,14 @@ export const Canvas2DEditor: React.FC<Canvas2DEditorProps> = ({
 
   return (
     <Paper
-      elevation={2}
+      elevation={0}
       sx={{
         width,
         height,
         overflow: 'hidden',
         position: 'relative',
-        bgcolor: '#ECEFF1',
-        borderRadius: 2,
+        bgcolor: 'transparent',
+        borderRadius: 1,
       }}
     >
       <Stage
