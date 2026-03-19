@@ -43,6 +43,7 @@ import WeekendIcon from '@mui/icons-material/Weekend';
 import TuneIcon from '@mui/icons-material/Tune';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState, AppDispatch } from '@/app/store';
+import { GLASS } from '@/theme/tokens';
 import {
   createDesign,
   updateDesign,
@@ -543,13 +544,37 @@ export const DesignEditorPage: React.FC = () => {
               Room configuration
             </Typography>
           </Box>
-          <Box sx={{ flex: 1, overflowY: 'auto', px: 2, pb: 2 }}>
+          <Box
+            sx={{
+              flex: 1,
+              overflowY: 'auto',
+              px: 2,
+              pb: 2,
+              scrollbarWidth: 'none',
+              msOverflowStyle: 'none',
+              '&::-webkit-scrollbar': { display: 'none' },
+            }}
+          >
             <RoomConfigForm initialConfig={currentDesign.room} onApply={handleRoomConfigApply} />
           </Box>
         </Card>
 
-        {/* Center canvas */}
-        <Card sx={{ position: 'relative', overflow: 'hidden', minHeight: { xs: 520, lg: 0 } }}>
+        {/* Center canvas — glassmorphism like Room configuration & Furniture */}
+        <Card
+          sx={{
+            position: 'relative',
+            overflow: 'hidden',
+            minHeight: { xs: 520, lg: 0 },
+            boxShadow: 'none',
+            backgroundImage: 'none',
+            backgroundColor:
+              theme.palette.mode === 'dark' ? GLASS.dark.background : GLASS.light.background,
+            border: `1px solid ${theme.palette.mode === 'dark' ? GLASS.dark.border : GLASS.light.border}`,
+            backdropFilter: `blur(${theme.palette.mode === 'dark' ? GLASS.dark.blur : GLASS.light.blur}px)`,
+            WebkitBackdropFilter: `blur(${theme.palette.mode === 'dark' ? GLASS.dark.blur : GLASS.light.blur}px)`,
+            borderRadius: 1,
+          }}
+        >
           {/* 2D Canvas - Always mounted, hidden when not active */}
           <Box
             ref={canvas2DRef}
@@ -559,8 +584,8 @@ export const DesignEditorPage: React.FC = () => {
               display: viewMode === '2d' ? 'flex' : 'none',
               alignItems: 'center',
               justifyContent: 'center',
-              bgcolor: alpha(theme.palette.background.paper, theme.palette.mode === 'dark' ? 0.35 : 0.55),
               overflow: 'hidden',
+              borderRadius: 1,
             }}
             data-tour="canvas-2d"
           >
@@ -598,7 +623,8 @@ export const DesignEditorPage: React.FC = () => {
               position: 'absolute',
               inset: 0,
               display: viewMode === '3d' ? 'block' : 'none',
-              bgcolor: alpha(theme.palette.background.paper, theme.palette.mode === 'dark' ? 0.25 : 0.5),
+              overflow: 'hidden',
+              borderRadius: 1,
             }}
           >
             <Box
@@ -698,13 +724,17 @@ export const DesignEditorPage: React.FC = () => {
         PaperProps={{
           sx: {
             width: { xs: 'min(92vw, 360px)', sm: 360 },
-            borderLeft: `1px solid ${alpha(theme.palette.divider, 0.7)}`,
             mt: 0,
             height: '100%',
             backgroundImage: 'none',
-            bgcolor: alpha(theme.palette.background.paper, theme.palette.mode === 'dark' ? 0.72 : 0.82),
-            backdropFilter: 'blur(14px)',
-            boxShadow: `0 18px 60px ${alpha(theme.palette.common.black, theme.palette.mode === 'dark' ? 0.6 : 0.25)}`,
+            bgcolor: (theme.palette.mode === 'dark' ? GLASS.dark : GLASS.light).background,
+            borderLeft: `1px solid ${(theme.palette.mode === 'dark' ? GLASS.dark : GLASS.light).border}`,
+            backdropFilter: `blur(${(theme.palette.mode === 'dark' ? GLASS.dark : GLASS.light).blur}px)`,
+            WebkitBackdropFilter: `blur(${(theme.palette.mode === 'dark' ? GLASS.dark : GLASS.light).blur}px)`,
+            boxShadow:
+              theme.palette.mode === 'dark'
+                ? '0 18px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04)'
+                : '0 18px 60px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.04)',
           },
         }}
         hideBackdrop
@@ -716,7 +746,7 @@ export const DesignEditorPage: React.FC = () => {
             justifyContent: 'space-between',
             px: 2,
             py: 2,
-            borderBottom: `1px solid ${alpha(theme.palette.divider, 0.5)}`,
+            borderBottom: `1px solid ${(theme.palette.mode === 'dark' ? GLASS.dark : GLASS.light).border}`,
           }}
         >
           <Typography variant="overline" sx={{ color: 'text.secondary' }}>

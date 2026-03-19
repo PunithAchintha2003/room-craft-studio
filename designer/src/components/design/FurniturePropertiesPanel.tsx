@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
   Box,
-  Paper,
   Typography,
   TextField,
   Slider,
@@ -9,6 +8,7 @@ import {
   Divider,
   Alert,
   Stack,
+  useTheme,
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { HexColorPicker } from 'react-colorful';
@@ -16,8 +16,12 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '@/app/store';
 import { updateFurnitureInDesign, removeFurnitureFromDesign } from '@/features/design/designSlice';
 import { clearSelection } from '@/features/editor/editorSlice';
+import { GLASS } from '@/theme/tokens';
 
 export const FurniturePropertiesPanel: React.FC = () => {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+  const glass = isDark ? GLASS.dark : GLASS.light;
   const dispatch = useDispatch();
   const currentDesign = useSelector((state: RootState) => state.design.currentDesign);
   const { selectedFurnitureIds } = useSelector((state: RootState) => state.editor);
@@ -105,35 +109,55 @@ export const FurniturePropertiesPanel: React.FC = () => {
     dispatch(clearSelection());
   };
 
+  const emptyStateSx = {
+    height: '100%',
+    p: 2,
+    background: glass.background,
+    border: `1px solid ${glass.border}`,
+    borderRadius: 2,
+    margin: 1,
+    mx: 2,
+    mb: 2,
+    backdropFilter: `blur(${glass.blur}px)`,
+    WebkitBackdropFilter: `blur(${glass.blur}px)`,
+    boxShadow: isDark ? '0 8px 24px rgba(0,0,0,0.2)' : '0 8px 24px rgba(0,0,0,0.06)',
+  };
+
+  const alertSx = {
+    bgcolor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)',
+    border: `1px solid ${glass.border}`,
+    '& .MuiAlert-message': { color: 'text.primary' },
+  };
+
   if (!currentDesign) {
     return (
-      <Paper elevation={2} sx={{ height: '100%', p: 2 }}>
-        <Typography variant="h6" gutterBottom>
+      <Box sx={emptyStateSx}>
+        <Typography variant="h6" gutterBottom color="text.primary">
           Properties
         </Typography>
-        <Alert severity="info">Create or load a design to view properties</Alert>
-      </Paper>
+        <Alert severity="info" sx={alertSx}>Create or load a design to view properties</Alert>
+      </Box>
     );
   }
 
   if (selectedFurnitureIds.length === 0) {
     return (
-      <Paper elevation={2} sx={{ height: '100%', p: 2 }}>
-        <Typography variant="h6" gutterBottom>
+      <Box sx={emptyStateSx}>
+        <Typography variant="h6" gutterBottom color="text.primary">
           Properties
         </Typography>
-        <Alert severity="info">Select furniture to edit properties</Alert>
-      </Paper>
+        <Alert severity="info" sx={alertSx}>Select furniture to edit properties</Alert>
+      </Box>
     );
   }
 
   if (selectedFurnitureIds.length > 1) {
     return (
-      <Paper elevation={2} sx={{ height: '100%', p: 2 }}>
-        <Typography variant="h6" gutterBottom>
+      <Box sx={emptyStateSx}>
+        <Typography variant="h6" gutterBottom color="text.primary">
           Properties
         </Typography>
-        <Alert severity="info">
+        <Alert severity="info" sx={alertSx}>
           {selectedFurnitureIds.length} items selected
         </Alert>
         <Button
@@ -151,33 +175,40 @@ export const FurniturePropertiesPanel: React.FC = () => {
         >
           Delete All Selected
         </Button>
-      </Paper>
+      </Box>
     );
   }
 
   if (!selectedItem || !furnitureData) {
     return (
-      <Paper elevation={2} sx={{ height: '100%', p: 2 }}>
-        <Typography variant="h6" gutterBottom>
+      <Box sx={emptyStateSx}>
+        <Typography variant="h6" gutterBottom color="text.primary">
           Properties
         </Typography>
-        <Alert severity="error">Selected furniture not found</Alert>
-      </Paper>
+        <Alert severity="error" sx={alertSx}>Selected furniture not found</Alert>
+      </Box>
     );
   }
 
   return (
-    <Paper
-      elevation={2}
+    <Box
       sx={{
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
         overflow: 'hidden',
+        mx: 2,
+        mb: 2,
+        borderRadius: 2,
+        background: glass.background,
+        border: `1px solid ${glass.border}`,
+        backdropFilter: `blur(${glass.blur}px)`,
+        WebkitBackdropFilter: `blur(${glass.blur}px)`,
+        boxShadow: isDark ? '0 8px 24px rgba(0,0,0,0.2)' : '0 8px 24px rgba(0,0,0,0.06)',
       }}
     >
-      <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
-        <Typography variant="h6" gutterBottom>
+      <Box sx={{ p: 2, borderBottom: `1px solid ${glass.border}` }}>
+        <Typography variant="h6" gutterBottom color="text.primary">
           Properties
         </Typography>
         <Typography variant="body2" color="text.secondary">
@@ -188,7 +219,7 @@ export const FurniturePropertiesPanel: React.FC = () => {
       <Box sx={{ flex: 1, overflowY: 'auto', p: 2 }}>
         <Stack spacing={3}>
           <Box>
-            <Typography variant="subtitle2" gutterBottom>
+            <Typography variant="subtitle2" gutterBottom color="text.primary">
               Position (meters)
             </Typography>
             <Stack direction="row" spacing={2}>
@@ -213,10 +244,10 @@ export const FurniturePropertiesPanel: React.FC = () => {
             </Stack>
           </Box>
 
-          <Divider />
+          <Divider sx={{ borderColor: glass.border }} />
 
           <Box>
-            <Typography variant="subtitle2" gutterBottom>
+            <Typography variant="subtitle2" gutterBottom color="text.primary">
               Rotation: {localRotation.toFixed(0)}°
             </Typography>
             <Slider
@@ -236,10 +267,10 @@ export const FurniturePropertiesPanel: React.FC = () => {
             />
           </Box>
 
-          <Divider />
+          <Divider sx={{ borderColor: glass.border }} />
 
           <Box>
-            <Typography variant="subtitle2" gutterBottom>
+            <Typography variant="subtitle2" gutterBottom color="text.primary">
               Scale: {localScale.toFixed(2)}x
             </Typography>
             <Slider
@@ -264,9 +295,9 @@ export const FurniturePropertiesPanel: React.FC = () => {
 
           {furnitureData.isColorizable && (
             <>
-              <Divider />
+              <Divider sx={{ borderColor: glass.border }} />
               <Box>
-                <Typography variant="subtitle2" gutterBottom>
+                <Typography variant="subtitle2" gutterBottom color="text.primary">
                   Color
                 </Typography>
                 <Box sx={{ display: 'flex', justifyContent: 'center', my: 2 }}>
@@ -284,7 +315,7 @@ export const FurniturePropertiesPanel: React.FC = () => {
             </>
           )}
 
-          <Divider />
+          <Divider sx={{ borderColor: glass.border }} />
 
           <Box>
             <Typography variant="subtitle2" gutterBottom color="text.secondary">
@@ -299,7 +330,7 @@ export const FurniturePropertiesPanel: React.FC = () => {
         </Stack>
       </Box>
 
-      <Box sx={{ p: 2, borderTop: 1, borderColor: 'divider' }}>
+      <Box sx={{ p: 2, borderTop: `1px solid ${glass.border}` }}>
         <Button
           fullWidth
           variant="outlined"
@@ -310,7 +341,7 @@ export const FurniturePropertiesPanel: React.FC = () => {
           Delete Furniture
         </Button>
       </Box>
-    </Paper>
+    </Box>
   );
 };
 

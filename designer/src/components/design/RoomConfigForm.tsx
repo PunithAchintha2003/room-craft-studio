@@ -13,10 +13,12 @@ import {
   Select,
   IconButton,
   Tooltip,
+  useTheme,
 } from '@mui/material';
 import { useForm, Controller, useFieldArray } from 'react-hook-form';
 import { HexColorPicker } from 'react-colorful';
 import { RoomConfig, RoomOpening, RoomLayout, CutoutPosition } from '@/types/design.types';
+import { GLASS } from '@/theme/tokens';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
@@ -36,7 +38,11 @@ const DEFAULT_OPENING: Omit<RoomOpening, 'id'> = {
 };
 
 export const RoomConfigForm: React.FC<RoomConfigFormProps> = ({ initialConfig, onApply }) => {
-  const { control, handleSubmit, watch, setValue, getValues } = useForm<RoomConfig>({
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+  const glass = isDark ? GLASS.dark : GLASS.light;
+
+  const { control, watch, setValue, getValues, subscribe } = useForm<RoomConfig>({
     defaultValues: {
       ...initialConfig,
       layout: initialConfig.layout ?? 'rectangle',
@@ -64,6 +70,21 @@ export const RoomConfigForm: React.FC<RoomConfigFormProps> = ({ initialConfig, o
   const layout = watch('layout') ?? 'rectangle';
   const needsCutout = layout !== 'rectangle';
 
+  useEffect(() => {
+    let isFirst = true;
+    const unsubscribe = subscribe({
+      formState: { values: true },
+      callback: ({ values }) => {
+        if (isFirst) {
+          isFirst = false;
+          return;
+        }
+        if (values) onApply(values as RoomConfig);
+      },
+    });
+    return unsubscribe;
+  }, [subscribe, onApply]);
+
   const cornerPositions: CutoutPosition[] = ['top-left', 'top-right', 'bottom-left', 'bottom-right'];
   const sidePositions: CutoutPosition[] = ['top', 'bottom', 'left', 'right'];
 
@@ -77,17 +98,23 @@ export const RoomConfigForm: React.FC<RoomConfigFormProps> = ({ initialConfig, o
     }
   }, [layout, needsCutout, setValue, getValues]);
 
-  const onSubmit = (data: RoomConfig) => {
-    onApply(data);
-  };
-
   return (
-    <Paper elevation={2} sx={{ p: 3, height: '100%', overflow: 'auto' }}>
+    <Paper
+      elevation={2}
+      sx={{
+        p: 3,
+        height: '100%',
+        overflow: 'auto',
+        scrollbarWidth: 'none',
+        msOverflowStyle: 'none',
+        '&::-webkit-scrollbar': { display: 'none' },
+      }}
+    >
       <Typography variant="h6" fontWeight={700} gutterBottom>
         Room Configuration
       </Typography>
 
-      <Box component="form" onSubmit={handleSubmit(onSubmit)}>
+      <Box component="div">
         <Stack spacing={3}>
           <Box>
             <Box display="flex" alignItems="center" gap={1}>
@@ -96,15 +123,44 @@ export const RoomConfigForm: React.FC<RoomConfigFormProps> = ({ initialConfig, o
                 arrow
                 placement="right"
                 title={
-                  <Box>
+                  <Box sx={{ py: 0.5 }}>
                     <Typography variant="body2">
-                      Width/Length: Minimum 2m, Maximum 30m
+                      Width: Min 2m, Max 30m
                     </Typography>
                     <Typography variant="body2">
-                      Height: Minimum 1m, Maximum 5m
+                      Length: Min 2m, Max 30m
+                    </Typography>
+                    <Typography variant="body2">
+                      Height: Min 1m, Max 5m
                     </Typography>
                   </Box>
                 }
+                slotProps={{
+                  tooltip: {
+                    sx: {
+                      backgroundColor: glass.background,
+                      color: theme.palette.text.primary,
+                      border: `1px solid ${glass.border}`,
+                      borderRadius: 2,
+                      boxSizing: 'border-box',
+                      backdropFilter: `blur(${glass.blur}px)`,
+                      WebkitBackdropFilter: `blur(${glass.blur}px)`,
+                      boxShadow:
+                        theme.palette.mode === 'dark'
+                          ? '0 8px 32px rgba(0,0,0,0.4)'
+                          : '0 8px 32px rgba(0,0,0,0.08)',
+                      maxWidth: 220,
+                    },
+                  },
+                  arrow: {
+                    sx: {
+                      color: glass.background,
+                      '&::before': {
+                        border: `1px solid ${glass.border}`,
+                      },
+                    },
+                  },
+                }}
               >
                 <IconButton size="small" aria-label="Dimension limits">
                   <InfoOutlinedIcon fontSize="small" />
@@ -427,63 +483,59 @@ export const RoomConfigForm: React.FC<RoomConfigFormProps> = ({ initialConfig, o
 
           {/* Doors & Windows */}
           <Box>
-            <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
-              <Typography variant="subtitle2">Doors &amp; Windows</Typography>
-              <Box display="flex" gap={1}>
-                <Button
-                  size="small"
-                  variant="outlined"
-                  startIcon={<AddIcon />}
-                  onClick={() =>
-                    append({
-                      ...DEFAULT_OPENING,
-                      id: crypto.randomUUID(),
-                    })
-                  }
-                >
-                  Add Door
-                </Button>
-                <Button
-                  size="small"
-                  variant="outlined"
-                  startIcon={<AddIcon />}
-                  onClick={() =>
-                    append({
-                      ...DEFAULT_OPENING,
-                      id: crypto.randomUUID(),
-                      type: 'window',
-                      bottom: 1,
-                      height: 1.2,
-                    })
-                  }
-                >
-                  Add Window
-                </Button>
-              </Box>
+            <Typography variant="subtitle2" gutterBottom>
+              Doors &amp; Windows
+            </Typography>
+            <Box display="flex" gap={1} sx={{ mb: 2 }}>
+              <Button
+                size="small"
+                variant="outlined"
+                startIcon={<AddIcon />}
+                onClick={() =>
+                  append({
+                    ...DEFAULT_OPENING,
+                    id: crypto.randomUUID(),
+                  })
+                }
+              >
+                Add Door
+              </Button>
+              <Button
+                size="small"
+                variant="outlined"
+                startIcon={<AddIcon />}
+                onClick={() =>
+                  append({
+                    ...DEFAULT_OPENING,
+                    id: crypto.randomUUID(),
+                    type: 'window',
+                    bottom: 1,
+                    height: 1.2,
+                  })
+                }
+              >
+                Add Window
+              </Button>
             </Box>
 
             {openingFields.length === 0 && (
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
                 No doors or windows defined. Use the buttons above to add openings.
               </Typography>
             )}
 
-            <Stack spacing={2} mt={1}>
+            <Stack spacing={2}>
               {openingFields.map((field, index) => (
-                <Paper
-                  key={field.fieldId}
-                  variant="outlined"
-                  sx={{ p: 1.5, borderStyle: 'dashed' }}
-                >
-                  <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
+                <Paper key={field.fieldId} variant="outlined" sx={{ p: 2 }}>
+                  <Box display="flex" justifyContent="space-between" alignItems="center" mb={1.5}>
                     <Typography variant="body2" fontWeight={600}>
                       Opening {index + 1}
                     </Typography>
-                    <IconButton size="small" onClick={() => remove(index)}>
+                    <IconButton size="small" onClick={() => remove(index)} aria-label={`Remove opening ${index + 1}`}>
                       <DeleteIcon fontSize="small" />
                     </IconButton>
                   </Box>
-                  <Grid container spacing={1}>
+                  <Grid container spacing={2}>
                     <Grid item xs={6}>
                       <Controller
                         name={`openings.${index}.type`}
@@ -593,10 +645,6 @@ export const RoomConfigForm: React.FC<RoomConfigFormProps> = ({ initialConfig, o
               ))}
             </Stack>
           </Box>
-
-          <Button type="submit" variant="contained" color="primary" fullWidth>
-            Apply Changes
-          </Button>
         </Stack>
       </Box>
     </Paper>
