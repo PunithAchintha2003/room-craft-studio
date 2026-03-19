@@ -183,9 +183,10 @@ export const Room3D: React.FC<Room3DProps> = ({ room }) => {
     const segs: Array<{ start: number; end: number }> = [];
     let cursor = 0;
     sorted.forEach(o => {
-      const half = o.width / 2;
-      const holeStart = Math.max(0, o.offset - half);
-      const holeEnd = Math.min(wallLength, o.offset + half);
+      // Offset is measured from the "left" corner to the START (left edge) of the opening.
+      // Carve out [offset, offset + width].
+      const holeStart = Math.max(0, Math.min(wallLength, o.offset));
+      const holeEnd = Math.max(0, Math.min(wallLength, o.offset + o.width));
       if (holeStart > cursor) segs.push({ start: cursor, end: holeStart });
       cursor = Math.max(cursor, holeEnd);
     });
@@ -283,8 +284,11 @@ export const Room3D: React.FC<Room3DProps> = ({ room }) => {
               />
             );
           })}
-          {northWallOpenings.map((o, i) => (
-            <mesh key={`north-frame-${i}`} position={[o.offset, o.bottom + o.height / 2, 0]}>
+          {northWallOpenings.map((o) => (
+            <mesh
+              key={`north-frame-${o.id}`}
+              position={[o.offset + o.width / 2, o.bottom + o.height / 2, 0]}
+            >
               <boxGeometry args={[o.width, o.height, WALL_THICKNESS * 1.2]} />
               <meshStandardMaterial color={o.type === 'door' ? '#6D4C41' : '#B3E5FC'} roughness={0.7} metalness={0.1} />
             </mesh>
@@ -304,8 +308,11 @@ export const Room3D: React.FC<Room3DProps> = ({ room }) => {
               />
             );
           })}
-          {southWallOpenings.map((o, i) => (
-            <mesh key={`south-frame-${i}`} position={[o.offset, o.bottom + o.height / 2, length]}>
+          {southWallOpenings.map((o) => (
+            <mesh
+              key={`south-frame-${o.id}`}
+              position={[o.offset + o.width / 2, o.bottom + o.height / 2, length]}
+            >
               <boxGeometry args={[o.width, o.height, WALL_THICKNESS * 1.2]} />
               <meshStandardMaterial color={o.type === 'door' ? '#6D4C41' : '#B3E5FC'} roughness={0.7} metalness={0.1} />
             </mesh>
@@ -325,8 +332,12 @@ export const Room3D: React.FC<Room3DProps> = ({ room }) => {
               />
             );
           })}
-          {westWallOpenings.map((o, i) => (
-            <mesh key={`west-frame-${i}`} position={[0, o.bottom + o.height / 2, o.offset]} rotation={[0, Math.PI / 2, 0]}>
+          {westWallOpenings.map((o) => (
+            <mesh
+              key={`west-frame-${o.id}`}
+              position={[0, o.bottom + o.height / 2, o.offset + o.width / 2]}
+              rotation={[0, Math.PI / 2, 0]}
+            >
               <boxGeometry args={[o.width, o.height, WALL_THICKNESS * 1.2]} />
               <meshStandardMaterial color={o.type === 'door' ? '#6D4C41' : '#B3E5FC'} roughness={0.7} metalness={0.1} />
             </mesh>
@@ -346,8 +357,12 @@ export const Room3D: React.FC<Room3DProps> = ({ room }) => {
               />
             );
           })}
-          {eastWallOpenings.map((o, i) => (
-            <mesh key={`east-frame-${i}`} position={[width, o.bottom + o.height / 2, o.offset]} rotation={[0, -Math.PI / 2, 0]}>
+          {eastWallOpenings.map((o) => (
+            <mesh
+              key={`east-frame-${o.id}`}
+              position={[width, o.bottom + o.height / 2, o.offset + o.width / 2]}
+              rotation={[0, -Math.PI / 2, 0]}
+            >
               <boxGeometry args={[o.width, o.height, WALL_THICKNESS * 1.2]} />
               <meshStandardMaterial color={o.type === 'door' ? '#6D4C41' : '#B3E5FC'} roughness={0.7} metalness={0.1} />
             </mesh>
@@ -358,32 +373,216 @@ export const Room3D: React.FC<Room3DProps> = ({ room }) => {
           <Baseboard position={[width - BASEBOARD_DEPTH / 2, BASEBOARD_HEIGHT / 2, cz]} rotation={[0, -Math.PI / 2, 0]} length={length} wallColor={wallColor} />
         </>
       ) : (
-        outlinePoints3D.map((pt, i) => {
-          const next = outlinePoints3D[(i + 1) % outlinePoints3D.length];
-          const x0 = pt[0];
-          const z0 = pt[1];
-          const x1 = next[0];
-          const z1 = next[1];
-          const dx = x1 - x0;
-          const dz = z1 - z0;
-          const len = Math.sqrt(dx * dx + dz * dz);
-          if (len < 0.01) return null;
-          const midX = (x0 + x1) / 2 + cx;
-          const midZ = (z0 + z1) / 2 + cz;
-          const angle = Math.atan2(dz, dx);
+        (() => {
+          // For non-rectangle layouts, we derive which outline edges belong to
+          // north/south/east/west, then carve openings into those edges.
+          const EPS = 1e-4;
+          const northZ = -length / 2;
+          const southZ = length / 2;
+          const westX = -width / 2;
+          const eastX = width / 2;
+
+          type WallSide = RoomOpening['wall'];
+          type Interval = { start: number; end: number }; // axis coordinate in centered space
+          type Edge = {
+            i: number;
+            x0: number;
+            z0: number;
+            x1: number;
+            z1: number;
+            len: number;
+            angle: number;
+            wall?: WallSide;
+            axisStart?: number;
+            axisEnd?: number;
+          };
+
+          const edges: Edge[] = outlinePoints3D.map((pt, i) => {
+            const next = outlinePoints3D[(i + 1) % outlinePoints3D.length];
+            const x0 = pt[0];
+            const z0 = pt[1];
+            const x1 = next[0];
+            const z1 = next[1];
+            const dx = x1 - x0;
+            const dz = z1 - z0;
+            const len = Math.sqrt(dx * dx + dz * dz);
+            const angle = Math.atan2(dz, dx);
+
+            // Determine which "cardinal" wall this edge lies on (only if axis-aligned).
+            let wall: WallSide | undefined;
+            let axisStart: number | undefined;
+            let axisEnd: number | undefined;
+
+            if (Math.abs(dz) < EPS) {
+              // Horizontal edge (along +x): z is constant
+              if (Math.abs(z0 - northZ) < EPS) wall = 'north';
+              else if (Math.abs(z0 - southZ) < EPS) wall = 'south';
+              if (wall) {
+                axisStart = Math.min(x0, x1);
+                axisEnd = Math.max(x0, x1);
+              }
+            } else if (Math.abs(dx) < EPS) {
+              // Vertical edge (along +z): x is constant
+              if (Math.abs(x0 - westX) < EPS) wall = 'west';
+              else if (Math.abs(x0 - eastX) < EPS) wall = 'east';
+              if (wall) {
+                axisStart = Math.min(z0, z1);
+                axisEnd = Math.max(z0, z1);
+              }
+            }
+
+            return { i, x0, z0, x1, z1, len, angle, wall, axisStart, axisEnd };
+          });
+
+          const sideEdgeIntervals = (side: WallSide): Interval[] =>
+            edges
+              .filter((e) => e.wall === side && e.axisStart !== undefined && e.axisEnd !== undefined && e.len > 0.01)
+              .map((e) => ({ start: e.axisStart!, end: e.axisEnd! }));
+
+          const openingIntervalCentered = (o: RoomOpening): Interval => {
+            if (o.wall === 'north' || o.wall === 'south') {
+              const start = o.offset - width / 2;
+              return { start, end: start + o.width };
+            }
+            const start = o.offset - length / 2;
+            return { start, end: start + o.width };
+          };
+
+          const openingOverlapsWall = (o: RoomOpening): boolean => {
+            const hole = openingIntervalCentered(o);
+            const ints = sideEdgeIntervals(o.wall);
+            return ints.some((seg) => Math.max(seg.start, hole.start) < Math.min(seg.end, hole.end));
+          };
+
+          const openingsOnWall = (side: WallSide) =>
+            openings.filter((o) => o.wall === side && openingOverlapsWall(o));
+
+          const buildEdgeSegments = (edge: Interval, wallOpenings: RoomOpening[], axisMax: number): Interval[] => {
+            const holeInts = wallOpenings
+              .map(openingIntervalCentered)
+              .map((h) => ({
+                start: Math.max(edge.start, Math.min(axisMax, h.start)),
+                end: Math.min(edge.end, Math.max(-axisMax, h.end)),
+              }))
+              .filter((h) => h.end - h.start > 1e-5)
+              .sort((a, b) => a.start - b.start);
+
+            if (!holeInts.length) return [edge];
+            const segs: Interval[] = [];
+            let cursor = edge.start;
+            for (const h of holeInts) {
+              if (h.start > cursor) segs.push({ start: cursor, end: h.start });
+              cursor = Math.max(cursor, h.end);
+            }
+            if (cursor < edge.end) segs.push({ start: cursor, end: edge.end });
+            return segs.filter((s) => s.end - s.start > 0.01);
+          };
+
+          const renderEdge = (e: Edge) => {
+            if (e.len < 0.01) return null;
+
+            // Non-cardinal/diagonal edges: render as-is (no openings).
+            if (!e.wall || e.axisStart === undefined || e.axisEnd === undefined) {
+              const midX = (e.x0 + e.x1) / 2 + cx;
+              const midZ = (e.z0 + e.z1) / 2 + cz;
+              return (
+                <WallSegment
+                  key={`outline-${e.i}`}
+                  position={[midX, height / 2, midZ]}
+                  rotation={[0, -e.angle, 0]}
+                  width={e.len}
+                  height={height}
+                  wallColor={wallColor}
+                  wallTexture={wallTexture ?? undefined}
+                  wallTextureScale={wallTextureScale}
+                />
+              );
+            }
+
+            // Cardinal edge: carve openings that land on this wall.
+            const edgeInterval: Interval = { start: e.axisStart, end: e.axisEnd };
+            const axisMax = e.wall === 'north' || e.wall === 'south' ? width / 2 : length / 2;
+            const segs = buildEdgeSegments(edgeInterval, openingsOnWall(e.wall), axisMax);
+
+            return segs.map((s, idx) => {
+              const segLen = s.end - s.start;
+              const segMid = (s.start + s.end) / 2;
+              const midX = (e.wall === 'north' || e.wall === 'south') ? segMid : e.x0;
+              const midZ = (e.wall === 'west' || e.wall === 'east') ? segMid : e.z0;
+              return (
+                <WallSegment
+                  key={`outline-${e.i}-seg-${idx}`}
+                  position={[midX + cx, height / 2, midZ + cz]}
+                  rotation={[0, -e.angle, 0]}
+                  width={segLen}
+                  height={height}
+                  wallColor={wallColor}
+                  wallTexture={wallTexture ?? undefined}
+                  wallTextureScale={wallTextureScale}
+                />
+              );
+            });
+          };
+
+          const renderFrames = () => {
+            const valid = openings.filter(openingOverlapsWall);
+            return valid.map((o) => {
+              const y = o.bottom + o.height / 2;
+              const material = (
+                <meshStandardMaterial
+                  color={o.type === 'door' ? '#6D4C41' : '#B3E5FC'}
+                  roughness={0.7}
+                  metalness={0.1}
+                  transparent={o.type === 'window'}
+                  opacity={o.type === 'window' ? 0.75 : 1}
+                />
+              );
+
+              if (o.wall === 'north') {
+                const x = o.offset + o.width / 2;
+                return (
+                  <mesh key={`frame-${o.id}`} position={[x, y, 0]}>
+                    <boxGeometry args={[o.width, o.height, WALL_THICKNESS * 1.2]} />
+                    {material}
+                  </mesh>
+                );
+              }
+              if (o.wall === 'south') {
+                const x = o.offset + o.width / 2;
+                return (
+                  <mesh key={`frame-${o.id}`} position={[x, y, length]}>
+                    <boxGeometry args={[o.width, o.height, WALL_THICKNESS * 1.2]} />
+                    {material}
+                  </mesh>
+                );
+              }
+              if (o.wall === 'west') {
+                const z = o.offset + o.width / 2;
+                return (
+                  <mesh key={`frame-${o.id}`} position={[0, y, z]} rotation={[0, Math.PI / 2, 0]}>
+                    <boxGeometry args={[o.width, o.height, WALL_THICKNESS * 1.2]} />
+                    {material}
+                  </mesh>
+                );
+              }
+              // east
+              const z = o.offset + o.width / 2;
+              return (
+                <mesh key={`frame-${o.id}`} position={[width, y, z]} rotation={[0, -Math.PI / 2, 0]}>
+                  <boxGeometry args={[o.width, o.height, WALL_THICKNESS * 1.2]} />
+                  {material}
+                </mesh>
+              );
+            });
+          };
+
           return (
-            <WallSegment
-              key={`outline-${i}`}
-              position={[midX, height / 2, midZ]}
-              rotation={[0, -angle, 0]}
-              width={len}
-              height={height}
-              wallColor={wallColor}
-              wallTexture={wallTexture ?? undefined}
-              wallTextureScale={wallTextureScale}
-            />
+            <>
+              {edges.map(renderEdge)}
+              {renderFrames()}
+            </>
           );
-        })
+        })()
       )}
     </group>
   );

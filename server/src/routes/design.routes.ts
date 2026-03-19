@@ -23,6 +23,18 @@ const cutoutPositionEnum = z.enum([
   'top', 'bottom', 'left', 'right',
 ]);
 
+const wallSideEnum = z.enum(['north', 'south', 'east', 'west']);
+const roomOpeningSchema = z.object({
+  id: z.string().min(1, 'Opening ID is required'),
+  type: z.enum(['door', 'window']),
+  wall: wallSideEnum,
+  width: z.number().min(0.1).max(10),
+  height: z.number().min(0.1).max(10),
+  bottom: z.number().min(0).max(10).default(0),
+  // Offset from the "left" corner to the START of the opening (meters)
+  offset: z.number().min(0),
+});
+
 const roomConfigSchema = z.object({
   width: z.number().min(1).max(20),
   length: z.number().min(1).max(20),
@@ -33,6 +45,11 @@ const roomConfigSchema = z.object({
   cutoutPosition: cutoutPositionEnum.optional(),
   cutoutWidth: z.number().min(0).optional(),
   cutoutLength: z.number().min(0).optional(),
+  wallTexture: z.string().optional(),
+  floorTexture: z.string().optional(),
+  wallTextureScale: z.number().min(0.1).max(10).optional(),
+  floorTextureScale: z.number().min(0.1).max(10).optional(),
+  openings: z.array(roomOpeningSchema).optional().default([]),
 });
 
 const createDesignSchema = z.object({

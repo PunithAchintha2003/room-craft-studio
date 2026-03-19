@@ -23,13 +23,17 @@ const FallbackBox: React.FC<{
 }> = ({ furniture, furnitureItem, isSelected, onClick }) => {
   const groupRef = useRef<THREE.Group>(null);
   const positionY = furniture.dimensions.height / 2;
+  const w = furniture.dimensions.width * furnitureItem.scale;
+  const l = furniture.dimensions.length * furnitureItem.scale;
+  const centerX = furnitureItem.position.x + w / 2;
+  const centerZ = furnitureItem.position.y + l / 2;
 
   return (
     <group
       ref={groupRef}
-      position={[furnitureItem.position.x, positionY, furnitureItem.position.y]}
+      position={[centerX, positionY, centerZ]}
       rotation={[0, (furnitureItem.rotation * Math.PI) / 180, 0]}
-      scale={furnitureItem.scale}
+      scale={[furnitureItem.scale, furnitureItem.scale, furnitureItem.scale]}
       onClick={onClick ? (e: any) => { e?.stopPropagation?.(); onClick(e); } : undefined}
     >
       <mesh castShadow receiveShadow>
@@ -66,9 +70,15 @@ const FallbackBox: React.FC<{
 
 const LoadingFallback: React.FC<{
   furnitureItem: FurnitureItem;
-}> = ({ furnitureItem }) => (
+  furniture: Furniture;
+}> = ({ furnitureItem, furniture }) => {
+  const w = furniture.dimensions.width * furnitureItem.scale;
+  const l = furniture.dimensions.length * furnitureItem.scale;
+  const centerX = furnitureItem.position.x + w / 2;
+  const centerZ = furnitureItem.position.y + l / 2;
+  return (
   <group
-    position={[furnitureItem.position.x, 0, furnitureItem.position.y]}
+    position={[centerX, 0, centerZ]}
     rotation={[0, (furnitureItem.rotation * Math.PI) / 180, 0]}
   >
     <Html center>
@@ -90,7 +100,8 @@ const LoadingFallback: React.FC<{
       </Box>
     </Html>
   </group>
-);
+  );
+};
 
 const Model3D: React.FC<{
   url: string;
@@ -159,13 +170,17 @@ const Model3D: React.FC<{
   if (!clonedScene) return null;
 
   const positionY = furniture.dimensions.height / 2;
+  const w = furniture.dimensions.width * furnitureItem.scale;
+  const l = furniture.dimensions.length * furnitureItem.scale;
+  const centerX = furnitureItem.position.x + w / 2;
+  const centerZ = furnitureItem.position.y + l / 2;
 
   return (
     <group
       ref={groupRef}
-      position={[furnitureItem.position.x, 0, furnitureItem.position.y]}
+      position={[centerX, 0, centerZ]}
       rotation={[0, (furnitureItem.rotation * Math.PI) / 180, 0]}
-      scale={furnitureItem.scale}
+      scale={[furnitureItem.scale, furnitureItem.scale, furnitureItem.scale]}
       onClick={onClick}
     >
       <primitive object={clonedScene} />
@@ -240,7 +255,7 @@ export const FurnitureModel3D: React.FC<FurnitureModel3DProps> = ({
       onError={handleError}
       resetKeys={[furniture.model3D.url]}
     >
-      <Suspense fallback={<LoadingFallback furnitureItem={furnitureItem} />}>
+      <Suspense fallback={<LoadingFallback furnitureItem={furnitureItem} furniture={furniture} />}>
         <Model3D
           url={furniture.model3D.url}
           furnitureItem={furnitureItem}

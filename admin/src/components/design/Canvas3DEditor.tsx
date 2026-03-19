@@ -86,8 +86,10 @@ const Scene: React.FC<{
         />
       )}
 
-      {/* Room */}
-      <Room3D room={design.room} />
+      {/* Room: same world space as designer (0..width, 0..length) */}
+      <group position={[design.room.width / 2, 0, design.room.length / 2]}>
+        <Room3D room={design.room} />
+      </group>
 
       {/* Furniture */}
       {design.furniture.map((item) => {

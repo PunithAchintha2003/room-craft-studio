@@ -25,7 +25,24 @@ const initialState: DesignState = {
 
 const handleError = (error: unknown): string => {
   if (error instanceof AxiosError) {
-    return error.response?.data?.message ?? 'An unexpected error occurred';
+    const data = error.response?.data as { message?: string; errors?: unknown } | undefined;
+    const msg = data?.message ?? 'An unexpected error occurred';
+    if (data?.errors && typeof data.errors === 'object') {
+      // Flatten common `{ field: [messages...] }` shape into a readable line.
+      try {
+        const entries = Object.entries(data.errors as Record<string, unknown>)
+          .flatMap(([field, v]) => {
+            if (Array.isArray(v)) return v.map(m => `${field}: ${String(m)}`);
+            if (v == null) return [];
+            return [`${field}: ${String(v)}`];
+          })
+          .filter(Boolean);
+        if (entries.length) return `${msg} — ${entries.join(' · ')}`;
+      } catch {
+        // fall through
+      }
+    }
+    return msg;
   }
   return 'An unexpected error occurred';
 };

@@ -70,6 +70,8 @@ const TIME_TO_SUN: Record<string, [number, number, number]> = {
 };
 
 // ── Interactive Furniture with TransformControls ──────────────────────────────
+// Position is stored as top-left (same as 2D). We place the group at the furniture
+// center so the 3D model (which is centered in local space) aligns with the 2D rect.
 const InteractiveFurniture: React.FC<{
   item: FurnitureItem;
   furniture: Furniture;
@@ -83,6 +85,11 @@ const InteractiveFurniture: React.FC<{
   const groupRef = useRef<THREE.Group>(null);
   const { camera, gl } = useThree();
 
+  const w = furniture.dimensions.width * item.scale;
+  const l = furniture.dimensions.length * item.scale;
+  const centerX = item.position.x + w / 2;
+  const centerZ = item.position.y + l / 2;
+
   useEffect(() => {
     if (!transformRef.current || !isSelected) return;
     const controls = transformRef.current;
@@ -90,22 +97,28 @@ const InteractiveFurniture: React.FC<{
     const handleChange = () => {
       if (!groupRef.current) return;
       const group = groupRef.current;
+      const scale = group.scale.x;
+      const halfW = (furniture.dimensions.width * scale) / 2;
+      const halfL = (furniture.dimensions.length * scale) / 2;
       onTransform(item.id, {
-        position: { x: group.position.x, y: group.position.z },
+        position: {
+          x: group.position.x - halfW,
+          y: group.position.z - halfL,
+        },
         rotation: (group.rotation.y * 180) / Math.PI,
-        scale: group.scale.x,
+        scale,
       });
     };
 
     controls.addEventListener('objectChange', handleChange);
     return () => controls.removeEventListener('objectChange', handleChange);
-  }, [isSelected, item.id, onTransform]);
+  }, [isSelected, item.id, onTransform, furniture.dimensions.width, furniture.dimensions.length]);
 
   return (
     <>
       <group
         ref={groupRef}
-        position={[item.position.x, 0, item.position.y]}
+        position={[centerX, 0, centerZ]}
         rotation={[0, (item.rotation * Math.PI) / 180, 0]}
         scale={[item.scale, item.scale, item.scale]}
       >
@@ -337,6 +350,7 @@ export const Canvas3DEditor: React.FC<Canvas3DEditorProps> = React.memo(({
   const [cameraPreset, setCameraPreset] = useState<CameraPreset>('corner');
   const [transformMode, setTransformMode] = useState<TransformMode>('translate');
   const [postProcessing, setPostProcessing] = useState(false);
+  const [webglLost, setWebglLost] = useState(false);
 
   const defaultLightingConfig: LightingConfig = useMemo(() => ({
     ambientIntensity: 0.5,
@@ -539,6 +553,16 @@ export const Canvas3DEditor: React.FC<Canvas3DEditorProps> = React.memo(({
           gl.shadowMap.type = THREE.PCFSoftShadowMap;
           // Ensure textures/materials render with correct (sRGB) authored colors.
           gl.outputColorSpace = THREE.SRGBColorSpace;
+
+          // Surface WebGL context loss with an actionable message instead of silently freezing.
+          const canvas = gl.domElement;
+          const onLost = (e: Event) => {
+            e.preventDefault();
+            setWebglLost(true);
+          };
+          const onRestored = () => setWebglLost(false);
+          canvas.addEventListener('webglcontextlost', onLost as EventListener, false);
+          canvas.addEventListener('webglcontextrestored', onRestored as EventListener, false);
         }}
       >
         <Suspense fallback={null}>
@@ -574,6 +598,33 @@ export const Canvas3DEditor: React.FC<Canvas3DEditorProps> = React.memo(({
       </Canvas>
 
       {isLoading && <LoadingFallback />}
+
+      {webglLost && (
+        <Box
+          sx={{
+            position: 'absolute',
+            inset: 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            bgcolor: 'rgba(10,10,14,0.72)',
+            backdropFilter: 'blur(6px)',
+            zIndex: 30,
+            p: 2,
+            textAlign: 'center',
+          }}
+        >
+          <Box>
+            <Typography variant="h6" sx={{ mb: 1, color: 'grey.100' }}>
+              3D renderer reset
+            </Typography>
+            <Typography variant="body2" sx={{ color: 'grey.300', maxWidth: 520 }}>
+              Your browser lost the WebGL context (usually GPU/driver memory pressure).
+              Try closing other heavy tabs, then refresh the page.
+            </Typography>
+          </Box>
+        </Box>
+      )}
     </Box>
   );
 });
