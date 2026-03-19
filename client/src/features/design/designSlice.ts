@@ -1,10 +1,12 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import api from '@/services/api';
-import { Design, CreateDesignInput, UpdateDesignInput } from '@/types/design.types';
+import { Design, CreateDesignInput, UpdateDesignInput, FurnitureItem } from '@/types/design.types';
 
 interface DesignState {
   designs: Design[];
   currentDesign: Design | null;
+  history: Design[];
+  historyIndex: number;
   loading: boolean;
   saving: boolean;
   error: string | null;
@@ -13,6 +15,8 @@ interface DesignState {
 const initialState: DesignState = {
   designs: [],
   currentDesign: null,
+  history: [],
+  historyIndex: -1,
   loading: false,
   saving: false,
   error: null,
@@ -95,9 +99,9 @@ export const createDesign = createAsyncThunk(
 
 export const updateDesign = createAsyncThunk(
   'design/updateDesign',
-  async ({ id, updates }: { id: string; updates: UpdateDesignInput }, { rejectWithValue }) => {
+  async ({ id, input }: { id: string; input: UpdateDesignInput }, { rejectWithValue }) => {
     try {
-      const response = await api.put(`/designs/${id}`, updates);
+      const response = await api.put(`/designs/${id}`, input);
       return response.data.data.design;
     } catch (error: unknown) {
       if (error instanceof Error) {
@@ -127,8 +131,89 @@ const designSlice = createSlice({
   name: 'design',
   initialState,
   reducers: {
-    setCurrentDesign: (state, action: PayloadAction<Design | null>) => {
+    setCurrentDesign(state, action: PayloadAction<Design | null>) {
       state.currentDesign = action.payload;
+      if (action.payload) {
+        state.history = [action.payload];
+        state.historyIndex = 0;
+      } else {
+        state.history = [];
+        state.historyIndex = -1;
+      }
+    },
+    updateCurrentDesign(state, action: PayloadAction<Partial<Design>>) {
+      if (state.currentDesign) {
+        const updated = { ...state.currentDesign, ...action.payload };
+        state.currentDesign = updated;
+        state.history = state.history.slice(0, state.historyIndex + 1);
+        state.history.push(updated);
+        state.historyIndex++;
+        if (state.history.length > 50) {
+          state.history.shift();
+          state.historyIndex--;
+        }
+      }
+    },
+    undo(state) {
+      if (state.historyIndex > 0) {
+        state.historyIndex--;
+        state.currentDesign = state.history[state.historyIndex];
+      }
+    },
+    redo(state) {
+      if (state.historyIndex < state.history.length - 1) {
+        state.historyIndex++;
+        state.currentDesign = state.history[state.historyIndex];
+      }
+    },
+    addFurnitureToDesign(
+      state,
+      action: PayloadAction<{
+        furnitureId: string;
+        position: { x: number; y: number };
+        rotation?: number;
+        scale?: number;
+        color?: string;
+      }>
+    ) {
+      if (state.currentDesign) {
+        const newItem: FurnitureItem = {
+          id: `furniture-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          furnitureId: action.payload.furnitureId,
+          position: action.payload.position,
+          rotation: action.payload.rotation ?? 0,
+          scale: action.payload.scale ?? 1,
+          color: action.payload.color,
+        };
+        state.currentDesign.furniture.push(newItem);
+        state.history = state.history.slice(0, state.historyIndex + 1);
+        state.history.push({ ...state.currentDesign });
+        state.historyIndex++;
+      }
+    },
+    removeFurnitureFromDesign(state, action: PayloadAction<string>) {
+      if (state.currentDesign) {
+        state.currentDesign.furniture = state.currentDesign.furniture.filter(
+          item => item.id !== action.payload
+        );
+        state.history = state.history.slice(0, state.historyIndex + 1);
+        state.history.push({ ...state.currentDesign });
+        state.historyIndex++;
+      }
+    },
+    updateFurnitureInDesign(
+      state,
+      action: PayloadAction<{ id: string; updates: Partial<FurnitureItem> }>
+    ) {
+      if (state.currentDesign) {
+        const index = state.currentDesign.furniture.findIndex(item => item.id === action.payload.id);
+        if (index !== -1) {
+          state.currentDesign.furniture[index] = {
+            ...state.currentDesign.furniture[index],
+            ...action.payload.updates,
+          };
+        }
+      }
     },
   },
   extraReducers: (builder) => {
@@ -152,6 +237,8 @@ const designSlice = createSlice({
       .addCase(fetchDesignById.fulfilled, (state, action) => {
         state.loading = false;
         state.currentDesign = action.payload;
+        state.history = [action.payload];
+        state.historyIndex = 0;
       })
       .addCase(fetchDesignById.rejected, (state, action) => {
         state.loading = false;
@@ -196,7 +283,6 @@ const designSlice = createSlice({
       })
       .addCase(updateDesign.pending, (state) => {
         state.saving = true;
-        state.error = null;
       })
       .addCase(updateDesign.fulfilled, (state, action) => {
         state.saving = false;
@@ -228,5 +314,13 @@ const designSlice = createSlice({
   },
 });
 
-export const { setCurrentDesign } = designSlice.actions;
+export const {
+  setCurrentDesign,
+  updateCurrentDesign,
+  undo,
+  redo,
+  addFurnitureToDesign,
+  removeFurnitureFromDesign,
+  updateFurnitureInDesign,
+} = designSlice.actions;
 export default designSlice.reducer;

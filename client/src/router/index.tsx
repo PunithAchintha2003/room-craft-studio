@@ -13,6 +13,7 @@ const FurnitureCatalogPage = lazy(() => import('@/pages/FurnitureCatalogPage'));
 const ProductDetailPage = lazy(() => import('@/pages/ProductDetailPage'));
 const MyDesignsPage = lazy(() => import('@/pages/MyDesignsPage'));
 const DesignViewerPage = lazy(() => import('@/pages/DesignViewerPage'));
+const DesignEditorPage = lazy(() => import('@/pages/DesignEditorPage'));
 const CartPage = lazy(() => import('@/pages/CartPage'));
 const OrderHistoryPage = lazy(() => import('@/pages/OrderHistoryPage'));
 const WishlistPage = lazy(() => import('@/pages/WishlistPage'));
@@ -73,6 +74,21 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 
 const AuthLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <Box component="main">{children}</Box>
+);
+
+/** Full-viewport layout for editor: no navbar, no footer, no page scroll. */
+const EditorLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <Box
+    sx={{
+      display: 'flex',
+      flexDirection: 'column',
+      height: '100vh',
+      width: '100%',
+      overflow: 'hidden',
+    }}
+  >
+    {children}
+  </Box>
 );
 
 export const AppRouter: React.FC = () => {
@@ -233,6 +249,27 @@ export const AppRouter: React.FC = () => {
               <MainLayout>
                 <Box sx={{ p: { xs: 2, sm: 4 }, textAlign: 'center' }}>Room Designer — Coming in Phase 3</Box>
               </MainLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/editor"
+          element={
+            <ProtectedRoute>
+              <EditorLayout>
+                <DesignEditorPage />
+              </EditorLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/editor/:id"
+          element={
+            <ProtectedRoute>
+              <EditorLayout>
+                <DesignEditorPage />
+              </EditorLayout>
             </ProtectedRoute>
           }
         />

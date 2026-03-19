@@ -2,6 +2,7 @@ import { configureStore } from '@reduxjs/toolkit';
 import authReducer from '@/features/auth/authSlice';
 import notificationReducer from '@/features/notifications/notificationSlice';
 import designReducer from '@/features/design/designSlice';
+import editorReducer from '@/features/editor/editorSlice';
 import furnitureReducer from '@/features/furniture/furnitureSlice';
 import viewer3DReducer from '@/features/viewer3D/viewer3DSlice';
 import cartReducer from '@/features/cart/cartSlice';
@@ -14,6 +15,7 @@ export const store = configureStore({
     auth: authReducer,
     notifications: notificationReducer,
     design: designReducer,
+    editor: editorReducer,
     furniture: furnitureReducer,
     viewer3D: viewer3DReducer,
     cart: cartReducer,

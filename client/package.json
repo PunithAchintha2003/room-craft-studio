@@ -33,6 +33,7 @@
     "react-helmet-async": "^2.0.5",
     "react-hook-form": "^7.54.0",
     "react-hot-toast": "^2.4.1",
+    "react-joyride": "^2.9.3",
     "react-konva": "^18.2.10",
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.1.0",

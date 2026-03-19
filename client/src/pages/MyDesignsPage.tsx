@@ -48,7 +48,7 @@ export const MyDesignsPage: React.FC = () => {
 
   const handleNewDesign = () => {
     dispatch(setCurrentDesign(null));
-    navigate('/designer');
+    navigate('/editor');
   };
 
   const handleViewDesign = (id: string) => {
