@@ -14,9 +14,10 @@
 
 [Features](#features) · [Quick Start](#quick-start) · [Architecture](#architecture-overview) · [Docs](#documentation) · [Testing](#testing)
 
-🌐 Live Client: [room-craft-studio.vercel.app](https://room-craft-studio.vercel.app)  
-🛠 Live Admin Portal: [room-craft-studio-admin-portal.vercel.app](https://room-craft-studio-admin-portal.vercel.app)  
-📺 YouTube: [PUSL 3122 HCI Group 96 Presentation](https://youtu.be/zHbJxvBknQM)
+**📺 YouTube: [PUSL 3122 HCI Group 96 Presentation](https://youtu.be/zHbJxvBknQM)**  
+**🌐 Live Client: [room-craft-studio.vercel.app](https://room-craft-studio.vercel.app)**  
+**🛠 Live Admin Portal: [room-craft-studio-admin-portal.vercel.app](https://room-craft-studio-admin-portal.vercel.app)**  
+**🎨 Live Designer Portal: [room-craft-studio-designer-portal.vercel.app](https://room-craft-studio-designer-portal.vercel.app)**
 
 </div>
 
@@ -306,7 +307,7 @@ You can add automated tests (unit/integration/e2e) following the existing archit
 ---
 
 <a id="team-contributions"></a>
-## 👥 Team Contributions
+## 👥 Team Contributions Group 96
 
 | Student ID | Name | Role | Contribution |
 |-----------|------|------|--------------|
