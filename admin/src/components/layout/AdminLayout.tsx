@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import {
   Box,
@@ -73,13 +73,26 @@ export const AdminLayout: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { user } = useAuth();
   const { resolvedMode, toggleMode } = useThemeMode();
+  const isEditorRoute = location.pathname.startsWith('/editor');
 
   const handleLogout = async () => {
     await dispatch(adminLogout());
     navigate('/login');
   };
 
-  const drawerWidth = isMobile ? DRAWER_WIDTH : collapsed ? DRAWER_COLLAPSED_WIDTH : DRAWER_WIDTH;
+  // Auto-hide sidebar on editor routes (desktop) for maximum canvas space.
+  useEffect(() => {
+    if (isMobile) return;
+    if (isEditorRoute) setCollapsed(true);
+  }, [isMobile, isEditorRoute]);
+
+  const drawerWidth = isMobile
+    ? DRAWER_WIDTH
+    : isEditorRoute
+      ? 0
+      : collapsed
+        ? DRAWER_COLLAPSED_WIDTH
+        : DRAWER_WIDTH;
   const pageTitle = PAGE_TITLES[location.pathname] ?? 'Admin';
 
   const drawerContent = (
@@ -262,9 +275,16 @@ export const AdminLayout: React.FC = () => {
   );
 
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh', backgroundColor: 'background.default' }}>
+    <Box
+      sx={{
+        display: 'flex',
+        minHeight: '100dvh',
+        backgroundColor: 'background.default',
+        overflow: isEditorRoute ? 'hidden' : 'auto',
+      }}
+    >
       {/* Sidebar — desktop */}
-      {!isMobile && (
+      {!isMobile && !isEditorRoute && (
         <Box
           component="nav"
           sx={{
@@ -316,6 +336,9 @@ export const AdminLayout: React.FC = () => {
           display: 'flex',
           flexDirection: 'column',
           minWidth: 0,
+          height: isEditorRoute ? '100dvh' : 'auto',
+          minHeight: 0,
+          overflow: isEditorRoute ? 'hidden' : 'visible',
           transition: 'margin 0.2s ease',
         }}
       >
@@ -380,7 +403,14 @@ export const AdminLayout: React.FC = () => {
         </AppBar>
 
         {/* Page content */}
-        <Box sx={{ flex: 1, p: { xs: 2, sm: 3, md: 4 } }}>
+        <Box
+          sx={{
+            flex: 1,
+            minHeight: 0,
+            overflow: isEditorRoute ? 'hidden' : 'visible',
+            p: isEditorRoute ? 0 : { xs: 2, sm: 3, md: 4 },
+          }}
+        >
           <Outlet />
         </Box>
       </Box>
